@@ -1,26 +1,96 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #020817;
+  --foreground: #e5e7eb;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --font-sans: var(--font-inter);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* Custom colors for DialDrill */
+  --color-dark-bg: #020817;
+  --color-card-bg: rgba(15, 23, 42, 0.9);
+  --color-teal: #2dd4e6;
+  --color-teal-dark: #1ab5c4;
+  --color-green: #22c55e;
+  --color-muted: #9ca3af;
+  --color-text: #e5e7eb;
+  --color-purple: #a855f7;
+
+  /* Custom shadows */
+  --shadow-glow-teal: 0 0 80px rgba(45, 212, 230, 0.3);
+  --shadow-glow-card: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 40px rgba(45, 212, 230, 0.1);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+}
+
+/* Animated grid background */
+.grid-background {
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+/* Radial glow effect */
+.radial-glow {
+  position: relative;
+}
+
+.radial-glow::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 800px;
+  height: 800px;
+  background: radial-gradient(circle, rgba(45, 212, 230, 0.15) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Gradient fade at section edges */
+.section-fade-top {
+  position: relative;
+}
+
+.section-fade-top::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(45, 212, 230, 0.5) 50%, transparent);
+}
+
+.section-fade-bottom {
+  position: relative;
+}
+
+.section-fade-bottom::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(45, 212, 230, 0.5) 50%, transparent);
+}
+
+/* Button glow effect */
+.btn-glow {
+  box-shadow: 0 0 20px rgba(45, 212, 230, 0.4), 0 0 40px rgba(45, 212, 230, 0.2);
+}
+
+.btn-glow:hover {
+  box-shadow: 0 0 30px rgba(45, 212, 230, 0.6), 0 0 60px rgba(45, 212, 230, 0.3);
 }
