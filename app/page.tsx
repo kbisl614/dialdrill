@@ -61,8 +61,36 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-[#020817] grid-background">
+      {/* Header with Logo */}
+      <header className="fixed top-0 left-0 right-0 z-50 border-b border-white/5 bg-[#020817]/80 backdrop-blur-xl">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <div className="flex h-20 items-center justify-between">
+            <div className="text-2xl font-extrabold text-white">
+              Dial<span className="text-[#2dd4e6]">Drill</span>
+            </div>
+            <nav className="hidden md:flex items-center gap-8">
+              <a href="#features" className="text-sm font-medium text-[#9ca3af] transition-colors hover:text-white">
+                Features
+              </a>
+              <a href="#how-it-works" className="text-sm font-medium text-[#9ca3af] transition-colors hover:text-white">
+                How it Works
+              </a>
+              <a href="#testimonials" className="text-sm font-medium text-[#9ca3af] transition-colors hover:text-white">
+                Testimonials
+              </a>
+              <a
+                href="#"
+                className="rounded-full bg-gradient-to-r from-[#2dd4e6] to-[#1ab5c4] px-6 py-2.5 text-sm font-semibold text-[#020817] transition-all hover:scale-105"
+              >
+                Get Started
+              </a>
+            </nav>
+          </div>
+        </div>
+      </header>
+
       {/* Hero Section */}
-      <section className="relative overflow-hidden pt-20 pb-24 lg:pt-32 lg:pb-40">
+      <section className="relative overflow-hidden pt-32 pb-24 lg:pt-40 lg:pb-40">
         <div className="radial-glow">
           <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-8">
             {/* Pill Badge */}
@@ -283,7 +311,7 @@ export default function Home() {
       </section>
 
       {/* Tabbed Features Section */}
-      <section className="relative py-24 lg:py-32">
+      <section id="features" className="relative py-24 lg:py-32">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mb-16 text-center">
             <h2 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl">
@@ -353,101 +381,140 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 3-Step Timeline */}
-      <section className="section-fade-top relative border-t border-white/5 py-32 lg:py-40">
+      {/* 3-Step Timeline - Uplinq Style */}
+      <section id="how-it-works" className="section-fade-top relative border-t border-white/5 py-40 lg:py-56">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          <div className="mb-20 lg:mb-24 text-center">
-            <h2 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl">
+          {/* Section Header */}
+          <div className="mb-28 lg:mb-36 text-center">
+            <h2 className="text-5xl font-extrabold tracking-tight text-white sm:text-6xl lg:text-7xl">
               How it <span className="text-[#2dd4e6]">works</span>
             </h2>
-            <p className="mt-6 text-xl text-[#9ca3af]">
-              Get started in three simple steps
+            <p className="mt-8 text-2xl text-[#9ca3af] max-w-3xl mx-auto">
+              Three simple steps to transform your sales team
             </p>
           </div>
 
-          <div className="relative mx-auto max-w-3xl">
-            {/* Vertical line */}
-            <div className="absolute left-8 top-8 bottom-8 w-0.5 bg-gradient-to-b from-[#2dd4e6] via-[#a855f7] to-[#22c55e] lg:left-1/2"></div>
+          {/* Timeline Container */}
+          <div className="relative mx-auto max-w-6xl">
+            {/* Vertical gradient line */}
+            <div className="absolute left-12 top-0 bottom-0 w-1 bg-gradient-to-b from-[#2dd4e6] via-[#a855f7] to-[#22c55e] opacity-40 lg:left-1/2 lg:-ml-0.5"></div>
 
-            <div className="space-y-16 lg:space-y-20">
-              {/* Step 1 */}
-              <div className="relative grid gap-8 lg:grid-cols-2 lg:gap-16">
-                <div className="lg:text-right lg:pr-16">
-                  <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[#2dd4e6] to-[#1ab5c4] text-2xl font-bold text-[#020817] shadow-lg lg:float-right">
+            <div className="space-y-24 lg:space-y-32">
+              {/* Step 1: CONNECT */}
+              <div className="relative grid gap-12 lg:grid-cols-2 lg:gap-20 items-center group">
+                {/* Left: Content */}
+                <div className="lg:text-right lg:pr-20">
+                  <div className="inline-flex h-24 w-24 items-center justify-center rounded-3xl bg-gradient-to-br from-[#2dd4e6] to-[#1ab5c4] text-4xl font-extrabold text-[#020817] shadow-[0_0_40px_rgba(45,212,230,0.4)] ring-4 ring-[#2dd4e6]/20 lg:float-right transition-all group-hover:scale-110 group-hover:shadow-[0_0_60px_rgba(45,212,230,0.6)]">
                     1
                   </div>
-                  <div className="clear-both mt-4 lg:mt-0">
-                    <h3 className="text-2xl font-bold text-white">Connect</h3>
-                    <p className="mt-2 text-[#9ca3af]">
+                  <div className="clear-both mt-6 lg:mt-0">
+                    <h3 className="text-4xl font-extrabold text-white mb-4">Connect</h3>
+                    <p className="text-xl leading-relaxed text-[#9ca3af]">
                       Choose your persona and script. Select from our library or create your own custom scenario.
                     </p>
                   </div>
                 </div>
-                <div className="rounded-2xl border border-white/5 bg-gradient-to-br from-[rgba(15,23,42,0.9)] to-[rgba(15,23,42,0.7)] p-6 shadow-lg backdrop-blur-xl">
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-3 rounded-lg border border-[#2dd4e6]/20 bg-[#2dd4e6]/5 p-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#2dd4e6]/20">
-                        <svg className="h-5 w-5 text-[#2dd4e6]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                        </svg>
+
+                {/* Right: UI Cards */}
+                <div className="space-y-6">
+                  {/* Persona Selection Card */}
+                  <div className="rounded-3xl border border-white/10 bg-gradient-to-br from-[rgba(15,23,42,0.95)] to-[rgba(15,23,42,0.8)] p-8 shadow-[0_20px_60px_rgba(0,0,0,0.5),0_0_40px_rgba(45,212,230,0.1)] backdrop-blur-xl transition-all hover:shadow-[0_20px_80px_rgba(0,0,0,0.6),0_0_60px_rgba(45,212,230,0.2)] hover:-translate-y-1">
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-4 rounded-2xl border border-[#2dd4e6]/30 bg-gradient-to-r from-[#2dd4e6]/10 to-transparent p-5 transition-all hover:border-[#2dd4e6]/50 hover:bg-[#2dd4e6]/15">
+                        <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-[#2dd4e6]/30 to-[#2dd4e6]/10 ring-2 ring-[#2dd4e6]/30">
+                          <svg className="h-7 w-7 text-[#2dd4e6]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                          </svg>
+                        </div>
+                        <div>
+                          <div className="text-lg font-bold text-white">Enterprise CTO</div>
+                          <div className="text-sm text-[#9ca3af]">Tech decision maker</div>
+                        </div>
                       </div>
-                      <div>
-                        <div className="text-sm font-semibold text-white">Enterprise CTO</div>
-                        <div className="text-xs text-[#9ca3af]">Tech decision maker</div>
+                      <div className="flex items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.02] p-5 opacity-50 transition-all hover:opacity-70">
+                        <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-white/5">
+                          <svg className="h-7 w-7 text-[#9ca3af]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                          </svg>
+                        </div>
+                        <div>
+                          <div className="text-lg font-bold text-[#9ca3af]">SMB Owner</div>
+                          <div className="text-sm text-[#9ca3af]">Budget-conscious</div>
+                        </div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-3 rounded-lg border border-white/5 bg-white/[0.02] p-3 opacity-60">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/5">
-                        <svg className="h-5 w-5 text-[#9ca3af]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                        </svg>
+                  </div>
+
+                  {/* Audio Playback Module */}
+                  <div className="rounded-3xl border border-white/10 bg-gradient-to-br from-[rgba(15,23,42,0.95)] to-[rgba(15,23,42,0.8)] p-8 shadow-[0_20px_60px_rgba(0,0,0,0.5)] backdrop-blur-xl">
+                    <div className="space-y-5">
+                      <div className="rounded-xl border border-white/10 bg-white/[0.03] p-6">
+                        <p className="text-lg italic text-white leading-relaxed">
+                          "I'm not sure we have the budget for this right now..."
+                        </p>
                       </div>
-                      <div>
-                        <div className="text-sm font-semibold text-[#9ca3af]">SMB Owner</div>
-                        <div className="text-xs text-[#9ca3af]">Budget-conscious</div>
+                      <div className="flex gap-3">
+                        <div className="flex-1 rounded-xl border border-[#2dd4e6]/30 bg-gradient-to-r from-[#2dd4e6]/10 to-transparent p-4 text-center text-base font-semibold text-[#2dd4e6] transition-all hover:border-[#2dd4e6]/50 hover:bg-[#2dd4e6]/15 cursor-pointer">
+                          Acknowledge
+                        </div>
+                        <div className="flex-1 rounded-xl border border-white/10 bg-white/[0.02] p-4 text-center text-base font-semibold text-[#9ca3af] transition-all hover:border-white/20 hover:bg-white/[0.05] cursor-pointer">
+                          Reframe
+                        </div>
+                        <div className="flex-1 rounded-xl border border-white/10 bg-white/[0.02] p-4 text-center text-base font-semibold text-[#9ca3af] transition-all hover:border-white/20 hover:bg-white/[0.05] cursor-pointer">
+                          Close
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Step 2 */}
-              <div className="relative grid gap-8 lg:grid-cols-2 lg:gap-16">
-                <div className="lg:order-2 lg:pl-16">
-                  <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[#a855f7] to-[#9333ea] text-2xl font-bold text-white shadow-lg">
+              {/* Step 2: DRILL */}
+              <div className="relative grid gap-12 lg:grid-cols-2 lg:gap-20 items-center group">
+                {/* Right: Content (order-2 on desktop) */}
+                <div className="lg:order-2 lg:pl-20">
+                  <div className="inline-flex h-24 w-24 items-center justify-center rounded-3xl bg-gradient-to-br from-[#a855f7] to-[#9333ea] text-4xl font-extrabold text-white shadow-[0_0_40px_rgba(168,85,247,0.4)] ring-4 ring-[#a855f7]/20 transition-all group-hover:scale-110 group-hover:shadow-[0_0_60px_rgba(168,85,247,0.6)]">
                     2
                   </div>
-                  <div className="mt-4 lg:mt-0">
-                    <h3 className="text-2xl font-bold text-white">Drill</h3>
-                    <p className="mt-2 text-[#9ca3af]">
+                  <div className="mt-6 lg:mt-0">
+                    <h3 className="text-4xl font-extrabold text-white mb-4">Drill</h3>
+                    <p className="text-xl leading-relaxed text-[#9ca3af]">
                       Call the AI and handle objections in real-time. Practice until you perfect your responses.
                     </p>
                   </div>
                 </div>
-                <div className="lg:order-1 rounded-2xl border border-white/5 bg-gradient-to-br from-[rgba(15,23,42,0.9)] to-[rgba(15,23,42,0.7)] p-6 shadow-lg backdrop-blur-xl">
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#22c55e]/20 ring-2 ring-[#22c55e]">
-                        <div className="h-3 w-3 animate-pulse rounded-full bg-[#22c55e]"></div>
+
+                {/* Left: UI Card (order-1 on desktop) */}
+                <div className="lg:order-1 rounded-3xl border border-white/10 bg-gradient-to-br from-[rgba(15,23,42,0.95)] to-[rgba(15,23,42,0.8)] p-8 shadow-[0_20px_60px_rgba(0,0,0,0.5),0_0_40px_rgba(168,85,247,0.1)] backdrop-blur-xl transition-all hover:shadow-[0_20px_80px_rgba(0,0,0,0.6),0_0_60px_rgba(168,85,247,0.2)] hover:-translate-y-1">
+                  <div className="space-y-6">
+                    {/* Live Call Indicator */}
+                    <div className="flex items-center gap-4 rounded-2xl border border-[#22c55e]/30 bg-gradient-to-r from-[#22c55e]/10 to-transparent p-5">
+                      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#22c55e]/20 ring-4 ring-[#22c55e]/30">
+                        <div className="h-5 w-5 animate-pulse rounded-full bg-[#22c55e] shadow-[0_0_20px_rgba(34,197,94,0.6)]"></div>
                       </div>
                       <div className="flex-1">
-                        <div className="h-2 w-3/4 rounded-full bg-gradient-to-r from-[#22c55e] to-transparent"></div>
+                        <div className="h-3 w-4/5 rounded-full bg-gradient-to-r from-[#22c55e] via-[#22c55e]/50 to-transparent"></div>
+                        <div className="mt-2 h-2 w-2/3 rounded-full bg-gradient-to-r from-[#22c55e]/60 to-transparent"></div>
                       </div>
-                      <span className="text-xs font-mono text-[#22c55e]">00:34</span>
+                      <span className="text-lg font-mono font-bold text-[#22c55e]">00:34</span>
                     </div>
-                    <div className="rounded-lg border border-white/5 bg-white/[0.02] p-4">
-                      <p className="text-sm italic text-[#9ca3af]">
+
+                    {/* Quote Display */}
+                    <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6">
+                      <p className="text-lg italic text-white leading-relaxed">
                         "I'm not sure we have the budget for this right now..."
                       </p>
                     </div>
-                    <div className="flex gap-2">
-                      <div className="flex-1 rounded-lg border border-[#2dd4e6]/20 bg-[#2dd4e6]/5 p-2 text-center text-xs text-[#2dd4e6]">
+
+                    {/* Response Options */}
+                    <div className="flex gap-3">
+                      <div className="flex-1 rounded-xl border border-[#2dd4e6]/30 bg-gradient-to-r from-[#2dd4e6]/10 to-transparent p-4 text-center text-base font-semibold text-[#2dd4e6] transition-all hover:border-[#2dd4e6]/50 hover:bg-[#2dd4e6]/15 cursor-pointer">
                         Acknowledge
                       </div>
-                      <div className="flex-1 rounded-lg border border-white/5 bg-white/[0.02] p-2 text-center text-xs text-[#9ca3af]">
+                      <div className="flex-1 rounded-xl border border-white/10 bg-white/[0.02] p-4 text-center text-base font-semibold text-[#9ca3af] transition-all hover:border-white/20 hover:bg-white/[0.05] cursor-pointer">
                         Reframe
                       </div>
-                      <div className="flex-1 rounded-lg border border-white/5 bg-white/[0.02] p-2 text-center text-xs text-[#9ca3af]">
+                      <div className="flex-1 rounded-xl border border-white/10 bg-white/[0.02] p-4 text-center text-base font-semibold text-[#9ca3af] transition-all hover:border-white/20 hover:bg-white/[0.05] cursor-pointer">
                         Close
                       </div>
                     </div>
@@ -455,39 +522,52 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Step 3 */}
-              <div className="relative grid gap-8 lg:grid-cols-2 lg:gap-16">
-                <div className="lg:text-right lg:pr-16">
-                  <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[#22c55e] to-[#16a34a] text-2xl font-bold text-[#020817] shadow-lg lg:float-right">
+              {/* Step 3: GROW */}
+              <div className="relative grid gap-12 lg:grid-cols-2 lg:gap-20 items-center group">
+                {/* Left: Content */}
+                <div className="lg:text-right lg:pr-20">
+                  <div className="inline-flex h-24 w-24 items-center justify-center rounded-3xl bg-gradient-to-br from-[#22c55e] to-[#16a34a] text-4xl font-extrabold text-[#020817] shadow-[0_0_40px_rgba(34,197,94,0.4)] ring-4 ring-[#22c55e]/20 lg:float-right transition-all group-hover:scale-110 group-hover:shadow-[0_0_60px_rgba(34,197,94,0.6)]">
                     3
                   </div>
-                  <div className="clear-both mt-4 lg:mt-0">
-                    <h3 className="text-2xl font-bold text-white">Grow</h3>
-                    <p className="mt-2 text-[#9ca3af]">
+                  <div className="clear-both mt-6 lg:mt-0">
+                    <h3 className="text-4xl font-extrabold text-white mb-4">Grow</h3>
+                    <p className="text-xl leading-relaxed text-[#9ca3af]">
                       Get scoring, feedback, and next steps. Track your improvement over time.
                     </p>
                   </div>
                 </div>
-                <div className="rounded-2xl border border-white/5 bg-gradient-to-br from-[rgba(15,23,42,0.9)] to-[rgba(15,23,42,0.7)] p-6 shadow-lg backdrop-blur-xl">
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-semibold text-white">Overall Score</span>
-                      <span className="text-2xl font-bold text-[#22c55e]">8.7</span>
+
+                {/* Right: Scoring Card */}
+                <div className="rounded-3xl border border-white/10 bg-gradient-to-br from-[rgba(15,23,42,0.95)] to-[rgba(15,23,42,0.8)] p-8 shadow-[0_20px_60px_rgba(0,0,0,0.5),0_0_40px_rgba(34,197,94,0.1)] backdrop-blur-xl transition-all hover:shadow-[0_20px_80px_rgba(0,0,0,0.6),0_0_60px_rgba(34,197,94,0.2)] hover:-translate-y-1">
+                  <div className="space-y-8">
+                    {/* Overall Score Header */}
+                    <div className="flex items-center justify-between pb-6 border-b border-white/10">
+                      <span className="text-xl font-bold text-white">Overall Score</span>
+                      <span className="text-5xl font-extrabold text-[#22c55e] tabular-nums">8.7</span>
                     </div>
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="text-[#9ca3af]">Confidence</span>
-                        <span className="text-white">92%</span>
+
+                    {/* Metrics */}
+                    <div className="space-y-6">
+                      {/* Confidence */}
+                      <div>
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="text-lg font-semibold text-[#9ca3af]">Confidence</span>
+                          <span className="text-lg font-bold text-white tabular-nums">92%</span>
+                        </div>
+                        <div className="h-4 overflow-hidden rounded-full bg-white/5 ring-1 ring-white/10">
+                          <div className="h-full w-[92%] rounded-full bg-gradient-to-r from-[#2dd4e6] to-[#22c55e] shadow-[0_0_20px_rgba(45,212,230,0.4)]"></div>
+                        </div>
                       </div>
-                      <div className="h-2 overflow-hidden rounded-full bg-white/5">
-                        <div className="h-full w-[92%] rounded-full bg-gradient-to-r from-[#2dd4e6] to-[#22c55e]"></div>
-                      </div>
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="text-[#9ca3af]">Objection Handling</span>
-                        <span className="text-white">85%</span>
-                      </div>
-                      <div className="h-2 overflow-hidden rounded-full bg-white/5">
-                        <div className="h-full w-[85%] rounded-full bg-gradient-to-r from-[#a855f7] to-[#22c55e]"></div>
+
+                      {/* Objection Handling */}
+                      <div>
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="text-lg font-semibold text-[#9ca3af]">Objection Handling</span>
+                          <span className="text-lg font-bold text-white tabular-nums">85%</span>
+                        </div>
+                        <div className="h-4 overflow-hidden rounded-full bg-white/5 ring-1 ring-white/10">
+                          <div className="h-full w-[85%] rounded-full bg-gradient-to-r from-[#a855f7] to-[#22c55e] shadow-[0_0_20px_rgba(168,85,247,0.4)]"></div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -499,7 +579,7 @@ export default function Home() {
       </section>
 
       {/* Testimonials */}
-      <section className="relative py-24">
+      <section id="testimonials" className="relative py-24">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mb-16 text-center">
             <h2 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl">
