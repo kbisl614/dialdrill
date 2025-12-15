@@ -44,13 +44,28 @@ export default function Dashboard() {
   }, [user]);
 
   async function handleStartCall() {
+    const perfStart = performance.now();
+    console.log('[PERF] Button click → Start call flow');
+
+    // UI-level credit check
+    if (freeCallsRemaining === null || freeCallsRemaining <= 0) {
+      setError("You're out of call credits. Please upgrade to continue.");
+      return;
+    }
+
     setStartingCall(true);
     setError(null);
 
     try {
+      const apiCallStart = performance.now();
+      console.log(`[PERF] ${(apiCallStart - perfStart).toFixed(0)}ms - Calling /api/calls/start`);
+
       const response = await fetch('/api/calls/start', {
         method: 'POST',
       });
+
+      const apiCallEnd = performance.now();
+      console.log(`[PERF] ${(apiCallEnd - perfStart).toFixed(0)}ms - API response received (took ${(apiCallEnd - apiCallStart).toFixed(0)}ms)`);
 
       if (!response.ok) {
         const data = await response.json();
@@ -63,8 +78,13 @@ export default function Dashboard() {
       // Update calls remaining
       setFreeCallsRemaining(data.callsRemaining);
 
+      const navStart = performance.now();
+      console.log(`[PERF] ${(navStart - perfStart).toFixed(0)}ms - Navigating to call page`);
+
       // Navigate to call interface
       router.push(`/call/${data.agentId}`);
+
+      console.log(`[PERF] Total dashboard flow: ${(navStart - perfStart).toFixed(0)}ms`);
     } catch (err) {
       console.error('Error starting call:', err);
       setError(err instanceof Error ? err.message : 'Failed to start call');
@@ -179,13 +199,13 @@ export default function Dashboard() {
           <button
             onClick={handleStartCall}
             className="rounded-full bg-gradient-to-r from-[#2dd4e6] to-[#1ab5c4] px-12 py-5 text-xl font-semibold text-[#020817] transition-all hover:scale-105 shadow-[0_0_40px_rgba(45,212,230,0.4)] hover:shadow-[0_0_60px_rgba(45,212,230,0.6)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-            disabled={freeCallsRemaining === 0 || startingCall}
+            disabled={freeCallsRemaining === null || freeCallsRemaining <= 0 || startingCall}
           >
-            {startingCall ? 'Starting Call...' : freeCallsRemaining === 0 ? 'No Free Calls Remaining' : 'Start Call'}
+            {startingCall ? 'Starting Call...' : (freeCallsRemaining === null || freeCallsRemaining <= 0) ? 'Out of Call Credits' : 'Start Call'}
           </button>
-          {freeCallsRemaining === 0 && (
+          {freeCallsRemaining !== null && freeCallsRemaining <= 0 && (
             <p className="mt-4 text-sm text-[#9ca3af]">
-              Upgrade to continue practicing
+              You're out of call credits. Please upgrade to continue.
             </p>
           )}
         </div>

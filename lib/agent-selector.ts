@@ -11,19 +11,18 @@ const DEFAULT_AGENT_IDS = [
 export function getRandomAgentId(): string {
   const agentIdsString = process.env.ELEVENLABS_AGENT_IDS;
 
-  let agentIds: string[];
+  let agentIds: string[] = DEFAULT_AGENT_IDS;
 
   if (agentIdsString) {
     // Parse from environment variable
-    agentIds = agentIdsString
+    const parsed = agentIdsString
       .split(',')
       .map(id => id.trim())
       .filter(id => id.length > 0);
-  }
 
-  // Fallback to defaults if empty or not configured
-  if (!agentIds || agentIds.length === 0) {
-    agentIds = DEFAULT_AGENT_IDS;
+    if (parsed.length > 0) {
+      agentIds = parsed;
+    }
   }
 
   // Randomly select one
@@ -31,6 +30,6 @@ export function getRandomAgentId(): string {
   return agentIds[randomIndex];
 }
 
-export function isMockMode(): boolean {
-  return process.env.ELEVENLABS_MOCK === '1';
+export function isSimulatedMode(): boolean {
+  return process.env.SIMULATE_CALLS === 'true';
 }

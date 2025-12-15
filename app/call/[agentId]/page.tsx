@@ -49,24 +49,33 @@ export default function CallPage() {
     let mockTimeouts: NodeJS.Timeout[] = [];
 
     async function initializeCall() {
+      const perfStart = performance.now();
+      console.log('[PERF] Call page mounted → Initialize call');
+
       try {
         console.log('[Call] Starting initialization...');
         setStatus('connecting');
         isInitializedRef.current = true;
 
         // Step 1: Get signed URL from our API
+        const apiCallStart = performance.now();
+        console.log(`[PERF] ${(apiCallStart - perfStart).toFixed(0)}ms - Fetching signed URL`);
+
         const response = await fetch('/api/calls/signed-url', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ agentId }),
         });
 
+        const apiCallEnd = performance.now();
+        console.log(`[PERF] ${(apiCallEnd - perfStart).toFixed(0)}ms - Signed URL received (took ${(apiCallEnd - apiCallStart).toFixed(0)}ms)`);
+
         if (!response.ok) {
           const errorData = await response.json();
           throw new Error(errorData.details || 'Failed to get signed URL');
         }
 
-        const { signedUrl } = await response.json();
+        const { signedUrl, simulated } = await response.json();
         console.log('[Call] Got signed URL, initializing conversation...');
 
         if (isCancelled) {
@@ -74,12 +83,57 @@ export default function CallPage() {
           return;
         }
 
+        // Simulated mode - run mock call without ElevenLabs
+        if (simulated || signedUrl.startsWith('simulated://')) {
+          console.log('[PERF] Simulated mode detected - no WebSocket connection');
+          console.log('[Call] Running in simulated mode');
+
+          // Simulate connection after short delay
+          const connectTimeout = setTimeout(() => {
+            if (!isCancelled) {
+              const connectedTime = performance.now();
+              console.log(`[PERF] ${(connectedTime - perfStart).toFixed(0)}ms - ✅ SIMULATED CALL CONNECTED`);
+              console.log('[Call] Simulated: Connected');
+              setStatus('connected');
+
+              // Add simulated transcript entries over time
+              const transcriptEntries = [
+                { role: 'agent' as const, text: "Hello, this is Sarah from TechCorp. How can I help you today?", delay: 800 },
+                { role: 'user' as const, text: "Hi Sarah, I wanted to discuss your enterprise package.", delay: 2500 },
+                { role: 'agent' as const, text: "Great! We have several options. What's your current team size?", delay: 4000 },
+                { role: 'user' as const, text: "We're about 50 people right now.", delay: 5500 },
+                { role: 'agent' as const, text: "Perfect. For that size, I'd recommend our Pro plan. Can I send you details?", delay: 7000 },
+              ];
+
+              transcriptEntries.forEach(({ role, text, delay }) => {
+                const timeout = setTimeout(() => {
+                  if (!isCancelled) {
+                    setTranscript(prev => [...prev, {
+                      role,
+                      text,
+                      timestamp: new Date(),
+                    }]);
+                  }
+                }, delay);
+                mockTimeouts.push(timeout);
+              });
+            }
+          }, 500);
+          mockTimeouts.push(connectTimeout);
+          return;
+        }
+
+        // Real mode - Initialize ElevenLabs conversation
+        const wsStartTime = performance.now();
+        console.log(`[PERF] ${(wsStartTime - perfStart).toFixed(0)}ms - Starting WebSocket connection`);
         console.log('[Call] About to call Conversation.startSession...');
         console.log('[Call] Signed URL:', signedUrl);
 
         // Set connection timeout
         const connectionTimeout = setTimeout(() => {
           if (!isCancelled) {
+            const timeoutTime = performance.now();
+            console.error(`[PERF] ${(timeoutTime - perfStart).toFixed(0)}ms - ❌ CONNECTION TIMEOUT (10s limit)`);
             console.error('[Call] Connection timeout after 10s');
             setStatus('error');
             setError('Connection timeout - please try again');
@@ -91,6 +145,8 @@ export default function CallPage() {
           conv = await Conversation.startSession({
             signedUrl: signedUrl,
             onConnect: () => {
+              const connectedTime = performance.now();
+              console.log(`[PERF] ${(connectedTime - perfStart).toFixed(0)}ms - ✅ WEBSOCKET CONNECTED (WebSocket handshake took ${(connectedTime - wsStartTime).toFixed(0)}ms)`);
               console.log('[Call] ✅ WebSocket Connected!');
               clearTimeout(connectionTimeout);
               setStatus('connected');
