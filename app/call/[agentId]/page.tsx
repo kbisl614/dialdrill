@@ -66,111 +66,78 @@ export default function CallPage() {
           throw new Error(errorData.details || 'Failed to get signed URL');
         }
 
-        const { signedUrl, mock } = await response.json();
+        const { signedUrl } = await response.json();
         console.log('[Call] Got signed URL, initializing conversation...');
-
-        if (mock) {
-          console.log('[Call] Mock mode enabled');
-        }
 
         if (isCancelled) {
           console.log('[Call] Cancelled before starting session');
           return;
         }
 
-        // Check if mock mode
-        const isMockMode = mock || signedUrl.startsWith('mock://');
+        console.log('[Call] About to call Conversation.startSession...');
+        console.log('[Call] Signed URL:', signedUrl);
 
-        if (isMockMode) {
-          // Mock mode - simulate conversation
-          console.log('[Call] Running in mock mode - simulating connection');
-
-          // Simulate connection after 300ms
-          const connectTimeout = setTimeout(() => {
-            if (!isCancelled) {
-              console.log('[Call] Mock: Connected');
-              setStatus('connected');
-
-              // Add mock transcript lines over time
-              const transcriptLines = [
-                { role: 'agent' as const, text: "Hello, this is a mock sales prospect. I'm quite busy right now.", delay: 1000 },
-                { role: 'user' as const, text: "Hi! I wanted to talk to you about our new product.", delay: 3000 },
-                { role: 'agent' as const, text: "We're already happy with our current vendor. What makes yours different?", delay: 5000 },
-                { role: 'user' as const, text: "Great question! Our solution offers 40% better ROI through automation.", delay: 7500 },
-                { role: 'agent' as const, text: "That sounds interesting. Can you send me some information?", delay: 9500 },
-              ];
-
-              transcriptLines.forEach(({ role, text, delay }) => {
-                const timeout = setTimeout(() => {
-                  if (!isCancelled) {
-                    setTranscript(prev => [...prev, {
-                      role,
-                      text,
-                      timestamp: new Date(),
-                    }]);
-                  }
-                }, delay);
-                mockTimeouts.push(timeout);
-              });
-            }
-          }, 300);
-          mockTimeouts.push(connectTimeout);
-
-        } else {
-          // Real mode - Initialize ElevenLabs conversation
-          console.log('[Call] About to call Conversation.startSession...');
-          console.log('[Call] Signed URL:', signedUrl);
-
-          try {
-            conv = await Conversation.startSession({
-              signedUrl: signedUrl,
-              onConnect: () => {
-                console.log('[Call] ✅ WebSocket Connected!');
-                setStatus('connected');
-              },
-              onDisconnect: () => {
-                console.log('[Call] WebSocket Disconnected');
-                setStatus('disconnected');
-              },
-              onError: (error) => {
-                console.error('[Call] ❌ WebSocket Error:', error);
-                setError(typeof error === 'string' ? error : 'Connection error');
-                setStatus('error');
-              },
-              onMessage: (message) => {
-                console.log('[Call] Message received:', message);
-
-                // Handle transcript messages
-                const msg = message as any;
-                if (msg.type === 'user_transcript' || msg.type === 'agent_transcript') {
-                  const role = msg.type === 'user_transcript' ? 'user' : 'agent';
-                  const text = msg.text || msg.message || '';
-
-                  if (text) {
-                    console.log(`[Call] Transcript [${role}]:`, text);
-                    setTranscript(prev => [...prev, {
-                      role,
-                      text,
-                      timestamp: new Date(),
-                    }]);
-                  }
-                }
-              },
-            });
-
-            console.log('[Call] ✅ Conversation object created:', conv);
-          } catch (sessionError) {
-            console.error('[Call] ❌ Error calling startSession:', sessionError);
-            throw sessionError;
-          }
-
+        // Set connection timeout
+        const connectionTimeout = setTimeout(() => {
           if (!isCancelled) {
-            setConversation(conv);
-            console.log('[Call] Conversation set');
-          } else {
-            console.log('[Call] Cancelled after starting session, ending immediately');
-            conv.endSession();
+            console.error('[Call] Connection timeout after 10s');
+            setStatus('error');
+            setError('Connection timeout - please try again');
           }
+        }, 10000);
+        mockTimeouts.push(connectionTimeout);
+
+        try {
+          conv = await Conversation.startSession({
+            signedUrl: signedUrl,
+            onConnect: () => {
+              console.log('[Call] ✅ WebSocket Connected!');
+              clearTimeout(connectionTimeout);
+              setStatus('connected');
+            },
+            onDisconnect: () => {
+              console.log('[Call] WebSocket Disconnected');
+              setStatus('disconnected');
+            },
+            onError: (error) => {
+              console.error('[Call] ❌ WebSocket Error:', error);
+              clearTimeout(connectionTimeout);
+              setError(typeof error === 'string' ? error : 'Connection error');
+              setStatus('error');
+            },
+            onMessage: (message) => {
+              console.log('[Call] Message received:', message);
+
+              // Handle transcript messages
+              const msg = message as any;
+              if (msg.type === 'user_transcript' || msg.type === 'agent_transcript') {
+                const role = msg.type === 'user_transcript' ? 'user' : 'agent';
+                const text = msg.text || msg.message || '';
+
+                if (text) {
+                  console.log(`[Call] Transcript [${role}]:`, text);
+                  setTranscript(prev => [...prev, {
+                    role,
+                    text,
+                    timestamp: new Date(),
+                  }]);
+                }
+              }
+            },
+          });
+
+          console.log('[Call] ✅ Conversation object created:', conv);
+        } catch (sessionError) {
+          console.error('[Call] ❌ Error calling startSession:', sessionError);
+          throw sessionError;
+        }
+
+        if (!isCancelled) {
+          setConversation(conv);
+          console.log('[Call] Conversation set');
+        } else {
+          console.log('[Call] Cancelled after starting session, ending immediately');
+          conv.endSession();
         }
 
       } catch (err) {
