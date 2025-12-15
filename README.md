@@ -1,36 +1,82 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# DialDrill - AI Sales Call Simulator
 
-## Getting Started
+Practice objection handling with AI-powered sales call simulations.
 
-First, run the development server:
+## Quick Start
 
+### 1. Install Dependencies
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Set Up Environment Variables
+Create `.env.local` with your keys:
+```env
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
+CLERK_SECRET_KEY=sk_test_...
+DATABASE_URL=postgresql://...
+WEBHOOK_SECRET=whsec_...
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 3. Configure Clerk Webhook (Important!)
+1. Go to [Clerk Dashboard](https://dashboard.clerk.com) → Webhooks
+2. Add endpoint: `https://yourdomain.com/api/webhooks/clerk`
+3. Subscribe to: `user.created`
+4. Copy signing secret to `.env.local` as `WEBHOOK_SECRET`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+For local testing, use [ngrok](https://ngrok.com):
+```bash
+ngrok http 3000
+# Use the HTTPS URL in Clerk webhook settings
+```
 
-## Learn More
+### 4. Run Development Server
+```bash
+npm run dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+Visit [http://localhost:3000](http://localhost:3000)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Features
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- ✅ Clerk authentication (sign-up/sign-in)
+- ✅ Neon PostgreSQL database integration
+- ✅ User dashboard with free call tracking
+- ✅ Modern dark UI with cyan accents
+- 🚧 AI voice call simulation (coming soon)
+- 🚧 Real-time feedback (coming soon)
+- 🚧 Call recordings & transcripts (coming soon)
+
+## Tech Stack
+
+- **Framework**: Next.js 16 (App Router)
+- **Auth**: Clerk
+- **Database**: Neon PostgreSQL
+- **Styling**: Tailwind CSS
+- **Language**: TypeScript
+
+## Documentation
+
+See [SETUP.md](./SETUP.md) for detailed setup instructions and troubleshooting.
+
+## Project Structure
+
+```
+/app
+  /dashboard       # Protected user dashboard
+  /api
+    /user/calls    # User data endpoints
+    /webhooks      # Clerk webhooks
+/lib
+  /db.ts          # Database connection
+```
 
 ## Deploy on Vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new).
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Check out the [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## License
+
+Private - All rights reserved

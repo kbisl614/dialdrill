@@ -1,0 +1,211 @@
+'use client';
+
+import { useAuth, useUser, SignOutButton } from '@clerk/nextjs';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+
+export default function Dashboard() {
+  const { isSignedIn, isLoaded } = useAuth();
+  const { user } = useUser();
+  const router = useRouter();
+  const [freeCallsRemaining, setFreeCallsRemaining] = useState<number | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [startingCall, setStartingCall] = useState(false);
+
+  useEffect(() => {
+    if (isLoaded && !isSignedIn) {
+      router.push('/');
+    }
+  }, [isSignedIn, isLoaded, router]);
+
+  useEffect(() => {
+    async function fetchUserData() {
+      if (!user?.id) return;
+
+      try {
+        const response = await fetch('/api/user/calls');
+        if (!response.ok) {
+          throw new Error('Failed to fetch user data');
+        }
+        const data = await response.json();
+        setFreeCallsRemaining(data.freeCallsRemaining);
+      } catch (err) {
+        console.error('Error fetching user data:', err);
+        setError('Failed to load your data. Please try refreshing the page.');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    if (user) {
+      fetchUserData();
+    }
+  }, [user]);
+
+  async function handleStartCall() {
+    setStartingCall(true);
+    setError(null);
+
+    try {
+      const response = await fetch('/api/calls/start', {
+        method: 'POST',
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to start call');
+      }
+
+      const data = await response.json();
+      console.log('Call started:', data);
+
+      // Update calls remaining
+      setFreeCallsRemaining(data.callsRemaining);
+
+      // Navigate to call interface
+      router.push(`/call/${data.agentId}`);
+    } catch (err) {
+      console.error('Error starting call:', err);
+      setError(err instanceof Error ? err.message : 'Failed to start call');
+    } finally {
+      setStartingCall(false);
+    }
+  }
+
+  if (!isLoaded || loading) {
+    return (
+      <div className="min-h-screen bg-[#020817] grid-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-[#2dd4e6] border-r-transparent"></div>
+          <p className="mt-4 text-[#9ca3af]">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isSignedIn) {
+    return null;
+  }
+
+  return (
+    <main className="min-h-screen bg-[#020817] grid-background">
+      {/* Header */}
+      <header className="border-b border-white/5 bg-[#020817]/80 backdrop-blur-xl">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <div className="flex h-20 items-center justify-between">
+            <div className="text-2xl font-extrabold text-white">
+              Dial<span className="text-[#2dd4e6]">Drill</span>
+            </div>
+            <SignOutButton>
+              <button className="rounded-full border border-white/10 bg-white/5 px-6 py-2.5 text-sm font-semibold text-white transition-all hover:bg-white/10">
+                Sign Out
+              </button>
+            </SignOutButton>
+          </div>
+        </div>
+      </header>
+
+      {/* Dashboard Content */}
+      <div className="mx-auto max-w-7xl px-6 lg:px-8 py-16">
+        {/* Welcome Section */}
+        <div className="mb-12">
+          <h1 className="text-4xl font-extrabold text-white sm:text-5xl">
+            Welcome back, <span className="text-[#2dd4e6]">{user?.emailAddresses[0]?.emailAddress}</span>
+          </h1>
+          <p className="mt-4 text-xl text-[#9ca3af]">
+            Ready to practice your sales skills?
+          </p>
+        </div>
+
+        {error && (
+          <div className="mb-8 rounded-2xl border border-red-500/20 bg-red-500/10 p-4 text-red-400">
+            {error}
+          </div>
+        )}
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+          {/* Free Calls Card */}
+          <div className="rounded-3xl border border-white/10 bg-gradient-to-br from-[rgba(15,23,42,0.95)] to-[rgba(15,23,42,0.8)] p-8 shadow-[0_20px_60px_rgba(0,0,0,0.5),0_0_40px_rgba(45,212,230,0.1)] backdrop-blur-xl">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-[#2dd4e6]/30 to-[#2dd4e6]/10 ring-2 ring-[#2dd4e6]/30">
+                <svg className="h-7 w-7 text-[#2dd4e6]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-[#9ca3af]">Free Calls Remaining</p>
+                <p className="text-4xl font-extrabold text-white tabular-nums">
+                  {freeCallsRemaining !== null ? freeCallsRemaining : '—'}
+                </p>
+              </div>
+            </div>
+            <div className="mt-4 h-3 overflow-hidden rounded-full bg-white/5 ring-1 ring-white/10">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-[#2dd4e6] to-[#22c55e] shadow-[0_0_20px_rgba(45,212,230,0.4)] transition-all"
+                style={{ width: `${freeCallsRemaining !== null ? (freeCallsRemaining / 5) * 100 : 0}%` }}
+              ></div>
+            </div>
+          </div>
+
+          {/* Account Info Card */}
+          <div className="rounded-3xl border border-white/10 bg-gradient-to-br from-[rgba(15,23,42,0.95)] to-[rgba(15,23,42,0.8)] p-8 shadow-[0_20px_60px_rgba(0,0,0,0.5)] backdrop-blur-xl">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-[#a855f7]/30 to-[#a855f7]/10 ring-2 ring-[#a855f7]/30">
+                <svg className="h-7 w-7 text-[#a855f7]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-[#9ca3af]">Account Type</p>
+                <p className="text-2xl font-extrabold text-white">Free Trial</p>
+              </div>
+            </div>
+            <p className="text-sm text-[#9ca3af] mt-2">
+              Upgrade to get unlimited calls and advanced analytics
+            </p>
+          </div>
+        </div>
+
+        {/* Start Call CTA */}
+        <div className="rounded-3xl border border-[#2dd4e6]/20 bg-gradient-to-br from-[rgba(15,23,42,0.95)] to-[rgba(15,23,42,0.8)] p-12 shadow-[0_20px_60px_rgba(0,0,0,0.5),0_0_60px_rgba(45,212,230,0.15)] backdrop-blur-xl text-center">
+          <h2 className="text-3xl font-extrabold text-white mb-4">
+            Ready to practice?
+          </h2>
+          <p className="text-lg text-[#9ca3af] mb-8 max-w-2xl mx-auto">
+            Start a new AI-powered sales call simulation and master objection handling in real-time.
+          </p>
+          <button
+            onClick={handleStartCall}
+            className="rounded-full bg-gradient-to-r from-[#2dd4e6] to-[#1ab5c4] px-12 py-5 text-xl font-semibold text-[#020817] transition-all hover:scale-105 shadow-[0_0_40px_rgba(45,212,230,0.4)] hover:shadow-[0_0_60px_rgba(45,212,230,0.6)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+            disabled={freeCallsRemaining === 0 || startingCall}
+          >
+            {startingCall ? 'Starting Call...' : freeCallsRemaining === 0 ? 'No Free Calls Remaining' : 'Start Call'}
+          </button>
+          {freeCallsRemaining === 0 && (
+            <p className="mt-4 text-sm text-[#9ca3af]">
+              Upgrade to continue practicing
+            </p>
+          )}
+        </div>
+
+        {/* Quick Stats */}
+        <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-6 backdrop-blur-xl text-center">
+            <p className="text-sm font-medium text-[#9ca3af] mb-2">Total Calls</p>
+            <p className="text-3xl font-extrabold text-white">0</p>
+          </div>
+          <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-6 backdrop-blur-xl text-center">
+            <p className="text-sm font-medium text-[#9ca3af] mb-2">Avg. Score</p>
+            <p className="text-3xl font-extrabold text-white">—</p>
+          </div>
+          <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-6 backdrop-blur-xl text-center">
+            <p className="text-sm font-medium text-[#9ca3af] mb-2">Success Rate</p>
+            <p className="text-3xl font-extrabold text-white">—</p>
+          </div>
+        </div>
+      </div>
+    </main>
+  );
+}
