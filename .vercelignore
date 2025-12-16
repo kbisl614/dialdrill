@@ -1,0 +1,2 @@
+# Force clean builds
+.vercel/cache
