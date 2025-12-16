@@ -24,7 +24,7 @@ export async function POST() {
 
     const dbQueryStart = Date.now();
     console.log('[API /calls/start] Querying database for clerk_id:', userId);
-    const userResult = await pool.query(
+    const userResult = await pool().query(
       'SELECT id, free_calls_remaining FROM users WHERE clerk_id = $1',
       [userId]
     );
@@ -46,7 +46,7 @@ export async function POST() {
 
     const dbUpdateStart = Date.now();
     console.log('[API /calls/start] Decrementing free_calls_remaining...');
-    await pool.query(
+    await pool().query(
       'UPDATE users SET free_calls_remaining = free_calls_remaining - 1 WHERE id = $1',
       [user.id]
     );

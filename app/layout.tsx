@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
-import { initializeDatabase } from "@/lib/db";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -14,9 +13,6 @@ export const metadata: Metadata = {
   title: "DialDrill - AI Sales Call Simulator",
   description: "Practice objection handling with AI-powered sales call simulations. Train your team faster with realistic scenarios and instant feedback.",
 };
-
-// Initialize database on server startup
-initializeDatabase().catch(console.error);
 
 export default function RootLayout({
   children,

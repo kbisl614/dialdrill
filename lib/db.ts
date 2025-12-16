@@ -1,31 +1,38 @@
 import { Pool } from 'pg';
 
-console.log('[DB] Initializing database connection pool');
-console.log('[DB] DATABASE_URL exists:', !!process.env.DATABASE_URL);
+let pool: Pool | null = null;
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-});
+function getPool(): Pool {
+  if (!pool) {
+    console.log('[DB] Initializing database connection pool');
+    console.log('[DB] DATABASE_URL exists:', !!process.env.DATABASE_URL);
+    pool = new Pool({
+      connectionString: process.env.DATABASE_URL,
+    });
 
-// Test connection
-pool.on('connect', () => {
-  console.log('[DB] New client connected to database');
-});
+    pool.on('connect', () => {
+      console.log('[DB] New client connected to database');
+    });
 
-pool.on('error', (err) => {
-  console.error('[DB] Unexpected database error:', err);
-});
+    pool.on('error', (err: Error) => {
+      console.error('[DB] Unexpected database error:', err);
+    });
+  }
+  return pool;
+}
 
 export async function initializeDatabase() {
   console.log('[DB] Starting database initialization...');
 
   try {
+    const dbPool = getPool();
+
     // Test connection first
-    const testResult = await pool.query('SELECT NOW()');
+    const testResult = await dbPool.query('SELECT NOW()');
     console.log('[DB] Connection test successful. Current time:', testResult.rows[0].now);
 
     // Create users table
-    await pool.query(`
+    await dbPool.query(`
       CREATE TABLE IF NOT EXISTS users (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         clerk_id TEXT UNIQUE NOT NULL,
@@ -37,7 +44,7 @@ export async function initializeDatabase() {
     console.log('[DB] Users table created/verified successfully');
 
     // Check if table has any data
-    const countResult = await pool.query('SELECT COUNT(*) FROM users');
+    const countResult = await dbPool.query('SELECT COUNT(*) FROM users');
     console.log('[DB] Current user count:', countResult.rows[0].count);
 
     console.log('[DB] Database initialization complete ✓');
@@ -48,4 +55,4 @@ export async function initializeDatabase() {
   }
 }
 
-export { pool };
+export { getPool as pool };

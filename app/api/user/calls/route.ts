@@ -18,7 +18,7 @@ export async function GET() {
 
     // Step 2: Query database
     console.log('[API /user/calls] Querying database for clerk_id:', userId);
-    const result = await pool.query(
+    const result = await pool().query(
       'SELECT free_calls_remaining FROM users WHERE clerk_id = $1',
       [userId]
     );

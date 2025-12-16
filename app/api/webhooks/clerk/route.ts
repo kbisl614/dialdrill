@@ -57,7 +57,7 @@ export async function POST(req: Request) {
 
     try {
       // Insert new user into database
-      await pool.query(
+      await pool().query(
         'INSERT INTO users (clerk_id, email, free_calls_remaining) VALUES ($1, $2, $3) ON CONFLICT (clerk_id) DO NOTHING',
         [id, primaryEmail.email_address, 5]
       );
