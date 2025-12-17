@@ -56,13 +56,15 @@ export async function POST(req: Request) {
     }
 
     try {
-      // Insert new user into database
+      // Insert new user into database with trial plan
       await pool().query(
-        'INSERT INTO users (clerk_id, email, free_calls_remaining) VALUES ($1, $2, $3) ON CONFLICT (clerk_id) DO NOTHING',
-        [id, primaryEmail.email_address, 5]
+        `INSERT INTO users (clerk_id, email, plan, trial_calls_remaining, trial_purchases_count)
+         VALUES ($1, $2, 'trial', 5, 1)
+         ON CONFLICT (clerk_id) DO NOTHING`,
+        [id, primaryEmail.email_address]
       );
 
-      console.log('User created in database:', id, primaryEmail.email_address);
+      console.log('User created in database with trial plan:', id, primaryEmail.email_address);
     } catch (error) {
       console.error('Error creating user in database:', error);
       return NextResponse.json({ error: 'Database error' }, { status: 500 });
