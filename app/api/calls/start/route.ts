@@ -2,8 +2,9 @@ import { auth } from '@clerk/nextjs/server';
 import { pool } from '@/lib/db';
 import { NextResponse } from 'next/server';
 import { getRandomAgentId } from '@/lib/agent-selector';
+import { getEntitlements, deductCallCredit } from '@/lib/entitlements';
 
-export async function POST() {
+export async function POST(request: Request) {
   const perfStart = Date.now();
   console.log('[API /calls/start] Request received');
 
@@ -19,47 +20,101 @@ export async function POST() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const agentId = getRandomAgentId();
-    console.log('[Call] Selected agentId:', agentId);
+    // Parse request body to get optional personality selection
+    const body = await request.json().catch(() => ({}));
+    const selectedPersonalityId = body.personalityId;
 
-    const dbQueryStart = Date.now();
-    console.log('[API /calls/start] Querying database for clerk_id:', userId);
-    const userResult = await pool().query(
-      'SELECT id, free_calls_remaining FROM users WHERE clerk_id = $1',
-      [userId]
-    );
-    const dbQueryEnd = Date.now();
-    console.log(`[PERF-API] ${dbQueryEnd - perfStart}ms - DB query completed (took ${dbQueryEnd - dbQueryStart}ms)`);
+    // Get user entitlements (single source of truth)
+    const entitlementsStart = Date.now();
+    const entitlements = await getEntitlements(userId);
+    const entitlementsEnd = Date.now();
+    console.log(`[PERF-API] ${entitlementsEnd - perfStart}ms - Entitlements loaded (took ${entitlementsEnd - entitlementsStart}ms)`);
+    console.log('[API /calls/start] Entitlements:', {
+      plan: entitlements.plan,
+      canCall: entitlements.canCall,
+      isOverage: entitlements.isOverage,
+    });
 
-    if (userResult.rows.length === 0) {
-      console.log('[API /calls/start] User not found in database');
-      return NextResponse.json({ error: 'User not found in database' }, { status: 404 });
+    // Check if user can make a call
+    if (!entitlements.canCall) {
+      console.log('[API /calls/start] User cannot make calls');
+
+      let errorMessage = "You're out of call credits.";
+      if (entitlements.canBuyAnotherTrial) {
+        errorMessage += ' You can purchase another $5 trial or upgrade to the unlimited plan.';
+      } else {
+        errorMessage += ' Please upgrade to continue.';
+      }
+
+      return NextResponse.json({
+        error: errorMessage,
+        canBuyAnotherTrial: entitlements.canBuyAnotherTrial,
+        trialPurchasesCount: entitlements.trialPurchasesCount,
+      }, { status: 403 });
     }
 
-    const user = userResult.rows[0];
-    console.log('[API /calls/start] User data:', user);
+    // Select personality (either user-selected or random from unlocked)
+    let agentId: string;
+    let personalityId: string | null = null;
 
-    if (user.free_calls_remaining <= 0) {
-      console.log('[API /calls/start] No free calls remaining');
-      return NextResponse.json({ error: "You're out of call credits. Please upgrade to continue." }, { status: 403 });
+    if (selectedPersonalityId) {
+      // Verify the selected personality is unlocked
+      const personality = entitlements.unlockedPersonalities.find(p => p.id === selectedPersonalityId);
+      if (!personality) {
+        return NextResponse.json({
+          error: 'Selected personality is not available on your plan'
+        }, { status: 403 });
+      }
+      agentId = personality.agentId;
+      personalityId = personality.id;
+      console.log('[Call] User selected personality:', personality.name);
+    } else {
+      // Random selection from unlocked personalities
+      const randomPersonality = entitlements.unlockedPersonalities[
+        Math.floor(Math.random() * entitlements.unlockedPersonalities.length)
+      ];
+      agentId = randomPersonality?.agentId || getRandomAgentId();
+      personalityId = randomPersonality?.id || null;
+      console.log('[Call] Randomly selected personality:', randomPersonality?.name || 'default');
     }
 
-    const dbUpdateStart = Date.now();
-    console.log('[API /calls/start] Decrementing free_calls_remaining...');
-    await pool().query(
-      'UPDATE users SET free_calls_remaining = free_calls_remaining - 1 WHERE id = $1',
-      [user.id]
-    );
-    const dbUpdateEnd = Date.now();
-    console.log(`[PERF-API] ${dbUpdateEnd - perfStart}ms - DB update completed (took ${dbUpdateEnd - dbUpdateStart}ms)`);
+    // Deduct credits
+    const deductStart = Date.now();
+    const deductionResult = await deductCallCredit(userId);
+    const deductEnd = Date.now();
+    console.log(`[PERF-API] ${deductEnd - perfStart}ms - Credit deducted (took ${deductEnd - deductStart}ms)`);
+
+    if (!deductionResult.success) {
+      console.log('[API /calls/start] Failed to deduct credits');
+      return NextResponse.json({
+        error: 'Failed to deduct credits. Please try again.'
+      }, { status: 500 });
+    }
+
+    // Log the call in call_logs table
+    if (personalityId) {
+      await pool().query(
+        `INSERT INTO call_logs (user_id, personality_id, tokens_used, overage_charge)
+         SELECT id, $2, $3, $4 FROM users WHERE clerk_id = $1`,
+        [
+          userId,
+          personalityId,
+          deductionResult.isOverage ? 0 : 1000,
+          deductionResult.isOverage ? 1.00 : 0,
+        ]
+      );
+    }
 
     const totalTime = Date.now() - perfStart;
     console.log(`[PERF-API] ${totalTime}ms - ✅ /calls/start TOTAL TIME`);
-    console.log('[API /calls/start] Success - call decremented');
+    console.log('[API /calls/start] Success - call started');
 
     return NextResponse.json({
       agentId,
-      callsRemaining: user.free_calls_remaining - 1,
+      creditsRemaining: deductionResult.remainingCredits,
+      isOverage: deductionResult.isOverage,
+      maxDurationSeconds: entitlements.maxCallDurationSeconds,
+      plan: entitlements.plan,
     });
   } catch (error) {
     console.error('[API /calls/start] ERROR:', error);
