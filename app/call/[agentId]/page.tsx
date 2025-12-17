@@ -1,6 +1,6 @@
 'use client';
 
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { Conversation } from '@elevenlabs/client';
@@ -16,18 +16,35 @@ interface TranscriptItem {
 export default function CallPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { isLoaded, user } = useUser();
   const agentId = params.agentId as string;
+
+  // Get max duration from URL params (90 for trial, 300 for paid)
+  const maxDurationParam = searchParams.get('maxDuration');
+  const initialMaxDuration = maxDurationParam ? parseInt(maxDurationParam) : 300;
 
   const [status, setStatus] = useState<CallStatus>('connecting');
   const [transcript, setTranscript] = useState<TranscriptItem[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isMuted, setIsMuted] = useState(false);
   const [conversation, setConversation] = useState<Conversation | null>(null);
+  const [maxDuration, setMaxDuration] = useState<number>(initialMaxDuration);
+  const [elapsedSeconds, setElapsedSeconds] = useState<number>(0);
+  const [showTimeWarning, setShowTimeWarning] = useState(false);
   const isInitializedRef = useRef(false);
+  const callStartTimeRef = useRef<number | null>(null);
+  const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const endCall = useCallback(() => {
     console.log('[Call] Ending call...');
+
+    // Clear timer
+    if (timerIntervalRef.current) {
+      clearInterval(timerIntervalRef.current);
+      timerIntervalRef.current = null;
+    }
+
     if (conversation) {
       try {
         conversation.endSession();
@@ -150,6 +167,9 @@ export default function CallPage() {
               console.log('[Call] ✅ WebSocket Connected!');
               clearTimeout(connectionTimeout);
               setStatus('connected');
+
+              // Start call timer
+              callStartTimeRef.current = Date.now();
             },
             onDisconnect: () => {
               console.log('[Call] WebSocket Disconnected');
@@ -223,6 +243,42 @@ export default function CallPage() {
     };
   }, [isLoaded, user, agentId]);
 
+  // Timer effect for call duration enforcement
+  useEffect(() => {
+    if (status !== 'connected' || !callStartTimeRef.current) {
+      return;
+    }
+
+    // Update elapsed time every second
+    timerIntervalRef.current = setInterval(() => {
+      if (!callStartTimeRef.current) return;
+
+      const elapsed = Math.floor((Date.now() - callStartTimeRef.current) / 1000);
+      setElapsedSeconds(elapsed);
+
+      const timeRemaining = maxDuration - elapsed;
+
+      // Show warning at 30 seconds remaining
+      if (timeRemaining <= 30 && timeRemaining > 0) {
+        setShowTimeWarning(true);
+      }
+
+      // Auto-disconnect when time limit reached
+      if (elapsed >= maxDuration) {
+        console.log('[Call] Maximum duration reached, ending call');
+        setError(`Call ended: ${maxDuration === 90 ? '1.5 minute' : '5 minute'} time limit reached`);
+        endCall();
+      }
+    }, 1000);
+
+    return () => {
+      if (timerIntervalRef.current) {
+        clearInterval(timerIntervalRef.current);
+        timerIntervalRef.current = null;
+      }
+    };
+  }, [status, maxDuration, endCall]);
+
   function handleEndCall() {
     endCall();
     router.push('/dashboard');
@@ -237,6 +293,12 @@ export default function CallPage() {
       conversation.setVolume({ volume: 0.0 });
     }
     setIsMuted(!isMuted);
+  }
+
+  function formatTime(seconds: number): string {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
   }
 
   if (!isLoaded || !user) {
@@ -261,6 +323,12 @@ export default function CallPage() {
                 status === 'error' ? 'text-red-400' :
                 'text-gray-400'
               }>{status}</span>
+              {status === 'connected' && (
+                <span className="ml-4">
+                  Time: <span className="text-white font-mono">{formatTime(elapsedSeconds)}</span>
+                  <span className="text-gray-500"> / {formatTime(maxDuration)}</span>
+                </span>
+              )}
             </p>
           </div>
           <button
@@ -271,6 +339,25 @@ export default function CallPage() {
           </button>
         </div>
       </div>
+
+      {/* Floating Time Warning */}
+      {showTimeWarning && status === 'connected' && (
+        <div className="fixed top-24 right-6 z-50 animate-pulse">
+          <div className="bg-yellow-900/90 border-2 border-yellow-500 rounded-lg p-4 shadow-xl">
+            <div className="flex items-center gap-3">
+              <svg className="w-6 h-6 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <div>
+                <p className="text-yellow-100 font-semibold">Time Running Out!</p>
+                <p className="text-yellow-200 text-sm">
+                  {formatTime(maxDuration - elapsedSeconds)} remaining
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Main Content */}
       <div className="flex-1 max-w-4xl mx-auto w-full p-6">

@@ -76,13 +76,14 @@ export default function Dashboard() {
       console.log('Call started:', data);
 
       // Update calls remaining
-      setFreeCallsRemaining(data.callsRemaining);
+      setFreeCallsRemaining(data.creditsRemaining ?? data.callsRemaining);
 
       const navStart = performance.now();
       console.log(`[PERF] ${(navStart - perfStart).toFixed(0)}ms - Navigating to call page`);
 
-      // Navigate to call interface
-      router.push(`/call/${data.agentId}`);
+      // Navigate to call interface with max duration param
+      const maxDuration = data.maxDurationSeconds || 300;
+      router.push(`/call/${data.agentId}?maxDuration=${maxDuration}`);
 
       console.log(`[PERF] Total dashboard flow: ${(navStart - perfStart).toFixed(0)}ms`);
     } catch (err) {
