@@ -3,6 +3,7 @@
 import { useAuth, useUser, SignOutButton } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 
 interface Entitlements {
   plan: 'trial' | 'paid';
@@ -108,42 +109,6 @@ export default function Dashboard() {
     }
   }
 
-  function scrollToTiers() {
-    const tiersSection = document.getElementById('payment-tiers');
-    if (tiersSection) {
-      tiersSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  }
-
-  async function handleSelectPlan(planType: 'trial' | 'paid') {
-    if (!entitlements) return;
-
-    try {
-      const priceId = planType === 'trial'
-        ? process.env.NEXT_PUBLIC_STRIPE_PRICE_TRIAL_ID!
-        : process.env.NEXT_PUBLIC_STRIPE_PRICE_PAID_ID!;
-
-      console.log('[Upgrade] Creating checkout session for plan:', planType);
-
-      const response = await fetch('/api/stripe/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ priceId, planType }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to create checkout session');
-      }
-
-      const { url } = await response.json();
-
-      // Redirect to Stripe Checkout
-      window.location.href = url;
-    } catch (err) {
-      console.error('Error creating checkout session:', err);
-      setError('Failed to start upgrade process. Please try again.');
-    }
-  }
 
   // Helper function to format credit display
   function getCreditsDisplay() {
@@ -198,12 +163,12 @@ export default function Dashboard() {
               Dial<span className="text-[#2dd4e6]">Drill</span>
             </div>
             <div className="flex items-center gap-6">
-              <button
-                onClick={scrollToTiers}
+              <Link
+                href="/plans"
                 className="text-sm font-semibold text-[#9ca3af] transition-colors hover:text-white"
               >
                 Plans
-              </button>
+              </Link>
               <SignOutButton>
                 <button className="rounded-full border border-white/10 bg-white/5 px-6 py-2.5 text-sm font-semibold text-white transition-all hover:bg-white/10">
                   Sign Out
@@ -268,12 +233,12 @@ export default function Dashboard() {
 
             {/* Upgrade Button - Show for trial users */}
             {entitlements?.plan === 'trial' && (
-              <button
-                onClick={scrollToTiers}
-                className="mt-4 w-full rounded-xl bg-gradient-to-r from-[#a855f7] to-[#9333ea] px-6 py-3 text-sm font-semibold text-white transition-all hover:scale-[1.02] shadow-[0_0_20px_rgba(168,85,247,0.3)] hover:shadow-[0_0_30px_rgba(168,85,247,0.5)]"
+              <Link
+                href="/plans"
+                className="mt-4 w-full block text-center rounded-xl bg-gradient-to-r from-[#a855f7] to-[#9333ea] px-6 py-3 text-sm font-semibold text-white transition-all hover:scale-[1.02] shadow-[0_0_20px_rgba(168,85,247,0.3)] hover:shadow-[0_0_30px_rgba(168,85,247,0.5)]"
               >
                 View Plans
-              </button>
+              </Link>
             )}
           </div>
 
@@ -320,12 +285,12 @@ export default function Dashboard() {
               <p className="text-sm text-[#9ca3af] mb-4">
                 You're out of call credits. Please upgrade to continue.
               </p>
-              <button
-                onClick={scrollToTiers}
-                className="rounded-full bg-gradient-to-r from-[#a855f7] to-[#9333ea] px-8 py-3 text-base font-semibold text-white transition-all hover:scale-105 shadow-[0_0_30px_rgba(168,85,247,0.4)] hover:shadow-[0_0_40px_rgba(168,85,247,0.6)]"
+              <Link
+                href="/plans"
+                className="inline-block rounded-full bg-gradient-to-r from-[#a855f7] to-[#9333ea] px-8 py-3 text-base font-semibold text-white transition-all hover:scale-105 shadow-[0_0_30px_rgba(168,85,247,0.4)] hover:shadow-[0_0_40px_rgba(168,85,247,0.6)]"
               >
                 View Plans
-              </button>
+              </Link>
             </div>
           )}
         </div>
@@ -343,143 +308,6 @@ export default function Dashboard() {
           <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-6 backdrop-blur-xl text-center">
             <p className="text-sm font-medium text-[#9ca3af] mb-2">Success Rate</p>
             <p className="text-3xl font-extrabold text-white">—</p>
-          </div>
-        </div>
-
-        {/* Payment Tiers Section */}
-        <div id="payment-tiers" className="mt-24 scroll-mt-20">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-extrabold text-white mb-4">
-              Choose Your Plan
-            </h2>
-            <p className="text-lg text-[#9ca3af] max-w-2xl mx-auto">
-              Start with our trial or unlock unlimited potential with Pro
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-            {/* Trial Tier */}
-            <div className={`rounded-3xl border p-8 shadow-2xl backdrop-blur-xl transition-all ${
-              entitlements?.canBuyAnotherTrial
-                ? 'border-[#2dd4e6]/30 bg-gradient-to-br from-[rgba(45,212,230,0.1)] to-[rgba(15,23,42,0.95)]'
-                : 'border-white/10 bg-gradient-to-br from-[rgba(15,23,42,0.5)] to-[rgba(15,23,42,0.8)] opacity-60'
-            }`}>
-              <div className="mb-6">
-                <h3 className="text-2xl font-bold text-white mb-2">Trial</h3>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-5xl font-extrabold text-white">$5</span>
-                  <span className="text-[#9ca3af]">one-time</span>
-                </div>
-                {entitlements && (
-                  <p className="text-sm text-[#9ca3af] mt-2">
-                    {entitlements.trialPurchasesCount === 0
-                      ? 'First trial - 2 trials available total'
-                      : entitlements.trialPurchasesCount === 1
-                      ? '1 trial used - 1 more available'
-                      : '2 trials used - No more trials available'}
-                  </p>
-                )}
-              </div>
-
-              <ul className="space-y-4 mb-8">
-                <li className="flex items-start gap-3">
-                  <svg className="h-6 w-6 text-[#2dd4e6] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span className="text-white">5 AI practice calls</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <svg className="h-6 w-6 text-[#2dd4e6] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span className="text-white">3 base personalities</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <svg className="h-6 w-6 text-[#2dd4e6] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span className="text-white">90 second call limit</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <svg className="h-6 w-6 text-[#2dd4e6] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span className="text-white">Can purchase up to 2 times</span>
-                </li>
-              </ul>
-
-              <button
-                onClick={() => handleSelectPlan('trial')}
-                disabled={!entitlements?.canBuyAnotherTrial}
-                className={`w-full rounded-xl px-6 py-4 text-lg font-semibold transition-all ${
-                  entitlements?.canBuyAnotherTrial
-                    ? 'bg-gradient-to-r from-[#2dd4e6] to-[#1ab5c4] text-[#020817] hover:scale-[1.02] shadow-[0_0_30px_rgba(45,212,230,0.4)] hover:shadow-[0_0_40px_rgba(45,212,230,0.6)]'
-                    : 'bg-white/10 text-white/50 cursor-not-allowed'
-                }`}
-              >
-                {entitlements?.canBuyAnotherTrial ? 'Get Trial' : 'Trial Limit Reached'}
-              </button>
-            </div>
-
-            {/* Pro Tier */}
-            <div className="rounded-3xl border border-[#a855f7]/30 bg-gradient-to-br from-[rgba(168,85,247,0.1)] to-[rgba(15,23,42,0.95)] p-8 shadow-2xl backdrop-blur-xl relative">
-              <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                <span className="inline-block rounded-full bg-gradient-to-r from-[#a855f7] to-[#9333ea] px-6 py-1.5 text-sm font-bold text-white shadow-lg">
-                  MOST POPULAR
-                </span>
-              </div>
-
-              <div className="mb-6 mt-4">
-                <h3 className="text-2xl font-bold text-white mb-2">Pro</h3>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-5xl font-extrabold text-white">$11.99</span>
-                  <span className="text-[#9ca3af]">/month</span>
-                </div>
-                <p className="text-sm text-[#9ca3af] mt-2">
-                  Cancel anytime
-                </p>
-              </div>
-
-              <ul className="space-y-4 mb-8">
-                <li className="flex items-start gap-3">
-                  <svg className="h-6 w-6 text-[#a855f7] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span className="text-white">20,000 tokens/month (~20 calls)</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <svg className="h-6 w-6 text-[#a855f7] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span className="text-white">All 8 personalities (including 5 bosses)</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <svg className="h-6 w-6 text-[#a855f7] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span className="text-white">5 minute call limit</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <svg className="h-6 w-6 text-[#a855f7] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span className="text-white">$1/call overage when out of tokens</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <svg className="h-6 w-6 text-[#a855f7] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span className="text-white">Priority support</span>
-                </li>
-              </ul>
-
-              <button
-                onClick={() => handleSelectPlan('paid')}
-                className="w-full rounded-xl bg-gradient-to-r from-[#a855f7] to-[#9333ea] px-6 py-4 text-lg font-semibold text-white transition-all hover:scale-[1.02] shadow-[0_0_30px_rgba(168,85,247,0.4)] hover:shadow-[0_0_40px_rgba(168,85,247,0.6)]"
-              >
-                Get Pro
-              </button>
-            </div>
           </div>
         </div>
       </div>
