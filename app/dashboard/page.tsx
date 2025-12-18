@@ -4,11 +4,21 @@ import { useAuth, useUser, SignOutButton } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
+interface Entitlements {
+  plan: 'trial' | 'paid';
+  canCall: boolean;
+  trialCallsRemaining?: number;
+  tokensRemaining?: number;
+  isOverage: boolean;
+  trialPurchasesCount: number;
+  canBuyAnotherTrial: boolean;
+}
+
 export default function Dashboard() {
   const { isSignedIn, isLoaded } = useAuth();
   const { user } = useUser();
   const router = useRouter();
-  const [freeCallsRemaining, setFreeCallsRemaining] = useState<number | null>(null);
+  const [entitlements, setEntitlements] = useState<Entitlements | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [startingCall, setStartingCall] = useState(false);
@@ -20,18 +30,18 @@ export default function Dashboard() {
   }, [isSignedIn, isLoaded, router]);
 
   useEffect(() => {
-    async function fetchUserData() {
+    async function fetchEntitlements() {
       if (!user?.id) return;
 
       try {
-        const response = await fetch('/api/user/calls');
+        const response = await fetch('/api/user/entitlements');
         if (!response.ok) {
-          throw new Error('Failed to fetch user data');
+          throw new Error('Failed to fetch entitlements');
         }
         const data = await response.json();
-        setFreeCallsRemaining(data.freeCallsRemaining);
+        setEntitlements(data);
       } catch (err) {
-        console.error('Error fetching user data:', err);
+        console.error('Error fetching entitlements:', err);
         setError('Failed to load your data. Please try refreshing the page.');
       } finally {
         setLoading(false);
@@ -39,7 +49,7 @@ export default function Dashboard() {
     }
 
     if (user) {
-      fetchUserData();
+      fetchEntitlements();
     }
   }, [user]);
 
@@ -47,8 +57,8 @@ export default function Dashboard() {
     const perfStart = performance.now();
     console.log('[PERF] Button click → Start call flow');
 
-    // UI-level credit check
-    if (freeCallsRemaining === null || freeCallsRemaining <= 0) {
+    // UI-level check
+    if (!entitlements || !entitlements.canCall) {
       setError("You're out of call credits. Please upgrade to continue.");
       return;
     }
@@ -75,8 +85,12 @@ export default function Dashboard() {
       const data = await response.json();
       console.log('Call started:', data);
 
-      // Update calls remaining
-      setFreeCallsRemaining(data.creditsRemaining ?? data.callsRemaining);
+      // Refresh entitlements after call starts
+      const entitlementsResponse = await fetch('/api/user/entitlements');
+      if (entitlementsResponse.ok) {
+        const updatedEntitlements = await entitlementsResponse.json();
+        setEntitlements(updatedEntitlements);
+      }
 
       const navStart = performance.now();
       console.log(`[PERF] ${(navStart - perfStart).toFixed(0)}ms - Navigating to call page`);
@@ -93,6 +107,34 @@ export default function Dashboard() {
       setStartingCall(false);
     }
   }
+
+  // Helper function to format credit display
+  function getCreditsDisplay() {
+    if (!entitlements) return { label: 'Credits', value: '—', max: 0, current: 0 };
+
+    if (entitlements.plan === 'trial') {
+      return {
+        label: 'Calls Remaining',
+        value: entitlements.trialCallsRemaining?.toString() || '0',
+        max: 5,
+        current: entitlements.trialCallsRemaining || 0,
+      };
+    } else {
+      // Paid plan
+      const tokens = entitlements.tokensRemaining || 0;
+      const calls = Math.floor(tokens / 1000);
+      return {
+        label: 'Tokens Remaining',
+        value: `${tokens.toLocaleString()}`,
+        subValue: `(~${calls} calls)`,
+        max: 20000,
+        current: tokens,
+        isOverage: entitlements.isOverage,
+      };
+    }
+  }
+
+  const creditsDisplay = getCreditsDisplay();
 
   if (!isLoaded || loading) {
     return (
@@ -147,7 +189,7 @@ export default function Dashboard() {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-          {/* Free Calls Card */}
+          {/* Credits Card */}
           <div className="rounded-3xl border border-white/10 bg-gradient-to-br from-[rgba(15,23,42,0.95)] to-[rgba(15,23,42,0.8)] p-8 shadow-[0_20px_60px_rgba(0,0,0,0.5),0_0_40px_rgba(45,212,230,0.1)] backdrop-blur-xl">
             <div className="flex items-center gap-4 mb-4">
               <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-[#2dd4e6]/30 to-[#2dd4e6]/10 ring-2 ring-[#2dd4e6]/30">
@@ -156,18 +198,28 @@ export default function Dashboard() {
                 </svg>
               </div>
               <div>
-                <p className="text-sm font-medium text-[#9ca3af]">Free Calls Remaining</p>
+                <p className="text-sm font-medium text-[#9ca3af]">{creditsDisplay.label}</p>
                 <p className="text-4xl font-extrabold text-white tabular-nums">
-                  {freeCallsRemaining !== null ? freeCallsRemaining : '—'}
+                  {creditsDisplay.value}
                 </p>
+                {creditsDisplay.subValue && (
+                  <p className="text-sm text-[#9ca3af] mt-1">{creditsDisplay.subValue}</p>
+                )}
               </div>
             </div>
             <div className="mt-4 h-3 overflow-hidden rounded-full bg-white/5 ring-1 ring-white/10">
               <div
                 className="h-full rounded-full bg-gradient-to-r from-[#2dd4e6] to-[#22c55e] shadow-[0_0_20px_rgba(45,212,230,0.4)] transition-all"
-                style={{ width: `${freeCallsRemaining !== null ? (freeCallsRemaining / 5) * 100 : 0}%` }}
+                style={{ width: `${(creditsDisplay.current / creditsDisplay.max) * 100}%` }}
               ></div>
             </div>
+            {creditsDisplay.isOverage && (
+              <div className="mt-4 rounded-xl border border-yellow-500/20 bg-yellow-500/10 p-3">
+                <p className="text-sm text-yellow-400">
+                  Out of tokens - Additional calls billed at $1 each
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Account Info Card */}
@@ -180,11 +232,15 @@ export default function Dashboard() {
               </div>
               <div>
                 <p className="text-sm font-medium text-[#9ca3af]">Account Type</p>
-                <p className="text-2xl font-extrabold text-white">Free Trial</p>
+                <p className="text-2xl font-extrabold text-white">
+                  {entitlements?.plan === 'trial' ? 'Trial' : 'Pro'}
+                </p>
               </div>
             </div>
             <p className="text-sm text-[#9ca3af] mt-2">
-              Upgrade to get unlimited calls and advanced analytics
+              {entitlements?.plan === 'trial'
+                ? 'Upgrade to Pro for more personalities and longer calls'
+                : 'Pro plan with all features unlocked'}
             </p>
           </div>
         </div>
@@ -200,11 +256,11 @@ export default function Dashboard() {
           <button
             onClick={handleStartCall}
             className="rounded-full bg-gradient-to-r from-[#2dd4e6] to-[#1ab5c4] px-12 py-5 text-xl font-semibold text-[#020817] transition-all hover:scale-105 shadow-[0_0_40px_rgba(45,212,230,0.4)] hover:shadow-[0_0_60px_rgba(45,212,230,0.6)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-            disabled={freeCallsRemaining === null || freeCallsRemaining <= 0 || startingCall}
+            disabled={!entitlements || !entitlements.canCall || startingCall}
           >
-            {startingCall ? 'Starting Call...' : (freeCallsRemaining === null || freeCallsRemaining <= 0) ? 'Out of Call Credits' : 'Start Call'}
+            {startingCall ? 'Starting Call...' : (!entitlements || !entitlements.canCall) ? 'Out of Call Credits' : 'Start Call'}
           </button>
-          {freeCallsRemaining !== null && freeCallsRemaining <= 0 && (
+          {entitlements && !entitlements.canCall && (
             <p className="mt-4 text-sm text-[#9ca3af]">
               You're out of call credits. Please upgrade to continue.
             </p>
