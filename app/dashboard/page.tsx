@@ -108,6 +108,56 @@ export default function Dashboard() {
     }
   }
 
+  async function handleUpgrade(planType?: 'trial' | 'paid') {
+    if (!entitlements) return;
+
+    try {
+      // Determine which plan to purchase
+      let priceId: string;
+      let selectedPlanType: 'trial' | 'paid';
+
+      if (planType) {
+        // Direct upgrade (e.g., from "Upgrade to Pro" button)
+        selectedPlanType = planType;
+        priceId = planType === 'trial'
+          ? process.env.NEXT_PUBLIC_STRIPE_PRICE_TRIAL_ID!
+          : process.env.NEXT_PUBLIC_STRIPE_PRICE_PAID_ID!;
+      } else {
+        // Auto-determine based on entitlements
+        if (!entitlements.canBuyAnotherTrial) {
+          // Can only upgrade to paid
+          selectedPlanType = 'paid';
+          priceId = process.env.NEXT_PUBLIC_STRIPE_PRICE_PAID_ID!;
+        } else {
+          // Show modal with both options (for now, default to trial)
+          // TODO: In Block 4, this will show a modal
+          selectedPlanType = 'trial';
+          priceId = process.env.NEXT_PUBLIC_STRIPE_PRICE_TRIAL_ID!;
+        }
+      }
+
+      console.log('[Upgrade] Creating checkout session for plan:', selectedPlanType);
+
+      const response = await fetch('/api/stripe/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ priceId, planType: selectedPlanType }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create checkout session');
+      }
+
+      const { url } = await response.json();
+
+      // Redirect to Stripe Checkout
+      window.location.href = url;
+    } catch (err) {
+      console.error('Error creating checkout session:', err);
+      setError('Failed to start upgrade process. Please try again.');
+    }
+  }
+
   // Helper function to format credit display
   function getCreditsDisplay() {
     if (!entitlements) return { label: 'Credits', value: '—', max: 0, current: 0 };
@@ -220,6 +270,24 @@ export default function Dashboard() {
                 </p>
               </div>
             )}
+
+            {/* Upgrade Button - Show for trial users when low on credits or paid users can't have this */}
+            {entitlements?.plan === 'trial' && (
+              <button
+                onClick={() => {
+                  // If can't buy another trial, go straight to paid
+                  if (!entitlements.canBuyAnotherTrial) {
+                    handleUpgrade('paid');
+                  } else {
+                    // For now, default to trial (Block 4 will add modal for choice)
+                    handleUpgrade('trial');
+                  }
+                }}
+                className="mt-4 w-full rounded-xl bg-gradient-to-r from-[#a855f7] to-[#9333ea] px-6 py-3 text-sm font-semibold text-white transition-all hover:scale-[1.02] shadow-[0_0_20px_rgba(168,85,247,0.3)] hover:shadow-[0_0_30px_rgba(168,85,247,0.5)]"
+              >
+                {entitlements.canBuyAnotherTrial ? 'Upgrade Plan' : 'Upgrade to Pro'}
+              </button>
+            )}
           </div>
 
           {/* Account Info Card */}
@@ -260,10 +328,24 @@ export default function Dashboard() {
           >
             {startingCall ? 'Starting Call...' : (!entitlements || !entitlements.canCall) ? 'Out of Call Credits' : 'Start Call'}
           </button>
-          {entitlements && !entitlements.canCall && (
-            <p className="mt-4 text-sm text-[#9ca3af]">
-              You're out of call credits. Please upgrade to continue.
-            </p>
+          {entitlements && !entitlements.canCall && entitlements.plan === 'trial' && (
+            <div className="mt-6">
+              <p className="text-sm text-[#9ca3af] mb-4">
+                You're out of call credits. Please upgrade to continue.
+              </p>
+              <button
+                onClick={() => {
+                  if (!entitlements.canBuyAnotherTrial) {
+                    handleUpgrade('paid');
+                  } else {
+                    handleUpgrade('trial');
+                  }
+                }}
+                className="rounded-full bg-gradient-to-r from-[#a855f7] to-[#9333ea] px-8 py-3 text-base font-semibold text-white transition-all hover:scale-105 shadow-[0_0_30px_rgba(168,85,247,0.4)] hover:shadow-[0_0_40px_rgba(168,85,247,0.6)]"
+              >
+                {entitlements.canBuyAnotherTrial ? 'View Upgrade Options' : 'Upgrade to Pro - $11.99/mo'}
+              </button>
+            </div>
           )}
         </div>
 
