@@ -235,7 +235,7 @@ export default function PlansPage() {
                 <svg className="h-6 w-6 text-[#a855f7] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
-                <span className="text-white">20,000 tokens/month (~20 calls)</span>
+                <span className="text-white">20 minutes/month</span>
               </li>
               <li className="flex items-start gap-3">
                 <svg className="h-6 w-6 text-[#a855f7] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -253,7 +253,7 @@ export default function PlansPage() {
                 <svg className="h-6 w-6 text-[#a855f7] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
-                <span className="text-white">$1/call overage when out of tokens</span>
+                <span className="text-white">$1/min overage when out of minutes</span>
               </li>
               <li className="flex items-start gap-3">
                 <svg className="h-6 w-6 text-[#a855f7] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -272,8 +272,109 @@ export default function PlansPage() {
           </div>
         </div>
 
-        {/* Additional Info Section */}
-        <div className="max-w-4xl mx-auto">
+        {/* Add Minutes Packages Section */}
+        <div className="mt-24 max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-extrabold text-white mb-4">
+              Add Minutes
+            </h2>
+            <p className="text-lg text-[#9ca3af]">
+              Need more practice time? Purchase additional minutes anytime
+            </p>
+          </div>
+
+          {/* Minute Packages Table */}
+          <div className="rounded-3xl border border-white/10 bg-gradient-to-br from-[rgba(15,23,42,0.95)] to-[rgba(15,23,42,0.8)] p-8 shadow-2xl backdrop-blur-xl overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-white/10">
+                  <th className="text-left py-4 px-6 text-sm font-semibold text-[#9ca3af]">Package</th>
+                  <th className="text-left py-4 px-6 text-sm font-semibold text-[#9ca3af]">Minutes</th>
+                  <th className="text-left py-4 px-6 text-sm font-semibold text-[#9ca3af]">Price</th>
+                  <th className="text-left py-4 px-6 text-sm font-semibold text-[#9ca3af]">Price / Min</th>
+                  <th className="text-left py-4 px-6 text-sm font-semibold text-[#9ca3af]">Savings</th>
+                  <th className="py-4 px-6"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {/* Small Boost */}
+                <tr className="border-b border-white/5 hover:bg-white/[0.02] transition-colors">
+                  <td className="py-4 px-6 text-white font-medium">Small Boost</td>
+                  <td className="py-4 px-6 text-white">+5 min</td>
+                  <td className="py-4 px-6 text-white font-semibold">$5</td>
+                  <td className="py-4 px-6 text-[#9ca3af]">$1.00</td>
+                  <td className="py-4 px-6 text-[#9ca3af]">—</td>
+                  <td className="py-4 px-6">
+                    <button
+                      onClick={() => handleSelectPlan('trial')}
+                      className="rounded-lg bg-gradient-to-r from-[#2dd4e6] to-[#1ab5c4] px-6 py-2 text-sm font-semibold text-[#020817] transition-all hover:scale-105"
+                    >
+                      Buy
+                    </button>
+                  </td>
+                </tr>
+
+                {/* Focus Pack */}
+                <tr className="border-b border-white/5 hover:bg-white/[0.02] transition-colors">
+                  <td className="py-4 px-6 text-white font-medium">Focus Pack</td>
+                  <td className="py-4 px-6 text-white">+10 min</td>
+                  <td className="py-4 px-6 text-white font-semibold">$9</td>
+                  <td className="py-4 px-6 text-[#9ca3af]">$0.90</td>
+                  <td className="py-4 px-6 text-green-400">Save $1</td>
+                  <td className="py-4 px-6">
+                    <button
+                      onClick={() => handleSelectPlan('trial')}
+                      className="rounded-lg bg-gradient-to-r from-[#2dd4e6] to-[#1ab5c4] px-6 py-2 text-sm font-semibold text-[#020817] transition-all hover:scale-105"
+                    >
+                      Buy
+                    </button>
+                  </td>
+                </tr>
+
+                {/* Power Pack */}
+                <tr className="border-b border-white/5 hover:bg-white/[0.02] transition-colors">
+                  <td className="py-4 px-6 text-white font-medium">Power Pack</td>
+                  <td className="py-4 px-6 text-white">+20 min</td>
+                  <td className="py-4 px-6 text-white font-semibold">$16</td>
+                  <td className="py-4 px-6 text-[#9ca3af]">$0.80</td>
+                  <td className="py-4 px-6 text-green-400">Save $4</td>
+                  <td className="py-4 px-6">
+                    <button
+                      onClick={() => handleSelectPlan('trial')}
+                      className="rounded-lg bg-gradient-to-r from-[#2dd4e6] to-[#1ab5c4] px-6 py-2 text-sm font-semibold text-[#020817] transition-all hover:scale-105"
+                    >
+                      Buy
+                    </button>
+                  </td>
+                </tr>
+
+                {/* Intensive Pack */}
+                <tr className="hover:bg-white/[0.02] transition-colors">
+                  <td className="py-4 px-6 text-white font-medium">Intensive Pack</td>
+                  <td className="py-4 px-6 text-white">+50 min</td>
+                  <td className="py-4 px-6 text-white font-semibold">$35</td>
+                  <td className="py-4 px-6 text-[#9ca3af]">$0.70</td>
+                  <td className="py-4 px-6 text-green-400 font-semibold">Save $15</td>
+                  <td className="py-4 px-6">
+                    <button
+                      onClick={() => handleSelectPlan('trial')}
+                      className="rounded-lg bg-gradient-to-r from-[#a855f7] to-[#9333ea] px-6 py-2 text-sm font-semibold text-white transition-all hover:scale-105"
+                    >
+                      Buy
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p className="text-center text-sm text-[#9ca3af] mt-6">
+            Minute packages never expire and can be used with any plan
+          </p>
+        </div>
+
+        {/* FAQ Section */}
+        <div className="mt-24 max-w-4xl mx-auto">
           <div className="rounded-3xl border border-white/10 bg-gradient-to-br from-[rgba(15,23,42,0.95)] to-[rgba(15,23,42,0.8)] p-12 shadow-2xl backdrop-blur-xl">
             <h2 className="text-3xl font-extrabold text-white mb-8 text-center">
               Frequently Asked Questions
@@ -284,7 +385,7 @@ export default function PlansPage() {
                 <h3 className="text-lg font-semibold text-white mb-2">What happens after I use my 2 trials?</h3>
                 <p className="text-[#9ca3af]">
                   After purchasing both trial packages, you'll need to upgrade to the Pro plan to continue practicing.
-                  The Pro plan gives you significantly more value with 20,000 tokens per month.
+                  The Pro plan gives you significantly more value with 20 minutes per month.
                 </p>
               </div>
 
@@ -296,10 +397,10 @@ export default function PlansPage() {
               </div>
 
               <div>
-                <h3 className="text-lg font-semibold text-white mb-2">What are tokens?</h3>
+                <h3 className="text-lg font-semibold text-white mb-2">How do minutes work?</h3>
                 <p className="text-[#9ca3af]">
-                  Tokens are your practice call credits. Each call uses 1,000 tokens, giving you approximately 20 calls per month with the Pro plan.
-                  If you run out, you can continue calling at $1 per call.
+                  Minutes are your practice call credits. Pro plan includes 20 minutes per month.
+                  If you run out, you can purchase additional minute packages or continue at $1/min.
                 </p>
               </div>
 

@@ -122,15 +122,15 @@ export default function Dashboard() {
         current: entitlements.trialCallsRemaining || 0,
       };
     } else {
-      // Paid plan
+      // Paid plan - Convert tokens to minutes (1000 tokens = 1 minute)
       const tokens = entitlements.tokensRemaining || 0;
-      const calls = Math.floor(tokens / 1000);
+      const minutes = Math.floor(tokens / 1000);
       return {
-        label: 'Tokens Remaining',
-        value: `${tokens.toLocaleString()}`,
-        subValue: `(~${calls} calls)`,
-        max: 20000,
-        current: tokens,
+        label: 'Minutes Remaining',
+        value: `${minutes}`,
+        subValue: `min`,
+        max: 20, // 20,000 tokens = 20 minutes
+        current: minutes,
         isOverage: entitlements.isOverage,
       };
     }
@@ -226,7 +226,7 @@ export default function Dashboard() {
             {creditsDisplay.isOverage && (
               <div className="mt-4 rounded-xl border border-yellow-500/20 bg-yellow-500/10 p-3">
                 <p className="text-sm text-yellow-400">
-                  Out of tokens - Additional calls billed at $1 each
+                  Out of minutes - Additional calls billed at $1/min
                 </p>
               </div>
             )}
