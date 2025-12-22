@@ -338,7 +338,7 @@ export default async function HistoryPage() {
                               trust: 'border-red-500/30 bg-red-500/10',
                               other: 'border-gray-500/30 bg-gray-500/10'
                             };
-                            return colors[objection.category] || colors.other;
+                            return colors[category] || colors.other;
                           };
 
                           const getBadgeTextColor = (category: string) => {
@@ -350,7 +350,7 @@ export default async function HistoryPage() {
                               trust: 'text-red-300',
                               other: 'text-gray-300'
                             };
-                            return colors[objection.category] || colors.other;
+                            return colors[category] || colors.other;
                           };
 
                           return (

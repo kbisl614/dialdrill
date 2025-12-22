@@ -5,12 +5,39 @@ import { useAuth, SignUpButton, SignInButton } from '@clerk/nextjs';
 import { motion, useInView, useScroll, useTransform } from 'framer-motion';
 import Link from 'next/link';
 
+type Testimonial = {
+  name: string;
+  role: string;
+  company: string;
+  description: string;
+  quote: string;
+  initials: string;
+};
+
+type FeatureStat = {
+  label: string;
+  value: string;
+};
+
+type Feature = {
+  title: string;
+  description: string;
+  stats: FeatureStat[];
+};
+
+type MetricCard = {
+  icon: string;
+  value: string;
+  label: string;
+  color: string;
+};
+
 export default function Home() {
   const [activeTab, setActiveTab] = useState(0);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { isSignedIn } = useAuth();
 
-  const testimonials = [
+  const testimonials: Testimonial[] = [
     {
       name: 'Jessica Sanders',
       role: 'VP of Sales',
@@ -37,7 +64,7 @@ export default function Home() {
     },
   ];
 
-  const features = [
+  const features: Feature[] = [
     {
       title: 'Real-time feedback',
       description: 'Get instant AI-powered coaching as you speak. See sentiment analysis, tone suggestions, and objection handling tips during your call.',
@@ -426,7 +453,7 @@ function MetricsStrip() {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: false, amount: 0.3 });
 
-  const metrics = [
+  const metrics: MetricCard[] = [
     { icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z', value: '40+', label: 'Realistic objection profiles across industries', color: '#0f9b99' },
     { icon: 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6', value: '2x faster', label: 'Onboarding speed for new sales reps', color: '#22c55e' },
     { icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z', value: 'Instant', label: 'Feedback and scoring after every call', color: '#a855f7' },
@@ -457,7 +484,12 @@ function MetricsStrip() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={metric.icon} />
                 </svg>
               </div>
-              <h3 className="text-2xl font-bold text-white transition-colors duration-300" style={{ '--hover-color': metric.color } as any}>{metric.value}</h3>
+              <h3
+                className="text-2xl font-bold text-white transition-colors duration-300"
+                style={{ color: metric.color }}
+              >
+                {metric.value}
+              </h3>
               <p className="mt-1 text-sm text-[#94a3b8]">{metric.label}</p>
             </motion.div>
           ))}
@@ -468,7 +500,15 @@ function MetricsStrip() {
 }
 
 // Features Section (abbreviated for space - would continue similarly)
-function FeaturesSection({ features, activeTab, setActiveTab }: any) {
+function FeaturesSection({
+  features,
+  activeTab,
+  setActiveTab,
+}: {
+  features: Feature[];
+  activeTab: number;
+  setActiveTab: (index: number) => void;
+}) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: false, amount: 0.2 });
 
@@ -497,7 +537,7 @@ function FeaturesSection({ features, activeTab, setActiveTab }: any) {
         >
           {/* Feature tabs and content would continue here - same structure with animations */}
           <div className="flex flex-col gap-3">
-            {features.map((feature: any, idx: number) => (
+            {features.map((feature: Feature, idx: number) => (
               <motion.button
                 key={idx}
                 initial={{ opacity: 0, x: -30 }}
@@ -535,7 +575,7 @@ function FeaturesSection({ features, activeTab, setActiveTab }: any) {
               {features[activeTab].description}
             </p>
             <div className="mt-6 grid gap-5 sm:grid-cols-2">
-              {features[activeTab].stats.map((stat: any, idx: number) => (
+              {features[activeTab].stats.map((stat: FeatureStat, idx: number) => (
                 <motion.div
                   key={idx}
                   initial={{ opacity: 0, y: 20 }}
@@ -656,7 +696,7 @@ function HowItWorksSection() {
   );
 }
 
-function TestimonialsSection({ testimonials }: any) {
+function TestimonialsSection({ testimonials }: { testimonials: Testimonial[] }) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: false, amount: 0.2 });
 
@@ -677,7 +717,7 @@ function TestimonialsSection({ testimonials }: any) {
           </p>
         </motion.div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
-          {testimonials.map((testimonial: any, idx: number) => (
+          {testimonials.map((testimonial: Testimonial, idx: number) => (
             <motion.div
               key={idx}
               initial={{ opacity: 0, y: 50, scale: 0.9 }}

@@ -26,11 +26,11 @@ export function scoreCall(
 
   // Score each category
   const categoryScores: CategoryScore[] = [
-    scoreOpening(signals, metadata),
+    scoreOpening(signals),
     scoreDiscovery(signals, metadata),
-    scoreObjectionHandling(signals, metadata),
+    scoreObjectionHandling(signals),
     scoreClarity(signals, metadata),
-    scoreClosing(signals, metadata)
+    scoreClosing(signals)
   ];
 
   // Calculate weighted overall score
@@ -66,10 +66,7 @@ function calculateWeightedScore(categoryScores: CategoryScore[]): number {
 /**
  * Score: Opening (0-10)
  */
-function scoreOpening(
-  signals: TranscriptSignals,
-  metadata: CallScore['metadata']
-): CategoryScore {
+function scoreOpening(signals: TranscriptSignals): CategoryScore {
   let score = 0;
   const scoreSignals: string[] = [];
   const strengths: string[] = [];
@@ -198,10 +195,7 @@ function scoreDiscovery(
 /**
  * Score: Objection Handling (0-10)
  */
-function scoreObjectionHandling(
-  signals: TranscriptSignals,
-  metadata: CallScore['metadata']
-): CategoryScore {
+function scoreObjectionHandling(signals: TranscriptSignals): CategoryScore {
   let score = 0;
   const scoreSignals: string[] = [];
   const strengths: string[] = [];
@@ -355,10 +349,7 @@ function scoreClarity(
 /**
  * Score: Closing (0-10)
  */
-function scoreClosing(
-  signals: TranscriptSignals,
-  metadata: CallScore['metadata']
-): CategoryScore {
+function scoreClosing(signals: TranscriptSignals): CategoryScore {
   let score = 0;
   const scoreSignals: string[] = [];
   const strengths: string[] = [];
