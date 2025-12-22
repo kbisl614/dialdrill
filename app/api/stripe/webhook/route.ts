@@ -128,7 +128,9 @@ async function handleInvoicePaid(invoice: Stripe.Invoice) {
   console.log('[Stripe Webhook] Invoice paid:', invoice.id);
 
   // Extract subscription ID (can be string or object)
-  const subscriptionValue = invoice.subscription;
+  const subscriptionValue = (invoice as Stripe.Invoice & {
+    subscription?: string | Stripe.Subscription | null;
+  }).subscription;
   const subscriptionId =
     typeof subscriptionValue === 'string'
       ? subscriptionValue
