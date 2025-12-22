@@ -92,18 +92,19 @@ export async function POST(request: Request) {
     }
 
     // Log the call in call_logs table
-    if (personalityId) {
-      await pool().query(
-        `INSERT INTO call_logs (user_id, personality_id, tokens_used, overage_charge)
-         SELECT id, $2, $3, $4 FROM users WHERE clerk_id = $1`,
-        [
-          userId,
-          personalityId,
-          deductionResult.isOverage ? 0 : 1000,
-          deductionResult.isOverage ? 1.00 : 0,
-        ]
-      );
-    }
+    let callLogId: string | null = null;
+    const logResult = await pool().query(
+      `INSERT INTO call_logs (user_id, personality_id, tokens_used, overage_charge)
+       SELECT id, $2, $3, $4 FROM users WHERE clerk_id = $1
+       RETURNING id`,
+      [
+        userId,
+        personalityId,
+        deductionResult.isOverage ? 0 : 1000,
+        deductionResult.isOverage ? 1.0 : 0,
+      ]
+    );
+    callLogId = logResult.rows[0]?.id || null;
 
     const totalTime = Date.now() - perfStart;
     console.log(`[PERF-API] ${totalTime}ms - ✅ /calls/start TOTAL TIME`);
@@ -115,6 +116,7 @@ export async function POST(request: Request) {
       isOverage: deductionResult.isOverage,
       maxDurationSeconds: entitlements.maxCallDurationSeconds,
       plan: entitlements.plan,
+      callLogId,
     });
   } catch (error) {
     console.error('[API /calls/start] ERROR:', error);

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 // Add the current Clerk user to the database
 const { Pool } = require('pg');
 require('dotenv').config({ path: '.env.local' });

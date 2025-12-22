@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 // Migration: Add entitlements model (Stripe tiers, personalities, call tracking)
 const { Pool } = require('pg');
 require('dotenv').config({ path: '.env.local' });

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 // Setup Stripe Products and Prices for DialDrill
 require('dotenv').config({ path: '.env.local' });
 const Stripe = require('stripe');
@@ -37,7 +38,7 @@ async function setupProducts() {
     console.log('📦 Creating $11.99/month Subscription product...');
     const paidProduct = await stripe.products.create({
       name: 'DialDrill Pro',
-      description: '20,000 tokens per month (~20 calls), all 8 personalities, 5 minute call limit. Overage: $1/call.',
+      description: '20 minutes per month, all 8 personalities (including 5 boss personalities), 5 minute call limit. Overage: $1/min.',
       metadata: {
         type: 'paid',
         tokens: '20000',

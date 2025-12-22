@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 // Create a test user in the database
 const { Pool } = require('pg');
 require('dotenv').config({ path: '.env.local' });

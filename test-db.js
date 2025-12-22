@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 // Test database connection
 const { Pool } = require('pg');
 require('dotenv').config({ path: '.env.local' });

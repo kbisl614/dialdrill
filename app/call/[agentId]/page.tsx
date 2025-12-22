@@ -19,6 +19,7 @@ export default function CallPage() {
   const searchParams = useSearchParams();
   const { isLoaded, user } = useUser();
   const agentId = params.agentId as string;
+  const callLogId = searchParams.get('callLogId');
 
   // Get max duration from URL params (90 for trial, 300 for paid)
   const maxDurationParam = searchParams.get('maxDuration');
@@ -29,12 +30,14 @@ export default function CallPage() {
   const [error, setError] = useState<string | null>(null);
   const [isMuted, setIsMuted] = useState(false);
   const [conversation, setConversation] = useState<Conversation | null>(null);
-  const [maxDuration, setMaxDuration] = useState<number>(initialMaxDuration);
+  const [maxDuration] = useState<number>(initialMaxDuration);
   const [elapsedSeconds, setElapsedSeconds] = useState<number>(0);
   const [showTimeWarning, setShowTimeWarning] = useState(false);
   const isInitializedRef = useRef(false);
   const callStartTimeRef = useRef<number | null>(null);
   const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const transcriptSavedRef = useRef(false);
+  const timeRemaining = Math.max(maxDuration - elapsedSeconds, 0);
 
   const endCall = useCallback(() => {
     console.log('[Call] Ending call...');
@@ -63,7 +66,7 @@ export default function CallPage() {
 
     let conv: Conversation | null = null;
     let isCancelled = false;
-    let mockTimeouts: NodeJS.Timeout[] = [];
+    const mockTimeouts: NodeJS.Timeout[] = [];
 
     async function initializeCall() {
       const perfStart = performance.now();
@@ -181,14 +184,12 @@ export default function CallPage() {
               setError(typeof error === 'string' ? error : 'Connection error');
               setStatus('error');
             },
-            onMessage: (message) => {
+            onMessage: (message: { type?: string; text?: string; message?: string }) => {
               console.log('[Call] Message received:', message);
 
-              // Handle transcript messages
-              const msg = message as any;
-              if (msg.type === 'user_transcript' || msg.type === 'agent_transcript') {
-                const role = msg.type === 'user_transcript' ? 'user' : 'agent';
-                const text = msg.text || msg.message || '';
+              if (message.type === 'user_transcript' || message.type === 'agent_transcript') {
+                const role = message.type === 'user_transcript' ? 'user' : 'agent';
+                const text = message.text || message.message || '';
 
                 if (text) {
                   console.log(`[Call] Transcript [${role}]:`, text);
@@ -279,8 +280,48 @@ export default function CallPage() {
     };
   }, [status, maxDuration, endCall]);
 
-  function handleEndCall() {
+  const saveTranscriptToServer = useCallback(async (finalDuration: number) => {
+    if (!callLogId || transcriptSavedRef.current) {
+      return;
+    }
+    transcriptSavedRef.current = true;
+
+    try {
+      const payload = {
+        callLogId,
+        durationSeconds: finalDuration,
+        transcript: transcript.map(item => ({
+          role: item.role,
+          text: item.text,
+          timestamp: item.timestamp instanceof Date ? item.timestamp.toISOString() : item.timestamp,
+        })),
+      };
+
+      const response = await fetch('/api/calls/save-transcript', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const details = await response.json().catch(() => null);
+        console.error('[Call] Failed to save transcript:', details);
+      }
+    } catch (err) {
+      console.error('[Call] Error saving transcript:', err);
+    }
+  }, [callLogId, transcript]);
+
+  useEffect(() => {
+    if (!callLogId) return;
+    if (transcriptSavedRef.current) return;
+    if (status !== 'disconnected' && status !== 'error') return;
+    saveTranscriptToServer(elapsedSeconds);
+  }, [status, elapsedSeconds, callLogId, transcript, saveTranscriptToServer]);
+
+  async function handleEndCall() {
     endCall();
+    await saveTranscriptToServer(elapsedSeconds);
     router.push('/dashboard');
   }
 
@@ -327,6 +368,9 @@ export default function CallPage() {
                 <span className="ml-4">
                   Time: <span className="text-white font-mono">{formatTime(elapsedSeconds)}</span>
                   <span className="text-gray-500"> / {formatTime(maxDuration)}</span>
+                  <span className="ml-4 text-gray-400">
+                    Time left: <span className="text-white font-mono">{formatTime(timeRemaining)}</span>
+                  </span>
                 </span>
               )}
             </p>
@@ -351,7 +395,7 @@ export default function CallPage() {
               <div>
                 <p className="text-yellow-100 font-semibold">Time Running Out!</p>
                 <p className="text-yellow-200 text-sm">
-                  {formatTime(maxDuration - elapsedSeconds)} remaining
+                  {formatTime(timeRemaining)} remaining
                 </p>
               </div>
             </div>

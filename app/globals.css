@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  --background: #020817;
+  --background: #080d1a;
   --foreground: #e5e7eb;
 }
 
@@ -10,19 +10,39 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-inter);
 
-  /* Custom colors for DialDrill */
-  --color-dark-bg: #020817;
-  --color-card-bg: rgba(15, 23, 42, 0.9);
-  --color-teal: #2dd4e6;
-  --color-teal-dark: #1ab5c4;
-  --color-green: #22c55e;
-  --color-muted: #9ca3af;
-  --color-text: #e5e7eb;
-  --color-purple: #a855f7;
+  /* Custom colors for DialDrill - Refined Palette */
+  --color-dark-bg: #080d1a;
+  --color-darker-bg: #050911;
+  --color-card-bg: rgba(15, 23, 42, 0.4);
+  --color-card-border: rgba(30, 41, 59, 0.5);
 
-  /* Custom shadows */
-  --shadow-glow-teal: 0 0 80px rgba(45, 212, 230, 0.3);
-  --shadow-glow-card: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 40px rgba(45, 212, 230, 0.1);
+  /* Primary Cyan - Reserved for CTAs */
+  --color-cyan-bright: #06d9d7;
+  --color-cyan-bright-hover: #05c4c2;
+
+  /* Secondary Cyan - Muted for accents */
+  --color-cyan-muted: #0f9b99;
+  --color-cyan-dark: #0d7a78;
+
+  /* Purple/Magenta - Strategic highlights */
+  --color-purple: #a855f7;
+  --color-purple-dark: #9333ea;
+  --color-magenta: #d946ef;
+
+  /* Text Colors - Improved hierarchy */
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #94a3b8;
+  --color-text-muted: #64748b;
+
+  /* Utility Colors */
+  --color-green: #22c55e;
+  --color-border-subtle: #1e293b;
+  --color-border-medium: #334155;
+
+  /* Custom shadows - Updated for darker bg */
+  --shadow-glow-cyan: 0 0 80px rgba(6, 217, 215, 0.25);
+  --shadow-glow-purple: 0 0 80px rgba(168, 85, 247, 0.25);
+  --shadow-card: 0 20px 60px rgba(0, 0, 0, 0.7), 0 0 40px rgba(6, 217, 215, 0.08);
 }
 
 body {
@@ -31,15 +51,16 @@ body {
   font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
 }
 
-/* Animated grid background */
+/* Animated grid background - Darker */
 .grid-background {
+  background-color: #080d1a;
   background-image:
-    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
   background-size: 60px 60px;
 }
 
-/* Radial glow effect */
+/* Radial glow effect - Muted cyan */
 .radial-glow {
   position: relative;
 }
@@ -52,12 +73,12 @@ body {
   transform: translate(-50%, -50%);
   width: 800px;
   height: 800px;
-  background: radial-gradient(circle, rgba(45, 212, 230, 0.15) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(15, 155, 153, 0.12) 0%, transparent 70%);
   pointer-events: none;
   z-index: 0;
 }
 
-/* Gradient fade at section edges */
+/* Gradient fade at section edges - Subtle */
 .section-fade-top {
   position: relative;
 }
@@ -68,8 +89,8 @@ body {
   top: 0;
   left: 0;
   right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, rgba(45, 212, 230, 0.5) 50%, transparent);
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(51, 65, 85, 0.4) 50%, transparent);
 }
 
 .section-fade-bottom {
@@ -82,15 +103,24 @@ body {
   bottom: 0;
   left: 0;
   right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, rgba(45, 212, 230, 0.5) 50%, transparent);
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(51, 65, 85, 0.4) 50%, transparent);
 }
 
-/* Button glow effect */
+/* Button glow effect - Bright cyan for CTAs only */
 .btn-glow {
-  box-shadow: 0 0 20px rgba(45, 212, 230, 0.4), 0 0 40px rgba(45, 212, 230, 0.2);
+  box-shadow: 0 0 20px rgba(6, 217, 215, 0.4), 0 0 40px rgba(6, 217, 215, 0.2);
 }
 
 .btn-glow:hover {
-  box-shadow: 0 0 30px rgba(45, 212, 230, 0.6), 0 0 60px rgba(45, 212, 230, 0.3);
+  box-shadow: 0 0 30px rgba(6, 217, 215, 0.6), 0 0 60px rgba(6, 217, 215, 0.3);
+}
+
+/* Purple glow for secondary elements */
+.btn-glow-purple {
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.3), 0 0 40px rgba(168, 85, 247, 0.15);
+}
+
+.btn-glow-purple:hover {
+  box-shadow: 0 0 30px rgba(168, 85, 247, 0.5), 0 0 60px rgba(168, 85, 247, 0.25);
 }

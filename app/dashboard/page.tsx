@@ -4,6 +4,8 @@ import { useAuth, useUser, SignOutButton } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import PersonalitySelector, { type Personality } from '@/components/PersonalitySelector';
+import ObjectionLibraryModal from '@/components/ObjectionLibraryModal';
 
 interface Entitlements {
   plan: 'trial' | 'paid';
@@ -13,6 +15,8 @@ interface Entitlements {
   isOverage: boolean;
   trialPurchasesCount: number;
   canBuyAnotherTrial: boolean;
+  unlockedPersonalities?: Personality[];
+  lockedPersonalities?: Personality[];
 }
 
 export default function Dashboard() {
@@ -23,6 +27,10 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [startingCall, setStartingCall] = useState(false);
+  const [selectionMode, setSelectionMode] = useState<'select' | 'random'>('random');
+  const [selectedPersonalityId, setSelectedPersonalityId] = useState<string | null>(null);
+  const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
+  const [showObjectionLibrary, setShowObjectionLibrary] = useState(false);
 
   useEffect(() => {
     if (isLoaded && !isSignedIn) {
@@ -54,6 +62,33 @@ export default function Dashboard() {
     }
   }, [user]);
 
+  useEffect(() => {
+    if (entitlements?.plan === 'paid' && showUpgradePrompt) {
+      setShowUpgradePrompt(false);
+    }
+  }, [entitlements?.plan, showUpgradePrompt]);
+
+  useEffect(() => {
+    if (!entitlements?.unlockedPersonalities || !entitlements.unlockedPersonalities.length) {
+      if (selectedPersonalityId !== null) {
+        setSelectedPersonalityId(null);
+      }
+      return;
+    }
+
+    if (selectionMode === 'random') {
+      if (selectedPersonalityId !== null) {
+        setSelectedPersonalityId(null);
+      }
+      return;
+    }
+
+    const availableIds = entitlements.unlockedPersonalities.map((p) => p.id);
+    if (!selectedPersonalityId || !availableIds.includes(selectedPersonalityId)) {
+      setSelectedPersonalityId(availableIds[0]);
+    }
+  }, [selectionMode, entitlements, selectedPersonalityId]);
+
   async function handleStartCall() {
     const perfStart = performance.now();
     console.log('[PERF] Button click → Start call flow');
@@ -64,6 +99,11 @@ export default function Dashboard() {
       return;
     }
 
+    if (selectionMode === 'select' && !selectedPersonalityId) {
+      setError('Please select a personality before starting a call.');
+      return;
+    }
+
     setStartingCall(true);
     setError(null);
 
@@ -71,19 +111,24 @@ export default function Dashboard() {
       const apiCallStart = performance.now();
       console.log(`[PERF] ${(apiCallStart - perfStart).toFixed(0)}ms - Calling /api/calls/start`);
 
+      const payload: { personalityId?: string } = {};
+      if (selectionMode === 'select' && selectedPersonalityId) {
+        payload.personalityId = selectedPersonalityId;
+      }
+
       const response = await fetch('/api/calls/start', {
         method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
       });
 
       const apiCallEnd = performance.now();
       console.log(`[PERF] ${(apiCallEnd - perfStart).toFixed(0)}ms - API response received (took ${(apiCallEnd - apiCallStart).toFixed(0)}ms)`);
 
+      const data = await response.json();
       if (!response.ok) {
-        const data = await response.json();
         throw new Error(data.error || 'Failed to start call');
       }
-
-      const data = await response.json();
       console.log('Call started:', data);
 
       // Refresh entitlements after call starts
@@ -98,7 +143,13 @@ export default function Dashboard() {
 
       // Navigate to call interface with max duration param
       const maxDuration = data.maxDurationSeconds || 300;
-      router.push(`/call/${data.agentId}?maxDuration=${maxDuration}`);
+      const query = new URLSearchParams({
+        maxDuration: maxDuration.toString(),
+      });
+      if (data.callLogId) {
+        query.set('callLogId', data.callLogId);
+      }
+      router.push(`/call/${data.agentId}?${query.toString()}`);
 
       console.log(`[PERF] Total dashboard flow: ${(navStart - perfStart).toFixed(0)}ms`);
     } catch (err) {
@@ -137,13 +188,16 @@ export default function Dashboard() {
   }
 
   const creditsDisplay = getCreditsDisplay();
+  const unlockedPersonalities = entitlements?.unlockedPersonalities ?? [];
+  const lockedPersonalities = entitlements?.lockedPersonalities ?? [];
+  const shouldShowPersonalitySelector = unlockedPersonalities.length > 0 || lockedPersonalities.length > 0;
 
   if (!isLoaded || loading) {
     return (
-      <div className="min-h-screen bg-[#020817] grid-background flex items-center justify-center">
+      <div className="min-h-screen bg-[#080d1a] grid-background flex items-center justify-center">
         <div className="text-center">
-          <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-[#2dd4e6] border-r-transparent"></div>
-          <p className="mt-4 text-[#9ca3af]">Loading...</p>
+          <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-[#0f9b99] border-r-transparent"></div>
+          <p className="mt-4 text-[#94a3b8]">Loading...</p>
         </div>
       </div>
     );
@@ -154,23 +208,36 @@ export default function Dashboard() {
   }
 
   return (
-    <main className="min-h-screen bg-[#020817] grid-background">
+    <>
+      <main className="min-h-screen bg-[#080d1a] grid-background">
       {/* Header */}
-      <header className="border-b border-white/5 bg-[#020817]/80 backdrop-blur-xl sticky top-0 z-50">
-        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+      <header className="border-b border-[#1e293b]/50 bg-[#080d1a]/80 backdrop-blur-xl sticky top-0 z-50">
+        <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-12">
           <div className="flex h-20 items-center justify-between">
             <div className="text-2xl font-extrabold text-white">
-              Dial<span className="text-[#2dd4e6]">Drill</span>
+              Dial<span className="text-[#0f9b99]">Drill</span>
             </div>
             <div className="flex items-center gap-6">
               <Link
                 href="/plans"
-                className="text-sm font-semibold text-[#9ca3af] transition-colors hover:text-white"
+                className="text-sm font-semibold text-[#94a3b8] transition-colors hover:text-white"
               >
                 Plans
               </Link>
+              <Link
+                href="/history"
+                className="text-sm font-semibold text-[#94a3b8] transition-colors hover:text-white"
+              >
+                Call History
+              </Link>
+              <Link
+                href="/performance"
+                className="text-sm font-semibold text-[#94a3b8] transition-colors hover:text-white"
+              >
+                Performance
+              </Link>
               <SignOutButton>
-                <button className="rounded-full border border-white/10 bg-white/5 px-6 py-2.5 text-sm font-semibold text-white transition-all hover:bg-white/10">
+                <button className="rounded-full border border-[#1e293b]/50 bg-white/5 px-6 py-2.5 text-sm font-semibold text-white transition-all hover:bg-white/10 hover:border-[#334155]">
                   Sign Out
                 </button>
               </SignOutButton>
@@ -180,13 +247,13 @@ export default function Dashboard() {
       </header>
 
       {/* Dashboard Content */}
-      <div className="mx-auto max-w-7xl px-6 lg:px-8 py-16">
+      <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-12 py-12 sm:py-16">
         {/* Welcome Section */}
         <div className="mb-12">
           <h1 className="text-4xl font-extrabold text-white sm:text-5xl">
-            Welcome back, <span className="text-[#2dd4e6]">{user?.emailAddresses[0]?.emailAddress}</span>
+            Welcome back, <span className="text-[#0f9b99]">{user?.emailAddresses[0]?.emailAddress}</span>
           </h1>
-          <p className="mt-4 text-xl text-[#9ca3af]">
+          <p className="mt-4 text-xl text-[#94a3b8]">
             Ready to practice your sales skills?
           </p>
         </div>
@@ -200,26 +267,26 @@ export default function Dashboard() {
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
           {/* Credits Card */}
-          <div className="rounded-3xl border border-white/10 bg-gradient-to-br from-[rgba(15,23,42,0.95)] to-[rgba(15,23,42,0.8)] p-8 shadow-[0_20px_60px_rgba(0,0,0,0.5),0_0_40px_rgba(45,212,230,0.1)] backdrop-blur-xl">
+          <div className="rounded-3xl border border-[#1e293b]/50 bg-gradient-to-br from-[rgba(15,23,42,0.6)] to-[rgba(5,9,17,0.8)] p-8 shadow-[0_20px_60px_rgba(0,0,0,0.7),0_0_40px_rgba(6,217,215,0.08)] backdrop-blur-xl">
             <div className="flex items-center gap-4 mb-4">
-              <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-[#2dd4e6]/30 to-[#2dd4e6]/10 ring-2 ring-[#2dd4e6]/30">
-                <svg className="h-7 w-7 text-[#2dd4e6]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-[#0f9b99]/30 to-[#0f9b99]/10 ring-2 ring-[#0f9b99]/30">
+                <svg className="h-7 w-7 text-[#0f9b99]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                 </svg>
               </div>
               <div>
-                <p className="text-sm font-medium text-[#9ca3af]">{creditsDisplay.label}</p>
+                <p className="text-sm font-medium text-[#94a3b8]">{creditsDisplay.label}</p>
                 <p className="text-4xl font-extrabold text-white tabular-nums">
                   {creditsDisplay.value}
                 </p>
                 {creditsDisplay.subValue && (
-                  <p className="text-sm text-[#9ca3af] mt-1">{creditsDisplay.subValue}</p>
+                  <p className="text-sm text-[#94a3b8] mt-1">{creditsDisplay.subValue}</p>
                 )}
               </div>
             </div>
-            <div className="mt-4 h-3 overflow-hidden rounded-full bg-white/5 ring-1 ring-white/10">
+            <div className="mt-4 h-3 overflow-hidden rounded-full bg-white/5 ring-1 ring-[#1e293b]/50">
               <div
-                className="h-full rounded-full bg-gradient-to-r from-[#2dd4e6] to-[#22c55e] shadow-[0_0_20px_rgba(45,212,230,0.4)] transition-all"
+                className="h-full rounded-full bg-gradient-to-r from-[#0f9b99] to-[#22c55e] shadow-[0_0_20px_rgba(15,155,153,0.4)] transition-all"
                 style={{ width: `${(creditsDisplay.current / creditsDisplay.max) * 100}%` }}
               ></div>
             </div>
@@ -243,7 +310,7 @@ export default function Dashboard() {
           </div>
 
           {/* Account Info Card */}
-          <div className="rounded-3xl border border-white/10 bg-gradient-to-br from-[rgba(15,23,42,0.95)] to-[rgba(15,23,42,0.8)] p-8 shadow-[0_20px_60px_rgba(0,0,0,0.5)] backdrop-blur-xl">
+          <div className="rounded-3xl border border-[#1e293b]/50 bg-gradient-to-br from-[rgba(15,23,42,0.6)] to-[rgba(5,9,17,0.8)] p-8 shadow-[0_20px_60px_rgba(0,0,0,0.7)] backdrop-blur-xl">
             <div className="flex items-center gap-4 mb-4">
               <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-[#a855f7]/30 to-[#a855f7]/10 ring-2 ring-[#a855f7]/30">
                 <svg className="h-7 w-7 text-[#a855f7]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -251,13 +318,13 @@ export default function Dashboard() {
                 </svg>
               </div>
               <div>
-                <p className="text-sm font-medium text-[#9ca3af]">Account Type</p>
+                <p className="text-sm font-medium text-[#94a3b8]">Account Type</p>
                 <p className="text-2xl font-extrabold text-white">
                   {entitlements?.plan === 'trial' ? 'Trial' : 'Pro'}
                 </p>
               </div>
             </div>
-            <p className="text-sm text-[#9ca3af] mt-2">
+            <p className="text-sm text-[#64748b] mt-2">
               {entitlements?.plan === 'trial'
                 ? 'Upgrade to Pro for more personalities and longer calls'
                 : 'Pro plan with all features unlocked'}
@@ -265,25 +332,75 @@ export default function Dashboard() {
           </div>
         </div>
 
+        {shouldShowPersonalitySelector && (
+          <div className="mb-12">
+            <PersonalitySelector
+              unlockedPersonalities={unlockedPersonalities}
+              lockedPersonalities={lockedPersonalities}
+              selectionMode={selectionMode}
+              selectedPersonalityId={selectedPersonalityId}
+              onModeChange={(mode) => {
+                setSelectionMode(mode);
+                if (mode === 'random') {
+                  setShowUpgradePrompt(false);
+                }
+              }}
+              onSelectPersonality={(id) => {
+                setSelectedPersonalityId(id);
+                setShowUpgradePrompt(false);
+              }}
+              onRequestUpgrade={() => {
+                if (entitlements?.plan === 'trial') {
+                  setShowUpgradePrompt(true);
+                }
+              }}
+            />
+          </div>
+        )}
+
         {/* Start Call CTA */}
-        <div className="rounded-3xl border border-[#2dd4e6]/20 bg-gradient-to-br from-[rgba(15,23,42,0.95)] to-[rgba(15,23,42,0.8)] p-12 shadow-[0_20px_60px_rgba(0,0,0,0.5),0_0_60px_rgba(45,212,230,0.15)] backdrop-blur-xl text-center">
+        <div className="rounded-3xl border border-[#1e293b]/50 bg-gradient-to-br from-[rgba(15,23,42,0.6)] to-[rgba(5,9,17,0.8)] p-12 shadow-[0_20px_60px_rgba(0,0,0,0.7),0_0_40px_rgba(6,217,215,0.08)] backdrop-blur-xl text-center">
           <h2 className="text-3xl font-extrabold text-white mb-4">
             Ready to practice?
           </h2>
-          <p className="text-lg text-[#9ca3af] mb-8 max-w-2xl mx-auto">
+          <p className="text-lg text-[#94a3b8] mb-8 max-w-2xl mx-auto">
             Start a new AI-powered sales call simulation and master objection handling in real-time.
           </p>
+
+          <div className="mb-6">
+            <button
+              onClick={() => setShowObjectionLibrary(true)}
+              className="inline-flex items-center gap-2 rounded-full border border-[#0f9b99]/30 bg-[#0f9b99]/10 px-6 py-3 text-sm font-semibold text-[#0f9b99] transition hover:bg-[#0f9b99]/20 hover:border-[#334155]"
+            >
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              View objection library (55+)
+            </button>
+          </div>
+
           <button
             onClick={handleStartCall}
-            className="rounded-full bg-gradient-to-r from-[#2dd4e6] to-[#1ab5c4] px-12 py-5 text-xl font-semibold text-[#020817] transition-all hover:scale-105 shadow-[0_0_40px_rgba(45,212,230,0.4)] hover:shadow-[0_0_60px_rgba(45,212,230,0.6)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-            disabled={!entitlements || !entitlements.canCall || startingCall}
+            className="rounded-full bg-gradient-to-r from-[#06d9d7] to-[#05c4c2] px-12 py-5 text-xl font-semibold text-[#080d1a] transition-all hover:scale-105 shadow-[0_0_40px_rgba(6,217,215,0.4)] hover:shadow-[0_0_60px_rgba(6,217,215,0.6)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+            disabled={
+              !entitlements ||
+              !entitlements.canCall ||
+              startingCall ||
+              (selectionMode === 'select' && !selectedPersonalityId)
+            }
           >
-            {startingCall ? 'Starting Call...' : (!entitlements || !entitlements.canCall) ? 'Out of Call Credits' : 'Start Call'}
+            {startingCall
+              ? 'Starting Call...'
+              : (!entitlements || !entitlements.canCall)
+              ? 'Out of Call Credits'
+              : selectionMode === 'select' && !selectedPersonalityId
+              ? 'Select a Personality'
+              : 'Start Call'}
           </button>
           {entitlements && !entitlements.canCall && entitlements.plan === 'trial' && (
             <div className="mt-6">
-              <p className="text-sm text-[#9ca3af] mb-4">
-                You're out of call credits. Please upgrade to continue.
+              <p className="text-sm text-[#94a3b8] mb-4">
+                You&apos;re out of call credits. Please upgrade to continue.
               </p>
               <Link
                 href="/plans"
@@ -295,22 +412,58 @@ export default function Dashboard() {
           )}
         </div>
 
-        {/* Quick Stats */}
-        <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-6 backdrop-blur-xl text-center">
-            <p className="text-sm font-medium text-[#9ca3af] mb-2">Total Calls</p>
-            <p className="text-3xl font-extrabold text-white">0</p>
+        {/* Quick Stats - Hidden until user has call history */}
+        {/* TODO: Unhide this section and populate with real data from call history */}
+        {false && (
+          <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="rounded-2xl border border-[#1e293b]/50 bg-white/[0.02] p-6 backdrop-blur-xl text-center">
+              <p className="text-sm font-medium text-[#94a3b8] mb-2">Total Calls</p>
+              <p className="text-3xl font-extrabold text-white">0</p>
+            </div>
+            <div className="rounded-2xl border border-[#1e293b]/50 bg-white/[0.02] p-6 backdrop-blur-xl text-center">
+              <p className="text-sm font-medium text-[#94a3b8] mb-2">Avg. Score</p>
+              <p className="text-3xl font-extrabold text-white">—</p>
+            </div>
+            <div className="rounded-2xl border border-[#1e293b]/50 bg-white/[0.02] p-6 backdrop-blur-xl text-center">
+              <p className="text-sm font-medium text-[#94a3b8] mb-2">Success Rate</p>
+              <p className="text-3xl font-extrabold text-white">—</p>
+            </div>
           </div>
-          <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-6 backdrop-blur-xl text-center">
-            <p className="text-sm font-medium text-[#9ca3af] mb-2">Avg. Score</p>
-            <p className="text-3xl font-extrabold text-white">—</p>
-          </div>
-          <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-6 backdrop-blur-xl text-center">
-            <p className="text-sm font-medium text-[#9ca3af] mb-2">Success Rate</p>
-            <p className="text-3xl font-extrabold text-white">—</p>
+        )}
+      </div>
+      </main>
+
+      {/* Objection Library Modal */}
+      <ObjectionLibraryModal
+        isOpen={showObjectionLibrary}
+        onClose={() => setShowObjectionLibrary(false)}
+      />
+
+      {showUpgradePrompt && entitlements?.plan === 'trial' && (
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/70 px-4">
+          <div className="w-full max-w-md rounded-2xl border border-[#1e293b]/50 bg-[#050911] p-6 text-center shadow-2xl">
+            <h3 className="text-2xl font-bold text-white">Unlock Boss Personalities</h3>
+            <p className="mt-3 text-sm text-[#94a3b8]">
+              Upgrade to the Pro plan to access The Wolf, The Shark, and three more advanced personalities.
+            </p>
+            <div className="mt-6 flex flex-col gap-3">
+              <Link
+                href="/plans"
+                className="w-full rounded-full bg-gradient-to-r from-[#a855f7] to-[#9333ea] px-6 py-3 text-sm font-semibold text-white transition hover:opacity-90"
+                onClick={() => setShowUpgradePrompt(false)}
+              >
+                Upgrade to Pro
+              </Link>
+              <button
+                onClick={() => setShowUpgradePrompt(false)}
+                className="w-full rounded-full border border-[#1e293b]/50 px-6 py-3 text-sm font-semibold text-white/70 transition hover:text-white hover:border-[#334155]"
+              >
+                Maybe later
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-    </main>
+      )}
+    </>
   );
 }
