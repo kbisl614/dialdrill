@@ -1,5 +1,6 @@
 import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
+import type Stripe from 'stripe';
 import { pool } from '@/lib/db';
 import { getStripeClient } from '@/lib/stripe';
 
