@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import PersonalitySelector, { type Personality } from '@/components/PersonalitySelector';
 import ObjectionLibraryModal from '@/components/ObjectionLibraryModal';
+import QuickPracticeModal from '@/components/QuickPracticeModal';
 import Sidebar from '@/components/Sidebar';
 import Breadcrumb from '@/components/Breadcrumb';
 import Link from 'next/link';
@@ -35,6 +36,7 @@ function DashboardContent() {
   const [selectedPersonalityId, setSelectedPersonalityId] = useState<string | null>(null);
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
   const [showObjectionLibrary, setShowObjectionLibrary] = useState(false);
+  const [showQuickPractice, setShowQuickPractice] = useState(false);
 
   useEffect(() => {
     if (isLoaded && !isSignedIn) {
@@ -357,7 +359,16 @@ function DashboardContent() {
             Start a new AI-powered sales call simulation and master objection handling in real-time.
           </p>
 
-          <div className="mb-6">
+          <div className="mb-6 flex flex-wrap justify-center gap-3">
+            <button
+              onClick={() => setShowQuickPractice(true)}
+              className="inline-flex items-center gap-2 rounded-full border border-[#a855f7]/30 bg-gradient-to-r from-[#a855f7]/20 to-[#9333ea]/20 px-6 py-3 text-sm font-semibold text-[#d8b4fe] transition hover:scale-105 shadow-[0_0_20px_rgba(168,85,247,0.3)] hover:shadow-[0_0_30px_rgba(168,85,247,0.5)]"
+            >
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+              ⚡ Quick Practice (30sec drills)
+            </button>
             <button
               onClick={() => setShowObjectionLibrary(true)}
               className="inline-flex items-center gap-2 rounded-full border border-[#00d9ff]/30 bg-[#00d9ff]/10 px-6 py-3 text-sm font-semibold text-[#00d9ff] transition hover:bg-[#00d9ff]/20 hover:border-[#334155]"
@@ -427,6 +438,12 @@ function DashboardContent() {
       <ObjectionLibraryModal
         isOpen={showObjectionLibrary}
         onClose={() => setShowObjectionLibrary(false)}
+      />
+
+      {/* Quick Practice Modal */}
+      <QuickPracticeModal
+        isOpen={showQuickPractice}
+        onClose={() => setShowQuickPractice(false)}
       />
 
       {showUpgradePrompt && entitlements?.plan === 'trial' && (
