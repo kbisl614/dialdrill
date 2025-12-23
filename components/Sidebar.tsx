@@ -4,10 +4,12 @@ import { SignOutButton } from '@clerk/nextjs';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
+import { useSidebar } from './SidebarContext';
 
 export default function Sidebar() {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { isCollapsed, setIsCollapsed } = useSidebar();
 
   const navItems = [
     {
@@ -112,12 +114,28 @@ export default function Sidebar() {
       </header>
 
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex lg:flex-col lg:fixed lg:inset-y-0 lg:w-64 lg:border-r lg:border-[#1e293b]/50 lg:bg-[#0a1120]/95 lg:backdrop-blur-xl">
+      <aside className={`hidden lg:flex lg:flex-col lg:fixed lg:inset-y-0 lg:border-r lg:border-[#1e293b]/50 lg:bg-[#0a1120]/95 lg:backdrop-blur-xl transition-all duration-300 ${
+        isCollapsed ? 'lg:w-20' : 'lg:w-64'
+      }`}>
         {/* Logo */}
-        <div className="flex h-20 items-center px-6 border-b border-[#1e293b]/50">
-          <Link href="/dashboard" className="text-2xl font-extrabold text-white">
-            Dial<span className="text-[#00d9ff]">Drill</span>
-          </Link>
+        <div className="flex h-20 items-center justify-between px-6 border-b border-[#1e293b]/50">
+          {!isCollapsed && (
+            <Link href="/dashboard" className="text-2xl font-extrabold text-white">
+              Dial<span className="text-[#00d9ff]">Drill</span>
+            </Link>
+          )}
+          <button
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            className={`flex items-center justify-center h-8 w-8 rounded-lg border border-white/10 bg-white/5 text-white transition-colors hover:bg-white/10 ${
+              isCollapsed ? 'mx-auto' : ''
+            }`}
+            aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          >
+            <svg className={`h-5 w-5 transition-transform ${isCollapsed ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+            </svg>
+          </button>
         </div>
 
         {/* Navigation */}
@@ -133,10 +151,10 @@ export default function Sidebar() {
                   isActive
                     ? 'bg-gradient-to-r from-[#00d9ff]/20 to-transparent text-white shadow-lg border-l-4 border-[#00d9ff]'
                     : 'text-[#94a3b8] hover:bg-white/5 hover:text-white'
-                }`}
+                } ${isCollapsed ? 'justify-center' : ''}`}
               >
                 {item.icon}
-                {item.name}
+                {!isCollapsed && item.name}
               </Link>
             );
           })}
@@ -151,7 +169,7 @@ export default function Sidebar() {
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
               </svg>
-              Sign Out
+              {!isCollapsed && 'Sign Out'}
             </button>
           </SignOutButton>
         </div>

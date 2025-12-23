@@ -8,6 +8,7 @@ import ObjectionLibraryModal from '@/components/ObjectionLibraryModal';
 import Sidebar from '@/components/Sidebar';
 import Breadcrumb from '@/components/Breadcrumb';
 import Link from 'next/link';
+import { SidebarProvider, useSidebar } from '@/components/SidebarContext';
 
 interface Entitlements {
   plan: 'trial' | 'paid';
@@ -21,10 +22,11 @@ interface Entitlements {
   lockedPersonalities?: Personality[];
 }
 
-export default function Dashboard() {
+function DashboardContent() {
   const { isSignedIn, isLoaded } = useAuth();
   const { user } = useUser();
   const router = useRouter();
+  const { isCollapsed } = useSidebar();
   const [entitlements, setEntitlements] = useState<Entitlements | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -229,7 +231,9 @@ export default function Dashboard() {
   return (
     <>
       <Sidebar />
-      <main className="min-h-screen bg-[#080d1a] grid-background lg:pl-64">
+      <main className={`min-h-screen bg-[#080d1a] grid-background transition-all duration-300 ${
+        isCollapsed ? 'lg:pl-20' : 'lg:pl-64'
+      }`}>
       {/* Dashboard Content */}
       <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-12 py-12 sm:py-16">
         <Breadcrumb items={[{ label: 'Dashboard' }]} />
@@ -451,5 +455,13 @@ export default function Dashboard() {
         </div>
       )}
     </>
+  );
+}
+
+export default function Dashboard() {
+  return (
+    <SidebarProvider>
+      <DashboardContent />
+    </SidebarProvider>
   );
 }

@@ -1,7 +1,7 @@
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import { pool } from '@/lib/db';
-import Sidebar from '@/components/Sidebar';
+import DashboardLayout from '@/components/DashboardLayout';
 import Breadcrumb from '@/components/Breadcrumb';
 import Link from 'next/link';
 
@@ -172,10 +172,8 @@ export default async function HistoryPage() {
   const calls = await getCallHistory(userId);
 
   return (
-    <>
-      <Sidebar />
-      <main className="min-h-screen bg-[#080d1a] grid-background lg:pl-64">
-        <section className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-12 py-12 sm:py-16">
+    <DashboardLayout>
+      <section className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-12 py-12 sm:py-16">
         <Breadcrumb items={[{ label: 'Call History' }]} />
 
         <div className="mb-12 text-center">
@@ -425,8 +423,7 @@ export default async function HistoryPage() {
             })}
           </div>
         )}
-        </section>
-      </main>
-    </>
+      </section>
+    </DashboardLayout>
   );
 }

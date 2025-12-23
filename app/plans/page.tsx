@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import Sidebar from '@/components/Sidebar';
 import Breadcrumb from '@/components/Breadcrumb';
 import Link from 'next/link';
+import { SidebarProvider, useSidebar } from '@/components/SidebarContext';
 
 interface Entitlements {
   plan: 'trial' | 'paid';
@@ -17,10 +18,11 @@ interface Entitlements {
   canBuyAnotherTrial: boolean;
 }
 
-export default function PlansPage() {
+function PlansPageContent() {
   const { isSignedIn, isLoaded } = useAuth();
   const { user } = useUser();
   const router = useRouter();
+  const { isCollapsed } = useSidebar();
   const [entitlements, setEntitlements] = useState<Entitlements | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -137,7 +139,9 @@ export default function PlansPage() {
   return (
     <>
       <Sidebar />
-      <main className="min-h-screen bg-[#080d1a] grid-background lg:pl-64">
+      <main className={`min-h-screen bg-[#080d1a] grid-background transition-all duration-300 ${
+        isCollapsed ? 'lg:pl-20' : 'lg:pl-64'
+      }`}>
         {/* Plans Content */}
         <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-12 py-12 sm:py-16">
         <Breadcrumb items={[{ label: 'Plans' }]} />
@@ -455,5 +459,13 @@ export default function PlansPage() {
         </div>
       </main>
     </>
+  );
+}
+
+export default function PlansPage() {
+  return (
+    <SidebarProvider>
+      <PlansPageContent />
+    </SidebarProvider>
   );
 }
