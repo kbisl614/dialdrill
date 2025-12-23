@@ -241,7 +241,7 @@ function DashboardContent() {
         {/* Welcome Section */}
         <div className="mb-12">
           <h1 className="text-4xl font-extrabold text-white sm:text-5xl">
-            Welcome back, <span className="text-[#00d9ff]">{user?.emailAddresses[0]?.emailAddress}</span>
+            Welcome back, <span className="text-[#00d9ff]">{user?.firstName || user?.username || 'there'}</span>
           </h1>
           <p className="mt-4 text-xl text-[#94a3b8]">
             Ready to practice your sales skills?
