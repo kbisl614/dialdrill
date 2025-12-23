@@ -1,11 +1,12 @@
 'use client';
 
-import { useAuth, useUser, SignOutButton } from '@clerk/nextjs';
+import { useAuth, useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
 import PersonalitySelector, { type Personality } from '@/components/PersonalitySelector';
 import ObjectionLibraryModal from '@/components/ObjectionLibraryModal';
+import Sidebar from '@/components/Sidebar';
+import Link from 'next/link';
 
 interface Entitlements {
   plan: 'trial' | 'paid';
@@ -209,43 +210,8 @@ export default function Dashboard() {
 
   return (
     <>
-      <main className="min-h-screen bg-[#080d1a] grid-background">
-      {/* Header */}
-      <header className="border-b border-[#1e293b]/50 bg-[#080d1a]/80 backdrop-blur-xl sticky top-0 z-50">
-        <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-12">
-          <div className="flex h-20 items-center justify-between">
-            <div className="text-2xl font-extrabold text-white">
-              Dial<span className="text-[#0f9b99]">Drill</span>
-            </div>
-            <div className="flex items-center gap-6">
-              <Link
-                href="/plans"
-                className="text-sm font-semibold text-[#94a3b8] transition-colors hover:text-white"
-              >
-                Plans
-              </Link>
-              <Link
-                href="/history"
-                className="text-sm font-semibold text-[#94a3b8] transition-colors hover:text-white"
-              >
-                Call History
-              </Link>
-              <Link
-                href="/performance"
-                className="text-sm font-semibold text-[#94a3b8] transition-colors hover:text-white"
-              >
-                Performance
-              </Link>
-              <SignOutButton>
-                <button className="rounded-full border border-[#1e293b]/50 bg-white/5 px-6 py-2.5 text-sm font-semibold text-white transition-all hover:bg-white/10 hover:border-[#334155]">
-                  Sign Out
-                </button>
-              </SignOutButton>
-            </div>
-          </div>
-        </div>
-      </header>
-
+      <Sidebar />
+      <main className="min-h-screen bg-[#080d1a] grid-background lg:pl-64">
       {/* Dashboard Content */}
       <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-12 py-12 sm:py-16">
         {/* Welcome Section */}

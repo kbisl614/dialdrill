@@ -3,6 +3,7 @@
 import { useAuth, useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import Sidebar from '@/components/Sidebar';
 import Link from 'next/link';
 
 interface Entitlements {
@@ -133,28 +134,11 @@ export default function PlansPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#080d1a] grid-background">
-      {/* Header */}
-      <header className="border-b border-[#1e293b]/50 bg-[#080d1a]/80 backdrop-blur-xl sticky top-0 z-50">
-        <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-12">
-          <div className="flex h-20 items-center justify-between">
-            <Link href="/dashboard" className="text-2xl font-extrabold text-white hover:opacity-80 transition-opacity">
-              Dial<span className="text-[#0f9b99]">Drill</span>
-            </Link>
-            <div className="flex items-center gap-6">
-              <Link
-                href="/dashboard"
-                className="text-sm font-semibold text-[#94a3b8] transition-colors hover:text-white"
-              >
-                Dashboard
-              </Link>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Plans Content */}
-      <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-12 py-12 sm:py-16">
+    <>
+      <Sidebar />
+      <main className="min-h-screen bg-[#080d1a] grid-background lg:pl-64">
+        {/* Plans Content */}
+        <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-12 py-12 sm:py-16">
         {/* Hero Section */}
         <div className="text-center mb-16">
           <h1 className="text-5xl font-extrabold text-white mb-6 sm:text-6xl">
@@ -465,7 +449,8 @@ export default function PlansPage() {
             </div>
           </div>
         </div>
-      </div>
-    </main>
+        </div>
+      </main>
+    </>
   );
 }

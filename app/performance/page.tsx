@@ -1,7 +1,8 @@
 import { auth } from '@clerk/nextjs/server';
-import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { pool } from '@/lib/db';
+import Sidebar from '@/components/Sidebar';
+import Link from 'next/link';
 
 interface CategoryScore {
   category: string;
@@ -143,32 +144,10 @@ export default async function PerformancePage() {
   const stats = await getPerformanceStats(userId);
 
   return (
-    <main className="min-h-screen bg-[#080d1a] grid-background">
-      <header className="border-b border-[#1e293b]/50 bg-[#080d1a]/80 backdrop-blur-xl sticky top-0 z-50">
-        <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-12">
-          <div className="flex h-20 items-center justify-between">
-            <Link href="/dashboard" className="text-2xl font-extrabold text-white hover:opacity-80 transition-opacity">
-              Dial<span className="text-[#0f9b99]">Drill</span>
-            </Link>
-            <div className="flex items-center gap-6">
-              <Link
-                href="/history"
-                className="text-sm font-semibold text-[#94a3b8] transition-colors hover:text-white"
-              >
-                Call History
-              </Link>
-              <Link
-                href="/dashboard"
-                className="text-sm font-semibold text-[#94a3b8] transition-colors hover:text-white"
-              >
-                Dashboard
-              </Link>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <section className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-12 py-12 sm:py-16">
+    <>
+      <Sidebar />
+      <main className="min-h-screen bg-[#080d1a] grid-background lg:pl-64">
+        <section className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-12 py-12 sm:py-16">
         <div className="mb-12 text-center">
           <h1 className="text-4xl font-extrabold text-white sm:text-5xl">Performance Dashboard</h1>
           <p className="mt-4 text-lg text-[#94a3b8]">
@@ -313,7 +292,8 @@ export default async function PerformancePage() {
             </div>
           </div>
         )}
-      </section>
-    </main>
+        </section>
+      </main>
+    </>
   );
 }
