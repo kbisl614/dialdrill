@@ -48,7 +48,7 @@ export default function HowItWorksPage() {
         <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-12">
           <div className="flex h-20 items-center justify-between">
             <Link href="/" className="text-2xl font-extrabold text-white hover:opacity-80 transition-opacity">
-              Dial<span className="text-[#0f9b99]">Drill</span>
+              Dial<span className="text-[#00d9ff]">Drill</span>
             </Link>
             <Link
               href="/"
@@ -65,7 +65,7 @@ export default function HowItWorksPage() {
         <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-12">
           <div className="text-center mb-12">
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white mb-6">
-              See How <span className="text-[#0f9b99]">DialDrill</span> Works
+              See How <span className="text-[#00d9ff]">DialDrill</span> Works
             </h1>
             <p className="text-lg sm:text-xl text-[#94a3b8] max-w-3xl mx-auto">
               Watch this quick demo to see how our AI-powered sales training platform helps you master objection handling and close more deals.

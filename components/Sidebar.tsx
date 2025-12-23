@@ -54,7 +54,7 @@ export default function Sidebar() {
       <header className="lg:hidden border-b border-[#1e293b]/50 bg-[#080d1a]/80 backdrop-blur-xl sticky top-0 z-50">
         <div className="flex h-16 items-center justify-between px-4">
           <Link href="/dashboard" className="text-xl font-extrabold text-white">
-            Dial<span className="text-[#0f9b99]">Drill</span>
+            Dial<span className="text-[#00d9ff]">Drill</span>
           </Link>
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -86,7 +86,7 @@ export default function Sidebar() {
                     onClick={() => setIsMobileMenuOpen(false)}
                     className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold transition-all ${
                       isActive
-                        ? 'bg-gradient-to-r from-[#0f9b99]/20 to-transparent text-white border-l-2 border-[#0f9b99]'
+                        ? 'bg-gradient-to-r from-[#00d9ff]/20 to-transparent text-white border-l-2 border-[#00d9ff]'
                         : 'text-[#94a3b8] hover:bg-white/5 hover:text-white'
                     }`}
                   >
@@ -115,7 +115,7 @@ export default function Sidebar() {
         {/* Logo */}
         <div className="flex h-20 items-center px-6 border-b border-[#1e293b]/50">
           <Link href="/dashboard" className="text-2xl font-extrabold text-white">
-            Dial<span className="text-[#0f9b99]">Drill</span>
+            Dial<span className="text-[#00d9ff]">Drill</span>
           </Link>
         </div>
 
@@ -129,7 +129,7 @@ export default function Sidebar() {
                 href={item.href}
                 className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition-all ${
                   isActive
-                    ? 'bg-gradient-to-r from-[#0f9b99]/20 to-transparent text-white shadow-lg border-l-4 border-[#0f9b99]'
+                    ? 'bg-gradient-to-r from-[#00d9ff]/20 to-transparent text-white shadow-lg border-l-4 border-[#00d9ff]'
                     : 'text-[#94a3b8] hover:bg-white/5 hover:text-white'
                 }`}
               >
