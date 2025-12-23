@@ -1,14 +1,15 @@
 import { NextResponse } from 'next/server';
-import Stripe from 'stripe';
+import type Stripe from 'stripe';
 import { pool } from '@/lib/db';
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+import { getStripeClient } from '@/lib/stripe';
 
 export async function POST(request: Request) {
   console.log('[Stripe Webhook] Received webhook');
 
   try {
+    const stripe = getStripeClient();
+    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
     const body = await request.text();
     const signature = request.headers.get('stripe-signature');
 
