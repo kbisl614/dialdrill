@@ -197,7 +197,7 @@ export default function Dashboard() {
     return (
       <div className="min-h-screen bg-[#080d1a] grid-background flex items-center justify-center">
         <div className="text-center">
-          <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-[#0f9b99] border-r-transparent"></div>
+          <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-[#00d9ff] border-r-transparent"></div>
           <p className="mt-4 text-[#94a3b8]">Loading...</p>
         </div>
       </div>
@@ -217,7 +217,7 @@ export default function Dashboard() {
         {/* Welcome Section */}
         <div className="mb-12">
           <h1 className="text-4xl font-extrabold text-white sm:text-5xl">
-            Welcome back, <span className="text-[#0f9b99]">{user?.emailAddresses[0]?.emailAddress}</span>
+            Welcome back, <span className="text-[#00d9ff]">{user?.emailAddresses[0]?.emailAddress}</span>
           </h1>
           <p className="mt-4 text-xl text-[#94a3b8]">
             Ready to practice your sales skills?
@@ -233,10 +233,10 @@ export default function Dashboard() {
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
           {/* Credits Card */}
-          <div className="rounded-3xl border border-[#1e293b]/50 bg-gradient-to-br from-[rgba(15,23,42,0.6)] to-[rgba(5,9,17,0.8)] p-8 shadow-[0_20px_60px_rgba(0,0,0,0.7),0_0_40px_rgba(6,217,215,0.08)] backdrop-blur-xl">
+          <div className="rounded-3xl border border-[#1e293b]/50 bg-gradient-to-br from-[rgba(15,23,42,0.6)] to-[rgba(5,9,17,0.8)] p-8 shadow-[0_20px_60px_rgba(0,0,0,0.7),0_0_40px_rgba(0,217,255,0.08)] backdrop-blur-xl">
             <div className="flex items-center gap-4 mb-4">
-              <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-[#0f9b99]/30 to-[#0f9b99]/10 ring-2 ring-[#0f9b99]/30">
-                <svg className="h-7 w-7 text-[#0f9b99]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-[#00d9ff]/30 to-[#00d9ff]/10 ring-2 ring-[#00d9ff]/30">
+                <svg className="h-7 w-7 text-[#00d9ff]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                 </svg>
               </div>
@@ -252,7 +252,7 @@ export default function Dashboard() {
             </div>
             <div className="mt-4 h-3 overflow-hidden rounded-full bg-white/5 ring-1 ring-[#1e293b]/50">
               <div
-                className="h-full rounded-full bg-gradient-to-r from-[#0f9b99] to-[#22c55e] shadow-[0_0_20px_rgba(15,155,153,0.4)] transition-all"
+                className="h-full rounded-full bg-gradient-to-r from-[#00d9ff] to-[#00ffea] shadow-[0_0_20px_rgba(0,217,255,0.4)] transition-all"
                 style={{ width: `${(creditsDisplay.current / creditsDisplay.max) * 100}%` }}
               ></div>
             </div>
@@ -325,7 +325,7 @@ export default function Dashboard() {
         )}
 
         {/* Start Call CTA */}
-        <div className="rounded-3xl border border-[#1e293b]/50 bg-gradient-to-br from-[rgba(15,23,42,0.6)] to-[rgba(5,9,17,0.8)] p-12 shadow-[0_20px_60px_rgba(0,0,0,0.7),0_0_40px_rgba(6,217,215,0.08)] backdrop-blur-xl text-center">
+        <div className="rounded-3xl border border-[#1e293b]/50 bg-gradient-to-br from-[rgba(15,23,42,0.6)] to-[rgba(5,9,17,0.8)] p-12 shadow-[0_20px_60px_rgba(0,0,0,0.7),0_0_40px_rgba(0,217,255,0.08)] backdrop-blur-xl text-center">
           <h2 className="text-3xl font-extrabold text-white mb-4">
             Ready to practice?
           </h2>
@@ -336,7 +336,7 @@ export default function Dashboard() {
           <div className="mb-6">
             <button
               onClick={() => setShowObjectionLibrary(true)}
-              className="inline-flex items-center gap-2 rounded-full border border-[#0f9b99]/30 bg-[#0f9b99]/10 px-6 py-3 text-sm font-semibold text-[#0f9b99] transition hover:bg-[#0f9b99]/20 hover:border-[#334155]"
+              className="inline-flex items-center gap-2 rounded-full border border-[#00d9ff]/30 bg-[#00d9ff]/10 px-6 py-3 text-sm font-semibold text-[#00d9ff] transition hover:bg-[#00d9ff]/20 hover:border-[#334155]"
             >
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -347,7 +347,7 @@ export default function Dashboard() {
 
           <button
             onClick={handleStartCall}
-            className="rounded-full bg-gradient-to-r from-[#06d9d7] to-[#05c4c2] px-12 py-5 text-xl font-semibold text-[#080d1a] transition-all hover:scale-105 shadow-[0_0_40px_rgba(6,217,215,0.4)] hover:shadow-[0_0_60px_rgba(6,217,215,0.6)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+            className="rounded-full bg-gradient-to-r from-[#00d9ff] to-[#00ffea] px-12 py-5 text-xl font-semibold text-[#080d1a] transition-all hover:scale-105 shadow-[0_0_40px_rgba(0,217,255,0.6)] hover:shadow-[0_0_60px_rgba(0,255,234,0.8)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
             disabled={
               !entitlements ||
               !entitlements.canCall ||

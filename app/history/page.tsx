@@ -188,7 +188,7 @@ export default async function HistoryPage() {
             <p>Once you complete a call, the transcript and summary will appear here.</p>
             <Link
               href="/dashboard"
-              className="mt-6 inline-flex items-center justify-center rounded-full bg-gradient-to-r from-[#06d9d7] to-[#05c4c2] px-8 py-3 text-sm font-semibold text-[#080d1a] transition hover:scale-105"
+              className="mt-6 inline-flex items-center justify-center rounded-full bg-gradient-to-r from-[#00d9ff] to-[#00ffea] px-8 py-3 text-sm font-semibold text-[#080d1a] transition hover:scale-105 shadow-[0_0_40px_rgba(0,217,255,0.6)] hover:shadow-[0_0_60px_rgba(0,255,234,0.8)]"
             >
               Start Practicing
             </Link>
@@ -399,7 +399,7 @@ export default async function HistoryPage() {
                             key={`${call.id}-${index}`}
                             className={`rounded-xl p-4 text-sm ${
                               entry.role === 'user'
-                                ? 'bg-[#0f172a] border border-[#0f9b99]/20'
+                                ? 'bg-[#0f172a] border border-[#00d9ff]/20'
                                 : 'bg-white/[0.03] border border-[#1e293b]/50'
                             }`}
                           >

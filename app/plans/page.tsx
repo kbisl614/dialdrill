@@ -122,7 +122,7 @@ export default function PlansPage() {
     return (
       <div className="min-h-screen bg-[#080d1a] grid-background flex items-center justify-center">
         <div className="text-center">
-          <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-[#0f9b99] border-r-transparent"></div>
+          <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-[#00d9ff] border-r-transparent"></div>
           <p className="mt-4 text-[#94a3b8]">Loading...</p>
         </div>
       </div>
@@ -149,8 +149,8 @@ export default function PlansPage() {
             Practice sales calls with AI-powered personalities and level up your skills.
           </p>
           {entitlements && (
-            <div className="mt-8 inline-block rounded-2xl border border-[#0f9b99]/30 bg-[#0f9b99]/10 px-6 py-3">
-              <p className="text-sm text-[#0f9b99] font-semibold">
+            <div className="mt-8 inline-block rounded-2xl border border-[#00d9ff]/30 bg-[#00d9ff]/10 px-6 py-3">
+              <p className="text-sm text-[#00d9ff] font-semibold">
                 Current Plan: {entitlements.plan === 'trial' ? 'Trial' : 'Pro'}
                 {entitlements.plan === 'trial' && ` • ${entitlements.trialPurchasesCount}/2 trials used`}
               </p>
@@ -169,7 +169,7 @@ export default function PlansPage() {
           {/* Trial Tier */}
           <div className={`rounded-3xl border p-8 shadow-2xl backdrop-blur-xl transition-all ${
             entitlements?.canBuyAnotherTrial
-              ? 'border-[#0f9b99]/30 bg-gradient-to-br from-[rgba(15,155,153,0.1)] to-[rgba(15,23,42,0.95)] hover:border-[#334155]'
+              ? 'border-[#00d9ff]/30 bg-gradient-to-br from-[rgba(0,217,255,0.1)] to-[rgba(15,23,42,0.95)] hover:border-[#334155]'
               : 'border-[#1e293b]/50 bg-gradient-to-br from-[rgba(15,23,42,0.6)] to-[rgba(5,9,17,0.8)] opacity-60'
           }`}>
             <div className="mb-6">
@@ -191,25 +191,25 @@ export default function PlansPage() {
 
             <ul className="space-y-4 mb-8">
               <li className="flex items-start gap-3">
-                <svg className="h-6 w-6 text-[#0f9b99] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="h-6 w-6 text-[#00d9ff] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
                 <span className="text-white">5 AI practice calls</span>
               </li>
               <li className="flex items-start gap-3">
-                <svg className="h-6 w-6 text-[#0f9b99] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="h-6 w-6 text-[#00d9ff] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
                 <span className="text-white">3 base personalities</span>
               </li>
               <li className="flex items-start gap-3">
-                <svg className="h-6 w-6 text-[#0f9b99] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="h-6 w-6 text-[#00d9ff] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
                 <span className="text-white">90 second call limit</span>
               </li>
               <li className="flex items-start gap-3">
-                <svg className="h-6 w-6 text-[#0f9b99] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="h-6 w-6 text-[#00d9ff] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
                 <span className="text-white">Purchase up to 2 trial packages (10 calls total)</span>
@@ -221,7 +221,7 @@ export default function PlansPage() {
               disabled={!entitlements?.canBuyAnotherTrial}
               className={`w-full rounded-xl px-6 py-4 text-lg font-semibold transition-all ${
                 entitlements?.canBuyAnotherTrial
-                  ? 'bg-gradient-to-r from-[#06d9d7] to-[#05c4c2] text-[#080d1a] hover:scale-[1.02] shadow-[0_0_30px_rgba(6,217,215,0.4)] hover:shadow-[0_0_40px_rgba(6,217,215,0.6)]'
+                  ? 'bg-gradient-to-r from-[#00d9ff] to-[#00ffea] text-[#080d1a] hover:scale-[1.02] shadow-[0_0_40px_rgba(0,217,255,0.6)] hover:shadow-[0_0_60px_rgba(0,255,234,0.8)]'
                   : 'bg-white/10 text-white/50 cursor-not-allowed'
               }`}
             >
@@ -325,7 +325,7 @@ export default function PlansPage() {
                     <td className="py-4 px-6">
                       <button
                         onClick={() => handleBuyMinutes('small_boost')}
-                        className="rounded-lg bg-gradient-to-r from-[#06d9d7] to-[#05c4c2] px-6 py-2 text-sm font-semibold text-[#080d1a] transition-all hover:scale-105"
+                        className="rounded-lg bg-gradient-to-r from-[#00d9ff] to-[#00ffea] px-6 py-2 text-sm font-semibold text-[#080d1a] transition-all hover:scale-105 shadow-[0_0_40px_rgba(0,217,255,0.6)] hover:shadow-[0_0_60px_rgba(0,255,234,0.8)]"
                       >
                         Buy
                       </button>
@@ -342,7 +342,7 @@ export default function PlansPage() {
                     <td className="py-4 px-6">
                       <button
                         onClick={() => handleBuyMinutes('focus_pack')}
-                        className="rounded-lg bg-gradient-to-r from-[#06d9d7] to-[#05c4c2] px-6 py-2 text-sm font-semibold text-[#080d1a] transition-all hover:scale-105"
+                        className="rounded-lg bg-gradient-to-r from-[#00d9ff] to-[#00ffea] px-6 py-2 text-sm font-semibold text-[#080d1a] transition-all hover:scale-105 shadow-[0_0_40px_rgba(0,217,255,0.6)] hover:shadow-[0_0_60px_rgba(0,255,234,0.8)]"
                       >
                         Buy
                       </button>
@@ -359,7 +359,7 @@ export default function PlansPage() {
                     <td className="py-4 px-6">
                       <button
                         onClick={() => handleBuyMinutes('power_pack')}
-                        className="rounded-lg bg-gradient-to-r from-[#06d9d7] to-[#05c4c2] px-6 py-2 text-sm font-semibold text-[#080d1a] transition-all hover:scale-105"
+                        className="rounded-lg bg-gradient-to-r from-[#00d9ff] to-[#00ffea] px-6 py-2 text-sm font-semibold text-[#080d1a] transition-all hover:scale-105 shadow-[0_0_40px_rgba(0,217,255,0.6)] hover:shadow-[0_0_60px_rgba(0,255,234,0.8)]"
                       >
                         Buy
                       </button>
@@ -430,11 +430,11 @@ export default function PlansPage() {
                   Upgrading to Pro unlocks five boss personalities designed for tough objection handling:
                 </p>
                 <ul className="mt-3 space-y-2 text-sm text-[#94a3b8]">
-                  <li><span className="text-[#0f9b99] font-semibold">The Wolf</span> — pressure-tests aggressive closing tactics.</li>
-                  <li><span className="text-[#0f9b99] font-semibold">The Shark</span> — challenges pricing and ROI claims.</li>
-                  <li><span className="text-[#0f9b99] font-semibold">The Motivator</span> — keeps energy high while probing for vision.</li>
-                  <li><span className="text-[#0f9b99] font-semibold">The Oracle</span> — forces you to defend long-term strategy.</li>
-                  <li><span className="text-[#0f9b99] font-semibold">The Titan</span> — expects concise, executive-ready pitches.</li>
+                  <li><span className="text-[#00d9ff] font-semibold">The Wolf</span> — pressure-tests aggressive closing tactics.</li>
+                  <li><span className="text-[#00d9ff] font-semibold">The Shark</span> — challenges pricing and ROI claims.</li>
+                  <li><span className="text-[#00d9ff] font-semibold">The Motivator</span> — keeps energy high while probing for vision.</li>
+                  <li><span className="text-[#00d9ff] font-semibold">The Oracle</span> — forces you to defend long-term strategy.</li>
+                  <li><span className="text-[#00d9ff] font-semibold">The Titan</span> — expects concise, executive-ready pitches.</li>
                 </ul>
               </div>
             </div>
@@ -442,7 +442,7 @@ export default function PlansPage() {
             <div className="mt-10 text-center">
               <Link
                 href="/dashboard"
-                className="inline-block rounded-full bg-gradient-to-r from-[#06d9d7] to-[#05c4c2] px-8 py-3 text-base font-semibold text-[#080d1a] transition-all hover:scale-105 shadow-[0_0_30px_rgba(6,217,215,0.4)] hover:shadow-[0_0_40px_rgba(6,217,215,0.6)]"
+                className="inline-block rounded-full bg-gradient-to-r from-[#00d9ff] to-[#00ffea] px-8 py-3 text-base font-semibold text-[#080d1a] transition-all hover:scale-105 shadow-[0_0_40px_rgba(0,217,255,0.6)] hover:shadow-[0_0_60px_rgba(0,255,234,0.8)]"
               >
                 Back to Dashboard
               </Link>

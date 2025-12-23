@@ -14,6 +14,7 @@ export async function GET() {
     }
 
     // Get full entitlements from single source of truth
+    // This will create the user if they don't exist yet
     const entitlements = await getEntitlements(userId);
 
     console.log('[API /user/entitlements] Entitlements loaded:', {

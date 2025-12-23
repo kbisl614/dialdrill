@@ -32,16 +32,12 @@ export interface Entitlements {
 export async function getEntitlements(clerkId: string): Promise<Entitlements> {
   const dbPool = pool();
 
-  // 1. Get user data
+  // 1. Get user data (create if doesn't exist)
   const userResult = await dbPool.query(
-    `SELECT
-      plan,
-      trial_purchases_count,
-      trial_calls_remaining,
-      tokens_remaining,
-      subscription_status
-    FROM users
-    WHERE clerk_id = $1`,
+    `INSERT INTO users (clerk_id, email, plan, trial_calls_remaining, trial_purchases_count)
+     VALUES ($1, $1 || '@temp.local', 'trial', 5, 1)
+     ON CONFLICT (clerk_id) DO UPDATE SET clerk_id = EXCLUDED.clerk_id
+     RETURNING plan, trial_purchases_count, trial_calls_remaining, tokens_remaining, subscription_status`,
     [clerkId]
   );
 

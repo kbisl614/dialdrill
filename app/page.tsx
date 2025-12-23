@@ -634,9 +634,6 @@ function HowItWorksSection() {
 
         {/* Timeline Steps */}
         <div className="relative max-w-4xl mx-auto">
-          {/* Vertical Line */}
-          <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-[#00d9ff] via-[#fbbf24] to-[#e879f9] opacity-40"></div>
-
           {/* Step 1 */}
           <motion.div
             initial={{ opacity: 0, x: -50 }}
