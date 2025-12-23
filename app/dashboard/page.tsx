@@ -11,6 +11,9 @@ import Breadcrumb from '@/components/Breadcrumb';
 import Link from 'next/link';
 import { SidebarProvider, useSidebar } from '@/components/SidebarContext';
 
+// Force dynamic rendering for this page
+export const dynamic = 'force-dynamic';
+
 interface Entitlements {
   plan: 'trial' | 'paid';
   canCall: boolean;
