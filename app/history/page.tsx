@@ -2,6 +2,7 @@ import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import { pool } from '@/lib/db';
 import Sidebar from '@/components/Sidebar';
+import Breadcrumb from '@/components/Breadcrumb';
 import Link from 'next/link';
 
 interface TranscriptEntry {
@@ -175,6 +176,8 @@ export default async function HistoryPage() {
       <Sidebar />
       <main className="min-h-screen bg-[#080d1a] grid-background lg:pl-64">
         <section className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-12 py-12 sm:py-16">
+        <Breadcrumb items={[{ label: 'Call History' }]} />
+
         <div className="mb-12 text-center">
           <h1 className="text-4xl font-extrabold text-white sm:text-5xl">Call History</h1>
           <p className="mt-4 text-lg text-[#94a3b8]">

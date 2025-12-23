@@ -4,6 +4,7 @@ import { useAuth, useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Sidebar from '@/components/Sidebar';
+import Breadcrumb from '@/components/Breadcrumb';
 import Link from 'next/link';
 
 interface Entitlements {
@@ -139,6 +140,8 @@ export default function PlansPage() {
       <main className="min-h-screen bg-[#080d1a] grid-background lg:pl-64">
         {/* Plans Content */}
         <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-12 py-12 sm:py-16">
+        <Breadcrumb items={[{ label: 'Plans' }]} />
+
         {/* Hero Section */}
         <div className="text-center mb-16">
           <h1 className="text-5xl font-extrabold text-white mb-6 sm:text-6xl">

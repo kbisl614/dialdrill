@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import PersonalitySelector, { type Personality } from '@/components/PersonalitySelector';
 import ObjectionLibraryModal from '@/components/ObjectionLibraryModal';
 import Sidebar from '@/components/Sidebar';
+import Breadcrumb from '@/components/Breadcrumb';
 import Link from 'next/link';
 
 interface Entitlements {
@@ -68,6 +69,23 @@ export default function Dashboard() {
       setShowUpgradePrompt(false);
     }
   }, [entitlements?.plan, showUpgradePrompt]);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Esc key closes any open modals
+      if (e.key === 'Escape') {
+        if (showObjectionLibrary) {
+          setShowObjectionLibrary(false);
+        } else if (showUpgradePrompt) {
+          setShowUpgradePrompt(false);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showObjectionLibrary, showUpgradePrompt]);
 
   useEffect(() => {
     if (!entitlements?.unlockedPersonalities || !entitlements.unlockedPersonalities.length) {
@@ -214,6 +232,8 @@ export default function Dashboard() {
       <main className="min-h-screen bg-[#080d1a] grid-background lg:pl-64">
       {/* Dashboard Content */}
       <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-12 py-12 sm:py-16">
+        <Breadcrumb items={[{ label: 'Dashboard' }]} />
+
         {/* Welcome Section */}
         <div className="mb-12">
           <h1 className="text-4xl font-extrabold text-white sm:text-5xl">
