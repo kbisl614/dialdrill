@@ -238,11 +238,111 @@ export default function QuickPracticeModal({ isOpen, onClose }: QuickPracticeMod
                 key="complete"
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                className="text-center py-12"
+                className="text-center py-8"
               >
                 <div className="text-6xl mb-4">🎯</div>
                 <h3 className="text-3xl font-bold text-white mb-2">Nice Work!</h3>
-                <p className="text-[#9ca3af] mb-8">Practice makes perfect. Keep it up!</p>
+                <p className="text-[#9ca3af] mb-6">Practice makes perfect. Keep it up!</p>
+
+                {/* Instant Feedback Card */}
+                <div className="max-w-2xl mx-auto mb-8 rounded-xl border border-[#00d9ff]/30 bg-gradient-to-br from-[#00d9ff]/10 to-transparent p-6 text-left">
+                  <div className="flex items-start gap-3 mb-4">
+                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-[#00d9ff]/20 flex items-center justify-center">
+                      <svg className="w-5 h-5 text-[#00d9ff]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                      </svg>
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="text-lg font-bold text-white mb-2">💡 Quick Tips for "{currentObjection?.name}"</h4>
+                      {selectedCategory === 'price' && (
+                        <ul className="space-y-2 text-sm text-[#94a3b8]">
+                          <li className="flex items-start gap-2">
+                            <span className="text-[#00d9ff] mt-1">•</span>
+                            <span>Focus on <span className="text-white font-semibold">value, not cost</span> - emphasize ROI and long-term benefits</span>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="text-[#00d9ff] mt-1">•</span>
+                            <span>Use comparison: "Compared to the cost of not solving this problem..."</span>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="text-[#00d9ff] mt-1">•</span>
+                            <span>Break it down: Show daily/monthly cost instead of total</span>
+                          </li>
+                        </ul>
+                      )}
+                      {selectedCategory === 'time' && (
+                        <ul className="space-y-2 text-sm text-[#94a3b8]">
+                          <li className="flex items-start gap-2">
+                            <span className="text-[#00d9ff] mt-1">•</span>
+                            <span>Create <span className="text-white font-semibold">urgency</span> - What's the cost of waiting?</span>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="text-[#00d9ff] mt-1">•</span>
+                            <span>Acknowledge their concern, then pivot: "I understand timing is important. That's exactly why..."</span>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="text-[#00d9ff] mt-1">•</span>
+                            <span>Ask: "What would need to happen for this to be the right time?"</span>
+                          </li>
+                        </ul>
+                      )}
+                      {selectedCategory === 'authority' && (
+                        <ul className="space-y-2 text-sm text-[#94a3b8]">
+                          <li className="flex items-start gap-2">
+                            <span className="text-[#00d9ff] mt-1">•</span>
+                            <span><span className="text-white font-semibold">Involve the decision maker</span> - "Let's get them on a call together"</span>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="text-[#00d9ff] mt-1">•</span>
+                            <span>Ask: "What information would you need to make a strong recommendation?"</span>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="text-[#00d9ff] mt-1">•</span>
+                            <span>Position them as a champion, not a gatekeeper</span>
+                          </li>
+                        </ul>
+                      )}
+                      {selectedCategory === 'need' && (
+                        <ul className="space-y-2 text-sm text-[#94a3b8]">
+                          <li className="flex items-start gap-2">
+                            <span className="text-[#00d9ff] mt-1">•</span>
+                            <span><span className="text-white font-semibold">Ask questions</span> - Uncover the hidden pain points</span>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="text-[#00d9ff] mt-1">•</span>
+                            <span>"What would it mean for your business if you could solve X problem?"</span>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="text-[#00d9ff] mt-1">•</span>
+                            <span>Share a relevant case study or success story</span>
+                          </li>
+                        </ul>
+                      )}
+                      {selectedCategory === 'trust' && (
+                        <ul className="space-y-2 text-sm text-[#94a3b8]">
+                          <li className="flex items-start gap-2">
+                            <span className="text-[#00d9ff] mt-1">•</span>
+                            <span><span className="text-white font-semibold">Build credibility</span> - Share social proof, testimonials, or case studies</span>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="text-[#00d9ff] mt-1">•</span>
+                            <span>Offer a low-risk next step: "Let's start with a pilot/trial"</span>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="text-[#00d9ff] mt-1">•</span>
+                            <span>Share specific metrics and results from similar clients</span>
+                          </li>
+                        </ul>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="mt-4 pt-4 border-t border-white/10">
+                    <p className="text-xs text-[#64748b] italic">
+                      💪 Pro tip: The best responses are confident, address the concern directly, and focus on the customer's success.
+                    </p>
+                  </div>
+                </div>
 
                 <div className="flex flex-col sm:flex-row gap-3 justify-center">
                   <button

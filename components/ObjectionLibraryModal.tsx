@@ -79,7 +79,14 @@ export default function ObjectionLibraryModal({ isOpen, onClose }: ObjectionLibr
         </div>
 
         {/* Content */}
-        <div className="overflow-y-auto p-6" style={{ maxHeight: 'calc(90vh - 120px)' }}>
+        <div
+          className="overflow-y-auto p-6"
+          style={{
+            maxHeight: 'calc(90vh - 120px)',
+            scrollbarWidth: 'thin',
+            scrollbarColor: '#00d9ff #1e293b'
+          }}
+        >
           {loading && (
             <div className="flex items-center justify-center py-12">
               <div className="text-center">
