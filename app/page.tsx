@@ -103,7 +103,7 @@ export default function Home() {
         <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-12">
           <div className="flex h-20 items-center justify-between">
             <div className="text-2xl font-extrabold text-white">
-              Dial<span className="text-[#0f9b99]">Drill</span>
+              Dial<span className="text-[#a855f7]">Drill</span>
             </div>
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center gap-8">
@@ -119,13 +119,13 @@ export default function Home() {
               {isSignedIn ? (
                 <Link
                   href="/dashboard"
-                  className="rounded-full bg-gradient-to-r from-[#06d9d7] to-[#05c4c2] px-6 py-2.5 text-sm font-semibold text-[#080d1a] transition-all hover:scale-105 shadow-[0_0_20px_rgba(6,217,215,0.3)]"
+                  className="rounded-full bg-gradient-to-r from-[#06d9d7] to-[#05c4c2] px-6 py-2.5 text-sm font-semibold text-[#080d1a] transition-all hover:scale-105 shadow-[0_0_25px_rgba(6,217,215,0.4)] hover:shadow-[0_0_35px_rgba(6,217,215,0.6)]"
                 >
                   Go to Dashboard
                 </Link>
               ) : (
                 <SignUpButton mode="modal">
-                  <button className="rounded-full bg-gradient-to-r from-[#06d9d7] to-[#05c4c2] px-6 py-2.5 text-sm font-semibold text-[#080d1a] transition-all hover:scale-105 shadow-[0_0_20px_rgba(6,217,215,0.3)]">
+                  <button className="rounded-full bg-gradient-to-r from-[#06d9d7] to-[#05c4c2] px-6 py-2.5 text-sm font-semibold text-[#080d1a] transition-all hover:scale-105 shadow-[0_0_25px_rgba(6,217,215,0.4)] hover:shadow-[0_0_35px_rgba(6,217,215,0.6)]">
                     Get Started
                   </button>
                 </SignUpButton>
@@ -183,13 +183,13 @@ export default function Home() {
                 {isSignedIn ? (
                   <Link
                     href="/dashboard"
-                    className="block w-full text-center rounded-full bg-gradient-to-r from-[#06d9d7] to-[#05c4c2] px-6 py-2.5 text-sm font-semibold text-[#080d1a] transition-all hover:scale-105 shadow-[0_0_20px_rgba(6,217,215,0.3)]"
+                    className="block w-full text-center rounded-full bg-gradient-to-r from-[#06d9d7] to-[#05c4c2] px-6 py-2.5 text-sm font-semibold text-[#080d1a] transition-all hover:scale-105 shadow-[0_0_25px_rgba(6,217,215,0.4)]"
                   >
                     Go to Dashboard
                   </Link>
                 ) : (
                   <SignUpButton mode="modal">
-                    <button className="w-full rounded-full bg-gradient-to-r from-[#06d9d7] to-[#05c4c2] px-6 py-2.5 text-sm font-semibold text-[#080d1a] transition-all hover:scale-105 shadow-[0_0_20px_rgba(6,217,215,0.3)]">
+                    <button className="w-full rounded-full bg-gradient-to-r from-[#06d9d7] to-[#05c4c2] px-6 py-2.5 text-sm font-semibold text-[#080d1a] transition-all hover:scale-105 shadow-[0_0_25px_rgba(6,217,215,0.4)]">
                       Get Started
                     </button>
                   </SignUpButton>
@@ -229,10 +229,10 @@ function HeroSection({ isSignedIn }: { isSignedIn: boolean }) {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="flex justify-center mb-6"
         >
-          <div className="inline-flex items-center gap-2 rounded-full border border-[#1e293b]/50 bg-[#0f9b99]/10 px-4 py-1.5 text-sm text-[#94a3b8] backdrop-blur-sm">
+          <div className="inline-flex items-center gap-2 rounded-full border border-[#1e293b]/50 bg-[#a855f7]/10 px-4 py-1.5 text-sm text-[#94a3b8] backdrop-blur-sm">
             <span className="flex h-2 w-2">
-              <span className="absolute inline-flex h-2 w-2 animate-ping rounded-full bg-[#0f9b99] opacity-75"></span>
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-[#0f9b99]"></span>
+              <span className="absolute inline-flex h-2 w-2 animate-ping rounded-full bg-[#a855f7] opacity-75"></span>
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-[#a855f7]"></span>
             </span>
             <span className="font-medium text-white">New</span>
             <span className="text-[#64748b]">•</span>
@@ -251,7 +251,7 @@ function HeroSection({ isSignedIn }: { isSignedIn: boolean }) {
               className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl"
             >
               Less awkward calls.{' '}
-              <span className="text-[#0f9b99]">Stronger closes.</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#a855f7] to-[#c084fc]">Stronger closes.</span>
             </motion.h1>
             <motion.p
               initial={{ opacity: 0, y: 30 }}
@@ -271,7 +271,7 @@ function HeroSection({ isSignedIn }: { isSignedIn: boolean }) {
               {isSignedIn ? (
                 <Link
                   href="/dashboard"
-                  className="btn-glow group relative inline-flex items-center justify-center rounded-full bg-gradient-to-r from-[#06d9d7] to-[#05c4c2] px-8 py-4 text-base font-semibold text-[#080d1a] transition-all hover:scale-105 hover:-translate-y-0.5"
+                  className="btn-glow group relative inline-flex items-center justify-center rounded-full bg-gradient-to-r from-[#06d9d7] to-[#05c4c2] px-8 py-4 text-base font-semibold text-[#080d1a] transition-all hover:scale-105 hover:-translate-y-0.5 shadow-[0_0_30px_rgba(6,217,215,0.5)] hover:shadow-[0_0_45px_rgba(6,217,215,0.7)]"
                 >
                   Go to Dashboard
                   <svg
@@ -285,7 +285,7 @@ function HeroSection({ isSignedIn }: { isSignedIn: boolean }) {
                 </Link>
               ) : (
                 <SignUpButton mode="modal">
-                  <button className="btn-glow group relative inline-flex items-center justify-center rounded-full bg-gradient-to-r from-[#06d9d7] to-[#05c4c2] px-8 py-4 text-base font-semibold text-[#080d1a] transition-all hover:scale-105 hover:-translate-y-0.5">
+                  <button className="btn-glow group relative inline-flex items-center justify-center rounded-full bg-gradient-to-r from-[#06d9d7] to-[#05c4c2] px-8 py-4 text-base font-semibold text-[#080d1a] transition-all hover:scale-105 hover:-translate-y-0.5 shadow-[0_0_30px_rgba(6,217,215,0.5)] hover:shadow-[0_0_45px_rgba(6,217,215,0.7)]">
                     Start My Trial Today!
                     <svg
                       className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1"
@@ -300,7 +300,7 @@ function HeroSection({ isSignedIn }: { isSignedIn: boolean }) {
               )}
               <Link
                 href="/how-it-works"
-                className="inline-flex items-center gap-2 text-base font-medium text-[#94a3b8] transition-all hover:text-white hover:gap-3"
+                className="inline-flex items-center gap-2 text-base font-medium text-[#94a3b8] transition-all hover:text-[#06d9d7] hover:gap-3"
               >
                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
@@ -328,15 +328,15 @@ function HeroSection({ isSignedIn }: { isSignedIn: boolean }) {
 
 function DashboardCard() {
   return (
-    <div className="overflow-hidden rounded-3xl border border-[#1e293b]/50 bg-gradient-to-br from-[rgba(15,23,42,0.6)] to-[rgba(5,9,17,0.8)] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.7),0_0_40px_rgba(6,217,215,0.08)] backdrop-blur-xl transition-all hover:shadow-[0_20px_80px_rgba(0,0,0,0.8),0_0_60px_rgba(6,217,215,0.12)] hover:-translate-y-1">
+    <div className="overflow-hidden rounded-3xl border border-[#1e293b]/50 bg-gradient-to-br from-[rgba(15,23,42,0.6)] to-[rgba(5,9,17,0.8)] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.7)] backdrop-blur-xl transition-all hover:shadow-[0_20px_80px_rgba(0,0,0,0.8)] hover:-translate-y-1">
       {/* Status Pills */}
       <div className="mb-6 flex flex-wrap gap-2">
         <span className="inline-flex items-center gap-1.5 rounded-full bg-[#22c55e]/10 px-3 py-1.5 text-xs font-medium text-[#22c55e] ring-1 ring-[#22c55e]/20">
           <span className="h-1.5 w-1.5 rounded-full bg-[#22c55e]"></span>
           AI Caller Active
         </span>
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-[#0f9b99]/10 px-3 py-1.5 text-xs font-medium text-[#0f9b99] ring-1 ring-[#0f9b99]/20">
-          <span className="h-1.5 w-1.5 rounded-full bg-[#0f9b99]"></span>
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-[#a855f7]/10 px-3 py-1.5 text-xs font-medium text-[#c084fc] ring-1 ring-[#a855f7]/20">
+          <span className="h-1.5 w-1.5 rounded-full bg-[#a855f7]"></span>
           Script Coach On
         </span>
       </div>
@@ -347,10 +347,10 @@ function DashboardCard() {
           <h3 className="mb-4 text-sm font-semibold text-[#e5e7eb]">Call Outcomes</h3>
           <div className="flex h-40 items-end gap-3">
             {[
-              { height: 75, color: 'from-[#0f9b99] to-[#0f9b99]/70', label: 'Won' },
-              { height: 50, color: 'from-[#a855f7] to-[#a855f7]/70', label: 'Lost' },
+              { height: 75, color: 'from-[#a855f7] to-[#a855f7]/70', label: 'Won' },
+              { height: 50, color: 'from-[#94a3b8] to-[#94a3b8]/70', label: 'Lost' },
               { height: 90, color: 'from-[#22c55e] to-[#22c55e]/70', label: 'Follow-up' },
-              { height: 60, color: 'from-[#0f9b99] to-[#0f9b99]/70', label: 'Demo' },
+              { height: 60, color: 'from-[#a855f7] to-[#a855f7]/70', label: 'Demo' },
             ].map((bar, i) => (
               <motion.div
                 key={i}
@@ -360,7 +360,7 @@ function DashboardCard() {
                 viewport={{ once: true }}
                 className="group relative flex flex-1 flex-col items-center gap-2"
               >
-                <div className={`w-full rounded-t-lg bg-gradient-to-t ${bar.color} transition-all group-hover:from-[#0f9b99] group-hover:to-[#0f9b99]`} style={{ height: '100%' }}></div>
+                <div className={`w-full rounded-t-lg bg-gradient-to-t ${bar.color} transition-all group-hover:from-[#a855f7] group-hover:to-[#a855f7]`} style={{ height: '100%' }}></div>
                 <span className="text-xs text-[#64748b]">{bar.label}</span>
               </motion.div>
             ))}
@@ -384,7 +384,7 @@ function DashboardCard() {
                   cy="50"
                   r="40"
                   fill="none"
-                  stroke="rgba(15, 155, 153, 0.2)"
+                  stroke="rgba(168, 85, 247, 0.2)"
                   strokeWidth="12"
                 />
                 <circle
@@ -392,7 +392,7 @@ function DashboardCard() {
                   cy="50"
                   r="40"
                   fill="none"
-                  stroke="#0f9b99"
+                  stroke="#a855f7"
                   strokeWidth="12"
                   strokeDasharray="150 251"
                   strokeLinecap="round"
@@ -402,7 +402,7 @@ function DashboardCard() {
                   cy="50"
                   r="40"
                   fill="none"
-                  stroke="#a855f7"
+                  stroke="#f59e0b"
                   strokeWidth="12"
                   strokeDasharray="75 251"
                   strokeDashoffset="-150"
@@ -430,11 +430,11 @@ function DashboardCard() {
           </div>
           <div className="mt-4 grid grid-cols-3 gap-2 text-xs">
             <div className="flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-[#0f9b99]"></span>
+              <span className="h-2 w-2 rounded-full bg-[#a855f7]"></span>
               <span className="text-[#64748b]">Price</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-[#a855f7]"></span>
+              <span className="h-2 w-2 rounded-full bg-[#f59e0b]"></span>
               <span className="text-[#64748b]">Timing</span>
             </div>
             <div className="flex items-center gap-1.5">
@@ -454,10 +454,10 @@ function MetricsStrip() {
   const isInView = useInView(ref, { once: false, amount: 0.3 });
 
   const metrics: MetricCard[] = [
-    { icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z', value: '40+', label: 'Realistic objection profiles across industries', color: '#0f9b99' },
-    { icon: 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6', value: '2x faster', label: 'Onboarding speed for new sales reps', color: '#22c55e' },
-    { icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z', value: 'Instant', label: 'Feedback and scoring after every call', color: '#a855f7' },
-    { icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z', value: 'Unlimited', label: 'Call recordings with full transcripts', color: '#0f9b99' },
+    { icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z', value: '40+', label: 'Realistic objection profiles across industries', color: '#f59e0b' },
+    { icon: 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6', value: '2x faster', label: 'Onboarding speed for new sales reps', color: '#f59e0b' },
+    { icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z', value: 'Instant', label: 'Feedback and scoring after every call', color: '#f59e0b' },
+    { icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z', value: 'Unlimited', label: 'Call recordings with full transcripts', color: '#f59e0b' },
   ];
 
   return (
@@ -471,7 +471,7 @@ function MetricsStrip() {
               animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
               transition={{ duration: 0.6, delay: index * 0.1 }}
               whileHover={{ y: -10, scale: 1.02 }}
-              className="group rounded-2xl border border-[#1e293b]/50 bg-gradient-to-br from-white/[0.02] to-transparent p-6 transition-all duration-300 hover:border-[#334155] hover:bg-white/[0.04] hover:shadow-lg cursor-pointer"
+              className="group rounded-2xl border border-[#1e293b]/50 bg-gradient-to-br from-white/[0.02] to-transparent p-6 transition-all duration-300 hover:border-[#f59e0b]/30 hover:bg-white/[0.04] hover:shadow-[0_0_25px_rgba(245,158,11,0.15)] cursor-pointer"
             >
               <div
                 className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br transition-all duration-300 group-hover:scale-110 group-hover:rotate-3"
@@ -485,7 +485,7 @@ function MetricsStrip() {
                 </svg>
               </div>
               <h3
-                className="text-2xl font-bold text-white transition-colors duration-300"
+                className="text-2xl font-bold transition-colors duration-300"
                 style={{ color: metric.color }}
               >
                 {metric.value}
@@ -522,7 +522,7 @@ function FeaturesSection({
           className="mb-10 text-center"
         >
           <h2 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
-            Everything you need to <span className="text-[#0f9b99]">level up</span>
+            Everything you need to <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#a855f7] to-[#c084fc]">level up</span>
           </h2>
           <p className="mt-3 text-base text-[#94a3b8]">
             Practice. Analyze. Improve. Repeat.
@@ -546,12 +546,12 @@ function FeaturesSection({
                 onClick={() => setActiveTab(idx)}
                 className={`group relative rounded-xl border p-5 text-left transition-all ${
                   activeTab === idx
-                    ? 'border-[#0f9b99]/50 bg-gradient-to-r from-[#0f9b99]/10 to-transparent shadow-lg'
+                    ? 'border-[#a855f7]/50 bg-gradient-to-r from-[#a855f7]/10 to-transparent shadow-lg'
                     : 'border-[#1e293b]/50 bg-white/[0.02] hover:border-[#334155] hover:bg-white/[0.04]'
                 }`}
               >
                 {activeTab === idx && (
-                  <div className="absolute left-0 top-1/2 h-8 w-1 -translate-y-1/2 rounded-r-full bg-gradient-to-b from-[#0f9b99] to-[#0d7a78]"></div>
+                  <div className="absolute left-0 top-1/2 h-8 w-1 -translate-y-1/2 rounded-r-full bg-gradient-to-b from-[#a855f7] to-[#c084fc]"></div>
                 )}
                 <h3
                   className={`text-lg font-semibold transition-colors ${
@@ -583,7 +583,7 @@ function FeaturesSection({
                   transition={{ duration: 0.5, delay: 0.5 + idx * 0.1 }}
                   className="rounded-xl border border-[#1e293b]/50 bg-gradient-to-br from-white/[0.03] to-transparent p-6"
                 >
-                  <div className="text-3xl font-bold text-[#0f9b99]">{stat.value}</div>
+                  <div className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#f59e0b] to-[#fbbf24]">{stat.value}</div>
                   <div className="mt-2 text-sm text-[#94a3b8]">{stat.label}</div>
                 </motion.div>
               ))}
@@ -598,7 +598,7 @@ function FeaturesSection({
                     initial={{ height: 0 }}
                     animate={isInView ? { height: `${height}%` } : { height: 0 }}
                     transition={{ duration: 0.6, delay: 0.6 + idx * 0.05 }}
-                    className="flex-1 rounded-t-lg bg-gradient-to-t from-[#0f9b99] to-[#0f9b99]/50 transition-all hover:from-[#0f9b99] hover:to-[#0f9b99]"
+                    className="flex-1 rounded-t-lg bg-gradient-to-t from-[#a855f7] to-[#a855f7]/50 transition-all hover:from-[#c084fc] hover:to-[#c084fc]"
                   ></motion.div>
                 ))}
               </div>
@@ -625,7 +625,7 @@ function HowItWorksSection() {
           className="mb-16 lg:mb-20 text-center"
         >
           <h2 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl">
-            How it <span className="text-[#a855f7]">works</span>
+            How it <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#a855f7] to-[#c084fc]">works</span>
           </h2>
           <p className="mt-5 text-xl text-[#94a3b8] max-w-3xl mx-auto">
             Three simple steps to transform your sales team
@@ -635,7 +635,7 @@ function HowItWorksSection() {
         {/* Timeline Steps */}
         <div className="relative max-w-4xl mx-auto">
           {/* Vertical Line */}
-          <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-[#a855f7] via-[#0f9b99] to-[#a855f7] opacity-30"></div>
+          <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-[#a855f7] via-[#f59e0b] to-[#a855f7] opacity-30"></div>
 
           {/* Step 1 */}
           <motion.div
@@ -650,7 +650,7 @@ function HowItWorksSection() {
             <div className="flex-1 pt-2">
               <h3 className="text-2xl font-bold text-white mb-3">Sign Up & Choose Your Plan</h3>
               <p className="text-lg text-[#94a3b8] leading-relaxed">
-                Start with our $5 trial for 5 practice calls, or go Pro for 20 minutes per month with all 8 personalities unlocked.
+                Start with our <span className="text-[#f59e0b] font-semibold">$5 trial</span> for 5 practice calls, or go Pro for <span className="text-[#f59e0b] font-semibold">20 minutes per month</span> with all 8 personalities unlocked.
               </p>
             </div>
           </motion.div>
@@ -662,7 +662,7 @@ function HowItWorksSection() {
             transition={{ duration: 0.6, delay: 0.4 }}
             className="relative mb-12 flex items-start gap-6"
           >
-            <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#0f9b99] to-[#0d7a78] text-2xl font-bold text-white ring-4 ring-[#0f9b99]/20 shadow-[0_0_30px_rgba(15,155,153,0.4)]">
+            <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#f59e0b] to-[#d97706] text-2xl font-bold text-white ring-4 ring-[#f59e0b]/20 shadow-[0_0_30px_rgba(245,158,11,0.4)]">
               2
             </div>
             <div className="flex-1 pt-2">
@@ -710,7 +710,7 @@ function TestimonialsSection({ testimonials }: { testimonials: Testimonial[] }) 
           className="mb-10 text-center"
         >
           <h2 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
-            Trusted by <span className="text-[#0f9b99]">sales teams</span>
+            Trusted by <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#a855f7] to-[#c084fc]">sales teams</span>
           </h2>
           <p className="mt-3 text-base text-[#94a3b8]">
             See what our customers have to say
@@ -727,7 +727,7 @@ function TestimonialsSection({ testimonials }: { testimonials: Testimonial[] }) 
               className="overflow-hidden rounded-3xl border border-[#1e293b]/50 bg-gradient-to-br from-[rgba(15,23,42,0.6)] to-[rgba(5,9,17,0.8)] p-5 lg:p-6 shadow-[0_20px_40px_rgba(0,0,0,0.5)] backdrop-blur-xl transition-all hover:shadow-[0_20px_60px_rgba(0,0,0,0.7)] hover:border-[#334155]"
             >
               <div className="flex items-start gap-4 mb-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-[#0f9b99] to-[#0d7a78] text-lg font-bold text-white ring-4 ring-[#0f9b99]/20 flex-shrink-0">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-[#a855f7] to-[#9333ea] text-lg font-bold text-white ring-4 ring-[#a855f7]/20 flex-shrink-0">
                   {testimonial.initials}
                 </div>
                 <div className="min-w-0">
@@ -763,7 +763,7 @@ function FinalCTA({ isSignedIn }: { isSignedIn: boolean }) {
           className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl lg:text-5xl"
         >
           Make your next real call{' '}
-          <span className="text-[#0f9b99]">feel easy.</span>
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#a855f7] to-[#c084fc]">feel easy.</span>
         </motion.h2>
         <motion.p
           initial={{ opacity: 0, y: 30 }}
@@ -782,7 +782,7 @@ function FinalCTA({ isSignedIn }: { isSignedIn: boolean }) {
           {isSignedIn ? (
             <Link
               href="/dashboard"
-              className="btn-glow group inline-flex items-center justify-center rounded-full bg-gradient-to-r from-[#06d9d7] to-[#05c4c2] px-10 py-5 text-lg font-semibold text-[#080d1a] transition-all hover:scale-105 hover:-translate-y-0.5"
+              className="btn-glow group inline-flex items-center justify-center rounded-full bg-gradient-to-r from-[#06d9d7] to-[#05c4c2] px-10 py-5 text-lg font-semibold text-[#080d1a] transition-all hover:scale-105 hover:-translate-y-0.5 shadow-[0_0_30px_rgba(6,217,215,0.5)] hover:shadow-[0_0_45px_rgba(6,217,215,0.7)]"
             >
               Go to Dashboard
               <svg
@@ -797,7 +797,7 @@ function FinalCTA({ isSignedIn }: { isSignedIn: boolean }) {
           ) : (
             <>
               <SignUpButton mode="modal">
-                <button className="btn-glow group inline-flex items-center justify-center rounded-full bg-gradient-to-r from-[#06d9d7] to-[#05c4c2] px-10 py-5 text-lg font-semibold text-[#080d1a] transition-all hover:scale-105 hover:-translate-y-0.5">
+                <button className="btn-glow group inline-flex items-center justify-center rounded-full bg-gradient-to-r from-[#06d9d7] to-[#05c4c2] px-10 py-5 text-lg font-semibold text-[#080d1a] transition-all hover:scale-105 hover:-translate-y-0.5 shadow-[0_0_30px_rgba(6,217,215,0.5)] hover:shadow-[0_0_45px_rgba(6,217,215,0.7)]">
                   Start My Trial Today!
                   <svg
                     className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1"
@@ -810,7 +810,7 @@ function FinalCTA({ isSignedIn }: { isSignedIn: boolean }) {
                 </button>
               </SignUpButton>
               <SignInButton mode="modal">
-                <button className="inline-flex items-center text-lg font-medium text-[#94a3b8] transition-colors hover:text-white">
+                <button className="inline-flex items-center text-lg font-medium text-[#94a3b8] transition-colors hover:text-[#06d9d7]">
                   Already have an account? Sign in
                 </button>
               </SignInButton>
@@ -828,7 +828,7 @@ function Footer() {
       <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-12">
         <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
           <div className="text-2xl font-extrabold text-white">
-            Dial<span className="text-[#0f9b99]">Drill</span>
+            Dial<span className="text-[#a855f7]">Drill</span>
           </div>
           <div className="text-sm text-[#64748b]">
             © 2025 DialDrill. All rights reserved.
