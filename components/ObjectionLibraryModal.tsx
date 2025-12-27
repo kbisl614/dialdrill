@@ -55,8 +55,8 @@ export default function ObjectionLibraryModal({ isOpen, onClose }: ObjectionLibr
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">
-      <div className="w-full max-w-5xl max-h-[90vh] overflow-hidden rounded-2xl border border-white/10 bg-[#030712] shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4" onClick={onClose}>
+      <div className="w-full max-w-5xl max-h-[90vh] overflow-hidden rounded-2xl border border-white/10 bg-[#030712] shadow-2xl" onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div className="border-b border-white/10 bg-gradient-to-r from-[#2dd4e6]/10 to-[#9333ea]/10 p-6">
           <div className="flex items-center justify-between">
@@ -82,9 +82,10 @@ export default function ObjectionLibraryModal({ isOpen, onClose }: ObjectionLibr
         <div
           className="overflow-y-auto p-6"
           style={{
-            maxHeight: 'calc(90vh - 120px)',
+            maxHeight: 'calc(90vh - 180px)',
             scrollbarWidth: 'thin',
-            scrollbarColor: '#00d9ff #1e293b'
+            scrollbarColor: '#00d9ff #1e293b',
+            overscrollBehavior: 'contain'
           }}
         >
           {loading && (
