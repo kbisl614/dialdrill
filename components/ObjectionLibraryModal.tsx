@@ -55,10 +55,17 @@ export default function ObjectionLibraryModal({ isOpen, onClose }: ObjectionLibr
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4" onClick={onClose}>
-      <div className="w-full max-w-5xl max-h-[90vh] overflow-hidden rounded-2xl border border-white/10 bg-[#030712] shadow-2xl" onClick={(e) => e.stopPropagation()}>
-        {/* Header */}
-        <div className="border-b border-white/10 bg-gradient-to-r from-[#2dd4e6]/10 to-[#9333ea]/10 p-6">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+      onClick={onClose}
+    >
+      {/* Modal Container */}
+      <div
+        className="relative flex flex-col w-full max-w-5xl h-[90vh] rounded-2xl border border-white/10 bg-[#030712] shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Fixed Header */}
+        <div className="flex-shrink-0 border-b border-white/10 bg-gradient-to-r from-[#2dd4e6]/10 to-[#9333ea]/10 p-6">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-2xl font-bold text-white">Objection Library</h2>
@@ -78,14 +85,12 @@ export default function ObjectionLibraryModal({ isOpen, onClose }: ObjectionLibr
           </div>
         </div>
 
-        {/* Content */}
+        {/* Scrollable Content Area */}
         <div
-          className="overflow-y-auto p-6"
+          className="flex-1 overflow-y-scroll p-6"
           style={{
-            maxHeight: 'calc(90vh - 180px)',
             scrollbarWidth: 'thin',
-            scrollbarColor: '#00d9ff #1e293b',
-            overscrollBehavior: 'contain'
+            scrollbarColor: '#00d9ff #1e293b'
           }}
         >
           {loading && (
@@ -194,8 +199,8 @@ export default function ObjectionLibraryModal({ isOpen, onClose }: ObjectionLibr
           )}
         </div>
 
-        {/* Footer */}
-        <div className="border-t border-white/10 bg-white/[0.02] p-4">
+        {/* Fixed Footer */}
+        <div className="flex-shrink-0 border-t border-white/10 bg-white/[0.02] p-4">
           <button
             onClick={onClose}
             className="w-full rounded-xl bg-gradient-to-r from-[#2dd4e6] to-[#1ab5c4] px-6 py-3 text-sm font-semibold text-[#020817] transition hover:opacity-90"
