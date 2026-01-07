@@ -443,6 +443,7 @@ export default function ObjectionLibraryModal({ isOpen, onClose }: ObjectionLibr
 
         {/* Scrollable Content */}
         <div
+          data-lenis-prevent
           className="overflow-y-scroll p-6 scrollbar-custom"
           style={{
             height: '600px',
