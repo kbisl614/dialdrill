@@ -402,7 +402,7 @@ export default function ObjectionLibraryModal({ isOpen, onClose }: ObjectionLibr
       onClick={onClose}
     >
       <div
-        className="relative flex flex-col w-full max-w-4xl h-[90vh] rounded-2xl border border-white/10 bg-[#030712] shadow-2xl"
+        className="relative flex flex-col w-full max-w-4xl max-h-[90vh] rounded-2xl border border-white/10 bg-[#030712] shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -443,8 +443,10 @@ export default function ObjectionLibraryModal({ isOpen, onClose }: ObjectionLibr
 
         {/* Scrollable Content */}
         <div
-          className="flex-1 overflow-y-auto p-6 scrollbar-custom"
+          className="overflow-y-auto p-6 scrollbar-custom"
           style={{
+            maxHeight: 'calc(90vh - 240px)',
+            minHeight: '400px',
             scrollbarWidth: 'thin',
             scrollbarColor: '#00d9ff #1e293b',
             WebkitOverflowScrolling: 'touch'
