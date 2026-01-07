@@ -193,10 +193,11 @@ export default function ObjectionLibraryModal({ isOpen, onClose }: ObjectionLibr
 
         {/* Scrollable Content */}
         <div
-          className="flex-1 overflow-y-scroll p-6"
+          className="flex-1 overflow-y-auto p-6 scrollbar-custom"
           style={{
             scrollbarWidth: 'thin',
-            scrollbarColor: '#00d9ff #1e293b'
+            scrollbarColor: '#00d9ff #1e293b',
+            WebkitOverflowScrolling: 'touch'
           }}
         >
           <div className="space-y-4">
@@ -281,6 +282,28 @@ export default function ObjectionLibraryModal({ isOpen, onClose }: ObjectionLibr
           </button>
         </div>
       </div>
+
+      {/* Add scrollbar styles */}
+      <style jsx>{`
+        .scrollbar-custom::-webkit-scrollbar {
+          width: 12px;
+        }
+
+        .scrollbar-custom::-webkit-scrollbar-track {
+          background: #1e293b;
+          border-radius: 10px;
+        }
+
+        .scrollbar-custom::-webkit-scrollbar-thumb {
+          background: #00d9ff;
+          border-radius: 10px;
+          border: 2px solid #1e293b;
+        }
+
+        .scrollbar-custom::-webkit-scrollbar-thumb:hover {
+          background: #00ffea;
+        }
+      `}</style>
     </div>
   );
 }
