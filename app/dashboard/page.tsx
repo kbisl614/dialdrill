@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import PersonalitySelector, { type Personality } from '@/components/PersonalitySelector';
 import QuickPracticeModal from '@/components/QuickPracticeModal';
+import ObjectionLibraryModal from '@/components/ObjectionLibraryModal';
 import Sidebar from '@/components/Sidebar';
 import Breadcrumb from '@/components/Breadcrumb';
 import Link from 'next/link';
@@ -38,6 +39,7 @@ function DashboardContent() {
   const [selectedPersonalityId, setSelectedPersonalityId] = useState<string | null>(null);
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
   const [showQuickPractice, setShowQuickPractice] = useState(false);
+  const [showObjectionLibrary, setShowObjectionLibrary] = useState(false);
 
   useEffect(() => {
     if (isLoaded && !isSignedIn) {
@@ -368,6 +370,15 @@ function DashboardContent() {
               </svg>
               ⚡ Quick Practice (30sec drills)
             </button>
+            <button
+              onClick={() => setShowObjectionLibrary(true)}
+              className="inline-flex items-center gap-2 rounded-full border border-[#00d9ff]/30 bg-[#00d9ff]/10 px-6 py-3 text-sm font-semibold text-[#00d9ff] transition hover:bg-[#00d9ff]/20 hover:border-[#00d9ff]/50"
+            >
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              📖 View Objection Library
+            </button>
           </div>
 
           <button
@@ -428,6 +439,12 @@ function DashboardContent() {
       <QuickPracticeModal
         isOpen={showQuickPractice}
         onClose={() => setShowQuickPractice(false)}
+      />
+
+      {/* Objection Library Modal */}
+      <ObjectionLibraryModal
+        isOpen={showObjectionLibrary}
+        onClose={() => setShowObjectionLibrary(false)}
       />
 
       {showUpgradePrompt && entitlements?.plan === 'trial' && (
