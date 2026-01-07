@@ -398,15 +398,15 @@ export default function ObjectionLibraryModal({ isOpen, onClose }: ObjectionLibr
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70"
       onClick={onClose}
     >
       <div
-        className="relative flex flex-col w-full max-w-4xl max-h-[90vh] rounded-2xl border border-white/10 bg-[#030712] shadow-2xl"
+        className="relative w-full max-w-4xl rounded-2xl border border-white/10 bg-[#030712] shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex-shrink-0 border-b border-white/10 bg-gradient-to-r from-[#2dd4e6]/10 to-[#9333ea]/10 p-6">
+        <div className="border-b border-white/10 bg-gradient-to-r from-[#2dd4e6]/10 to-[#9333ea]/10 p-6">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h2 className="text-2xl font-bold text-white">Objection Library</h2>
@@ -445,8 +445,7 @@ export default function ObjectionLibraryModal({ isOpen, onClose }: ObjectionLibr
         <div
           className="overflow-y-scroll p-6 scrollbar-custom"
           style={{
-            maxHeight: 'calc(90vh - 240px)',
-            minHeight: '400px',
+            height: '600px',
             scrollbarWidth: 'auto',
             scrollbarColor: '#00d9ff #1e293b',
             WebkitOverflowScrolling: 'touch'
@@ -525,7 +524,7 @@ export default function ObjectionLibraryModal({ isOpen, onClose }: ObjectionLibr
         </div>
 
         {/* Footer */}
-        <div className="flex-shrink-0 border-t border-white/10 bg-white/[0.02] p-4">
+        <div className="border-t border-white/10 bg-white/[0.02] p-4">
           <button
             onClick={onClose}
             className="w-full rounded-xl bg-gradient-to-r from-[#00d9ff] to-[#00ffea] px-6 py-3 text-sm font-semibold text-[#020817] transition hover:opacity-90"
