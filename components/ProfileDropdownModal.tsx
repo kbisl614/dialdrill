@@ -1,0 +1,442 @@
+'use client';
+
+import { useState } from 'react';
+
+interface ProfileDropdownModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  userData: UserProfileData;
+}
+
+interface UserProfileData {
+  username: string;
+  avatar: string;
+  email: string;
+  memberSince: string;
+  currentPower: number;
+  currentBelt: BeltInfo;
+  nextBelt: BeltInfo;
+  streak: StreakInfo;
+  multiplier: MultiplierInfo;
+  badges: Badge[];
+  statistics: Statistics;
+}
+
+interface BeltInfo {
+  tier: string;
+  belt: string;
+  color: string;
+  minPower: number;
+  maxPower: number;
+}
+
+interface StreakInfo {
+  currentStreak: number;
+  longestStreak: number;
+  lastLogin: string;
+}
+
+interface MultiplierInfo {
+  active: boolean;
+  percentage: number;
+  daysToNext: number | null;
+  nextMultiplier: number | null;
+}
+
+interface Badge {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  rarity: 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
+  earned: boolean;
+  earnedDate?: string;
+  progress?: number;
+  total?: number;
+}
+
+interface Statistics {
+  totalCalls: number;
+  totalMinutes: number;
+  averageScore: number;
+  objectionSuccessRate: number;
+  closingRate: number;
+  averageWPM: number;
+  fillerWordAverage: number;
+}
+
+type TabType = 'information' | 'badges' | 'journey' | 'statistics';
+
+export default function ProfileDropdownModal({ isOpen, onClose, userData }: ProfileDropdownModalProps) {
+  const [activeTab, setActiveTab] = useState<TabType>('information');
+
+  if (!isOpen) return null;
+
+  // Calculate progress to next belt
+  const progressPercentage =
+    ((userData.currentPower - userData.currentBelt.minPower) /
+    (userData.nextBelt.minPower - userData.currentBelt.minPower)) * 100;
+
+  const powerToNextBelt = userData.nextBelt.minPower - userData.currentPower;
+
+  return (
+    <>
+      {/* Backdrop */}
+      <div
+        className="fixed inset-0 z-40 bg-black/50"
+        onClick={onClose}
+      />
+
+      {/* Dropdown Modal */}
+      <div className="fixed top-20 right-6 z-50 w-[480px] max-h-[calc(100vh-120px)] rounded-2xl border border-white/10 bg-[#1A1F2E] shadow-2xl">
+        {/* Header */}
+        <div className="border-b border-white/10 bg-gradient-to-r from-[#00d9ff]/10 to-[#9d4edd]/10 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-4">
+              {/* Avatar */}
+              <div className="relative">
+                <div className="h-16 w-16 rounded-full bg-gradient-to-br from-[#00d9ff] to-[#9d4edd] p-0.5">
+                  <div className="h-full w-full rounded-full bg-[#1A1F2E] flex items-center justify-center">
+                    <span className="text-2xl font-bold text-white">
+                      {userData.username.charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                </div>
+                {/* Streak indicator */}
+                {userData.streak.currentStreak > 0 && (
+                  <div className="absolute -bottom-1 -right-1 flex items-center gap-1 rounded-full bg-gradient-to-r from-orange-500 to-red-500 px-2 py-0.5 text-xs font-bold text-white">
+                    🔥 {userData.streak.currentStreak}
+                  </div>
+                )}
+              </div>
+
+              {/* Username and Belt */}
+              <div>
+                <h2 className="text-xl font-bold text-white">{userData.username}</h2>
+                <div className="flex items-center gap-2 mt-1">
+                  <div
+                    className="h-2 w-2 rounded-full"
+                    style={{ backgroundColor: userData.currentBelt.color }}
+                  />
+                  <span className="text-sm font-semibold" style={{ color: userData.currentBelt.color }}>
+                    {userData.currentBelt.tier} {userData.currentBelt.belt}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Close button */}
+            <button
+              onClick={onClose}
+              className="rounded-full p-2 text-white/60 transition hover:bg-white/10 hover:text-white"
+              aria-label="Close"
+            >
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          {/* Power Level Display */}
+          <div className="text-center">
+            <p className="text-sm text-[#9ca3af] mb-1">Power Level</p>
+            <p className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#00d9ff] to-[#9d4edd]">
+              {userData.currentPower.toLocaleString()}
+            </p>
+          </div>
+        </div>
+
+        {/* Scrollable Content */}
+        <div
+          className="overflow-y-scroll p-6 scrollbar-custom"
+          style={{
+            height: '600px',
+            scrollbarWidth: 'auto',
+            scrollbarColor: '#00d9ff #1e293b'
+          }}
+        >
+          {/* Next Milestone Card */}
+          <div className="mb-6 rounded-xl border border-white/10 bg-white/[0.03] p-4">
+            <h3 className="text-sm font-semibold text-white mb-3">Next Milestone</h3>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs text-[#9ca3af]">
+                {userData.currentBelt.tier} {userData.currentBelt.belt}
+              </span>
+              <span className="text-xs text-[#9ca3af]">
+                {userData.nextBelt.tier} {userData.nextBelt.belt}
+              </span>
+            </div>
+            {/* Progress bar */}
+            <div className="h-3 w-full rounded-full bg-white/10 overflow-hidden mb-2">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-[#00d9ff] to-[#9d4edd] transition-all duration-500"
+                style={{ width: `${Math.min(progressPercentage, 100)}%` }}
+              />
+            </div>
+            <p className="text-xs text-[#9ca3af] text-center">
+              {powerToNextBelt.toLocaleString()} power to next belt ({progressPercentage.toFixed(1)}%)
+            </p>
+          </div>
+
+          {/* Multiplier Status Card */}
+          {userData.multiplier.active && (
+            <div className="mb-6 rounded-xl border border-[#00d9ff]/30 bg-gradient-to-r from-[#00d9ff]/10 to-[#9d4edd]/10 p-4">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-sm font-semibold text-white">Active Multiplier</h3>
+                <span className="rounded-full bg-[#00d9ff]/20 px-3 py-1 text-sm font-bold text-[#00d9ff]">
+                  +{userData.multiplier.percentage}%
+                </span>
+              </div>
+              {userData.multiplier.daysToNext && userData.multiplier.nextMultiplier && (
+                <p className="text-xs text-[#9ca3af]">
+                  {userData.multiplier.daysToNext} more days to unlock +{userData.multiplier.nextMultiplier}% multiplier
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* Tab Navigation */}
+          <div className="mb-6 flex gap-2 border-b border-white/10">
+            {(['information', 'badges', 'journey', 'statistics'] as TabType[]).map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`pb-3 px-4 text-sm font-semibold transition border-b-2 ${
+                  activeTab === tab
+                    ? 'border-[#00d9ff] text-[#00d9ff]'
+                    : 'border-transparent text-[#9ca3af] hover:text-white'
+                }`}
+              >
+                {tab.charAt(0).toUpperCase() + tab.slice(1)}
+              </button>
+            ))}
+          </div>
+
+          {/* Tab Content */}
+          {activeTab === 'information' && <InformationTab userData={userData} />}
+          {activeTab === 'badges' && <BadgesTab badges={userData.badges} />}
+          {activeTab === 'journey' && <JourneyTab userData={userData} />}
+          {activeTab === 'statistics' && <StatisticsTab statistics={userData.statistics} />}
+        </div>
+
+        {/* Scrollbar styles */}
+        <style jsx>{`
+          .scrollbar-custom::-webkit-scrollbar {
+            width: 8px;
+          }
+          .scrollbar-custom::-webkit-scrollbar-track {
+            background: #1e293b;
+            border-radius: 10px;
+          }
+          .scrollbar-custom::-webkit-scrollbar-thumb {
+            background: #00d9ff;
+            border-radius: 10px;
+          }
+          .scrollbar-custom::-webkit-scrollbar-thumb:hover {
+            background: #00ffea;
+          }
+        `}</style>
+      </div>
+    </>
+  );
+}
+
+// Information Tab Component
+function InformationTab({ userData }: { userData: UserProfileData }) {
+  return (
+    <div className="space-y-4">
+      <InfoRow label="Email" value={userData.email} />
+      <InfoRow label="Member Since" value={userData.memberSince} />
+      <InfoRow
+        label="Current Streak"
+        value={`${userData.streak.currentStreak} days 🔥`}
+      />
+      <InfoRow
+        label="Longest Streak"
+        value={`${userData.streak.longestStreak} days`}
+      />
+      <InfoRow
+        label="Total Badges"
+        value={`${userData.badges.filter(b => b.earned).length} / ${userData.badges.length}`}
+      />
+      <InfoRow
+        label="Total Calls"
+        value={userData.statistics.totalCalls.toLocaleString()}
+      />
+    </div>
+  );
+}
+
+function InfoRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-center justify-between py-2 border-b border-white/5">
+      <span className="text-sm text-[#9ca3af]">{label}</span>
+      <span className="text-sm font-semibold text-white">{value}</span>
+    </div>
+  );
+}
+
+// Badges Tab Component
+function BadgesTab({ badges }: { badges: Badge[] }) {
+  const rarityColors = {
+    common: '#9ca3af',
+    uncommon: '#10b981',
+    rare: '#3b82f6',
+    epic: '#a855f7',
+    legendary: '#f59e0b'
+  };
+
+  return (
+    <div className="grid grid-cols-2 gap-3">
+      {badges.map((badge) => (
+        <div
+          key={badge.id}
+          className={`rounded-lg border p-3 transition ${
+            badge.earned
+              ? 'border-white/20 bg-white/[0.05]'
+              : 'border-white/5 bg-white/[0.02] opacity-50'
+          }`}
+        >
+          <div className="flex items-start justify-between mb-2">
+            <div
+              className="h-10 w-10 rounded-lg flex items-center justify-center text-xl"
+              style={{ backgroundColor: `${rarityColors[badge.rarity]}20` }}
+            >
+              🏆
+            </div>
+            {badge.earned && (
+              <div className="rounded-full bg-green-500/20 px-2 py-0.5">
+                <span className="text-xs font-bold text-green-400">✓</span>
+              </div>
+            )}
+          </div>
+          <h4
+            className="text-xs font-bold mb-1"
+            style={{ color: rarityColors[badge.rarity] }}
+          >
+            {badge.name}
+          </h4>
+          <p className="text-xs text-[#9ca3af] line-clamp-2">
+            {badge.description}
+          </p>
+          {!badge.earned && badge.progress !== undefined && badge.total !== undefined && (
+            <div className="mt-2">
+              <div className="h-1 w-full rounded-full bg-white/10 overflow-hidden">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-[#00d9ff] to-[#9d4edd]"
+                  style={{ width: `${(badge.progress / badge.total) * 100}%` }}
+                />
+              </div>
+              <p className="text-xs text-[#9ca3af] mt-1">
+                {badge.progress} / {badge.total}
+              </p>
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// Hero's Journey Tab Component
+function JourneyTab({ userData }: { userData: UserProfileData }) {
+  const allBelts = [
+    { tier: 'Bronze', belts: ['White', 'Yellow', 'Orange', 'Green', 'Blue', 'Brown', 'Black'], color: '#cd7f32' },
+    { tier: 'Silver', belts: ['White', 'Yellow', 'Orange', 'Green', 'Blue', 'Brown', 'Black'], color: '#c0c0c0' },
+    { tier: 'Gold', belts: ['White', 'Yellow', 'Orange', 'Green', 'Blue', 'Brown', 'Black'], color: '#ffd700' },
+    { tier: 'Platinum', belts: ['White', 'Yellow', 'Orange', 'Green', 'Blue', 'Brown', 'Black'], color: '#e5e4e2' },
+    { tier: 'Diamond', belts: ['White', 'Yellow', 'Orange', 'Green', 'Blue', 'Brown', 'Black'], color: '#b9f2ff' },
+    { tier: 'Sales Master', belts: ['White', 'Yellow', 'Orange', 'Green', 'Blue', 'Brown', 'Black'], color: '#ff6b6b' },
+    { tier: 'Sales Predator', belts: ['White', 'Yellow', 'Orange', 'Green', 'Blue', 'Brown', 'Black'], color: '#8b00ff' }
+  ];
+
+  return (
+    <div className="space-y-6">
+      {allBelts.map((tierGroup) => (
+        <div key={tierGroup.tier}>
+          <h4 className="text-sm font-bold mb-3" style={{ color: tierGroup.color }}>
+            {tierGroup.tier}
+          </h4>
+          <div className="grid grid-cols-7 gap-2">
+            {tierGroup.belts.map((belt) => {
+              const isCurrentBelt =
+                userData.currentBelt.tier === tierGroup.tier &&
+                userData.currentBelt.belt === belt;
+
+              return (
+                <div
+                  key={`${tierGroup.tier}-${belt}`}
+                  className={`aspect-square rounded-lg border flex items-center justify-center ${
+                    isCurrentBelt
+                      ? 'border-[#00d9ff] bg-[#00d9ff]/20 ring-2 ring-[#00d9ff]'
+                      : 'border-white/10 bg-white/[0.02]'
+                  }`}
+                >
+                  <div
+                    className="h-6 w-6 rounded-full"
+                    style={{ backgroundColor: isCurrentBelt ? tierGroup.color : '#ffffff20' }}
+                  />
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// Statistics Tab Component
+function StatisticsTab({ statistics }: { statistics: Statistics }) {
+  return (
+    <div className="space-y-4">
+      <StatCard
+        label="Total Calls"
+        value={statistics.totalCalls.toLocaleString()}
+        icon="📞"
+      />
+      <StatCard
+        label="Total Minutes"
+        value={statistics.totalMinutes.toLocaleString()}
+        icon="⏱️"
+      />
+      <StatCard
+        label="Average Score"
+        value={`${statistics.averageScore.toFixed(1)}%`}
+        icon="⭐"
+      />
+      <StatCard
+        label="Objection Success Rate"
+        value={`${statistics.objectionSuccessRate.toFixed(1)}%`}
+        icon="🛡️"
+      />
+      <StatCard
+        label="Closing Rate"
+        value={`${statistics.closingRate.toFixed(1)}%`}
+        icon="🎯"
+      />
+      <StatCard
+        label="Average WPM"
+        value={statistics.averageWPM.toString()}
+        icon="💬"
+      />
+      <StatCard
+        label="Filler Word Average"
+        value={`${statistics.fillerWordAverage.toFixed(1)}/call`}
+        icon="🔇"
+      />
+    </div>
+  );
+}
+
+function StatCard({ label, value, icon }: { label: string; value: string; icon: string }) {
+  return (
+    <div className="flex items-center justify-between rounded-lg border border-white/10 bg-white/[0.03] p-4">
+      <div className="flex items-center gap-3">
+        <span className="text-2xl">{icon}</span>
+        <span className="text-sm text-[#9ca3af]">{label}</span>
+      </div>
+      <span className="text-lg font-bold text-white">{value}</span>
+    </div>
+  );
+}
