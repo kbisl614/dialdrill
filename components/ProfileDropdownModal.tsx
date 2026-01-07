@@ -5,7 +5,8 @@ import { useState } from 'react';
 interface ProfileDropdownModalProps {
   isOpen: boolean;
   onClose: () => void;
-  userData: UserProfileData;
+  userData: UserProfileData | null;
+  loading?: boolean;
 }
 
 interface UserProfileData {
@@ -67,10 +68,27 @@ interface Statistics {
 
 type TabType = 'information' | 'badges' | 'journey' | 'statistics';
 
-export default function ProfileDropdownModal({ isOpen, onClose, userData }: ProfileDropdownModalProps) {
+export default function ProfileDropdownModal({ isOpen, onClose, userData, loading = false }: ProfileDropdownModalProps) {
   const [activeTab, setActiveTab] = useState<TabType>('information');
 
   if (!isOpen) return null;
+
+  // Show loading state
+  if (loading || !userData) {
+    return (
+      <>
+        <div className="fixed inset-0 z-40 bg-black/50" onClick={onClose} />
+        <div className="fixed top-20 right-6 z-50 w-[480px] rounded-2xl border border-white/10 bg-[#1A1F2E] shadow-2xl p-6">
+          <div className="flex items-center justify-center h-96">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00d9ff] mx-auto mb-4"></div>
+              <p className="text-sm text-[#9ca3af]">Loading profile...</p>
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  }
 
   // Calculate progress to next belt
   const progressPercentage =
