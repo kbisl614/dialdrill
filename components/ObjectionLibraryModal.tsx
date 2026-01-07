@@ -443,11 +443,11 @@ export default function ObjectionLibraryModal({ isOpen, onClose }: ObjectionLibr
 
         {/* Scrollable Content */}
         <div
-          className="overflow-y-auto p-6 scrollbar-custom"
+          className="overflow-y-scroll p-6 scrollbar-custom"
           style={{
             maxHeight: 'calc(90vh - 240px)',
             minHeight: '400px',
-            scrollbarWidth: 'thin',
+            scrollbarWidth: 'auto',
             scrollbarColor: '#00d9ff #1e293b',
             WebkitOverflowScrolling: 'touch'
           }}
@@ -535,25 +535,46 @@ export default function ObjectionLibraryModal({ isOpen, onClose }: ObjectionLibr
         </div>
       </div>
 
-      {/* Add scrollbar styles */}
+      {/* Add scrollbar styles - ALWAYS VISIBLE */}
       <style jsx>{`
+        .scrollbar-custom {
+          overflow-y: scroll !important;
+          scrollbar-width: auto !important;
+          scrollbar-color: #00d9ff #1e293b !important;
+        }
+
         .scrollbar-custom::-webkit-scrollbar {
-          width: 12px;
+          width: 16px !important;
+          display: block !important;
         }
 
         .scrollbar-custom::-webkit-scrollbar-track {
-          background: #1e293b;
-          border-radius: 10px;
+          background: #1e293b !important;
+          border-radius: 0px !important;
+          display: block !important;
         }
 
         .scrollbar-custom::-webkit-scrollbar-thumb {
-          background: #00d9ff;
-          border-radius: 10px;
-          border: 2px solid #1e293b;
+          background: #00d9ff !important;
+          border-radius: 0px !important;
+          border: 3px solid #1e293b !important;
+          min-height: 50px !important;
+          display: block !important;
         }
 
         .scrollbar-custom::-webkit-scrollbar-thumb:hover {
-          background: #00ffea;
+          background: #00ffea !important;
+          cursor: pointer !important;
+        }
+
+        .scrollbar-custom::-webkit-scrollbar-thumb:active {
+          background: #00d9ff !important;
+        }
+
+        /* Force scrollbar to always appear */
+        .scrollbar-custom::-webkit-scrollbar-button {
+          display: block !important;
+          height: 0px !important;
         }
       `}</style>
     </div>
