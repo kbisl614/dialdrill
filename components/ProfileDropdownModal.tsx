@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface ProfileDropdownModalProps {
   isOpen: boolean;
@@ -66,10 +66,110 @@ interface Statistics {
   fillerWordAverage: number;
 }
 
-type TabType = 'information' | 'badges' | 'journey' | 'statistics';
+type TabType = 'information' | 'notifications' | 'badges' | 'journey' | 'statistics' | 'leaderboard';
+
+interface Notification {
+  id: string;
+  type: string;
+  title: string;
+  message: string;
+  read: boolean;
+  created_at: string;
+}
+
+interface LeaderboardUser {
+  username: string;
+  power_level: number;
+  current_tier: string;
+  current_belt: string;
+  total_calls: number;
+}
+
+interface LeaderboardData {
+  leaderboard: LeaderboardUser[];
+  currentUser: {
+    username: string;
+    powerLevel: number;
+    tier: string;
+    belt: string;
+    rank: number;
+  };
+}
 
 export default function ProfileDropdownModal({ isOpen, onClose, userData, loading = false }: ProfileDropdownModalProps) {
   const [activeTab, setActiveTab] = useState<TabType>('information');
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [notificationsLoading, setNotificationsLoading] = useState(false);
+  const [leaderboardData, setLeaderboardData] = useState<LeaderboardData | null>(null);
+  const [leaderboardLoading, setLeaderboardLoading] = useState(false);
+
+  // Fetch notifications when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      fetchNotifications();
+      fetchLeaderboard();
+    }
+  }, [isOpen]);
+
+  async function fetchNotifications() {
+    setNotificationsLoading(true);
+    try {
+      const response = await fetch('/api/notifications');
+      if (response.ok) {
+        const data = await response.json();
+        setNotifications(data.notifications);
+        setUnreadCount(data.unreadCount);
+      }
+    } catch (error) {
+      console.error('Failed to fetch notifications:', error);
+    } finally {
+      setNotificationsLoading(false);
+    }
+  }
+
+  async function markAsRead(notificationId: string) {
+    try {
+      await fetch('/api/notifications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ notificationId }),
+      });
+      // Refresh notifications
+      fetchNotifications();
+    } catch (error) {
+      console.error('Failed to mark notification as read:', error);
+    }
+  }
+
+  async function markAllAsRead() {
+    try {
+      await fetch('/api/notifications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ markAllRead: true }),
+      });
+      // Refresh notifications
+      fetchNotifications();
+    } catch (error) {
+      console.error('Failed to mark all notifications as read:', error);
+    }
+  }
+
+  async function fetchLeaderboard() {
+    setLeaderboardLoading(true);
+    try {
+      const response = await fetch('/api/leaderboard?limit=50');
+      if (response.ok) {
+        const data = await response.json();
+        setLeaderboardData(data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch leaderboard:', error);
+    } finally {
+      setLeaderboardLoading(false);
+    }
+  }
 
   if (!isOpen) return null;
 
@@ -216,25 +316,44 @@ export default function ProfileDropdownModal({ isOpen, onClose, userData, loadin
           )}
 
           {/* Tab Navigation */}
-          <div className="mb-6 flex gap-2 border-b border-white/10">
-            {(['information', 'badges', 'journey', 'statistics'] as TabType[]).map((tab) => (
+          <div className="mb-6 flex gap-2 border-b border-white/10 overflow-x-auto">
+            {(['information', 'notifications', 'badges', 'leaderboard', 'journey', 'statistics'] as TabType[]).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`pb-3 px-4 text-sm font-semibold transition border-b-2 ${
+                className={`pb-3 px-4 text-sm font-semibold transition border-b-2 whitespace-nowrap relative ${
                   activeTab === tab
                     ? 'border-[#00d9ff] text-[#00d9ff]'
                     : 'border-transparent text-[#9ca3af] hover:text-white'
                 }`}
               >
                 {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                {tab === 'notifications' && unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
               </button>
             ))}
           </div>
 
           {/* Tab Content */}
           {activeTab === 'information' && <InformationTab userData={userData} />}
+          {activeTab === 'notifications' && (
+            <NotificationsTab
+              notifications={notifications}
+              loading={notificationsLoading}
+              onMarkAsRead={markAsRead}
+              onMarkAllAsRead={markAllAsRead}
+            />
+          )}
           {activeTab === 'badges' && <BadgesTab badges={userData.badges} />}
+          {activeTab === 'leaderboard' && (
+            <LeaderboardTab
+              data={leaderboardData}
+              loading={leaderboardLoading}
+            />
+          )}
           {activeTab === 'journey' && <JourneyTab userData={userData} />}
           {activeTab === 'statistics' && <StatisticsTab statistics={userData.statistics} />}
         </div>
@@ -283,6 +402,246 @@ export default function ProfileDropdownModal({ isOpen, onClose, userData, loadin
         `}</style>
       </div>
     </>
+  );
+}
+
+// Leaderboard Tab Component
+function LeaderboardTab({
+  data,
+  loading,
+}: {
+  data: LeaderboardData | null;
+  loading: boolean;
+}) {
+  if (loading || !data) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#00d9ff] mx-auto mb-2"></div>
+          <p className="text-xs text-[#9ca3af]">Loading leaderboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const { leaderboard, currentUser } = data;
+
+  const getTierColor = (tier: string) => {
+    const colors: Record<string, string> = {
+      'Bronze': '#cd7f32',
+      'Silver': '#c0c0c0',
+      'Gold': '#ffd700',
+      'Platinum': '#e5e4e2',
+      'Diamond': '#b9f2ff',
+      'Sales Master': '#ff6b6b',
+      'Sales Predator': '#8b00ff',
+    };
+    return colors[tier] || '#9ca3af';
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Current User Card */}
+      <div className="rounded-xl border-2 border-[#00d9ff]/50 bg-gradient-to-r from-[#00d9ff]/10 to-[#9d4edd]/10 p-4">
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center justify-center w-10 h-10 rounded-full bg-[#00d9ff]/20 text-[#00d9ff] font-bold">
+              #{currentUser.rank}
+            </div>
+            <div>
+              <p className="text-sm font-bold text-white">{currentUser.username}</p>
+              <p className="text-xs" style={{ color: getTierColor(currentUser.tier) }}>
+                {currentUser.tier} {currentUser.belt}
+              </p>
+            </div>
+          </div>
+          <div className="text-right">
+            <p className="text-lg font-bold text-white">{currentUser.powerLevel.toLocaleString()}</p>
+            <p className="text-xs text-[#9ca3af]">power</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Top 3 Podium */}
+      {leaderboard.length >= 3 && (
+        <div className="grid grid-cols-3 gap-2 mb-4">
+          {/* 2nd Place */}
+          <div className="flex flex-col items-center pt-8">
+            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#c0c0c0] to-[#a8a8a8] flex items-center justify-center text-white font-bold mb-2">
+              2
+            </div>
+            <p className="text-xs font-semibold text-white text-center line-clamp-1">{leaderboard[1]?.username}</p>
+            <p className="text-xs text-[#9ca3af]">{leaderboard[1]?.power_level.toLocaleString()}</p>
+          </div>
+
+          {/* 1st Place */}
+          <div className="flex flex-col items-center">
+            <div className="relative">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                <div className="text-2xl">👑</div>
+              </div>
+              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#ffd700] to-[#ffaa00] flex items-center justify-center text-white font-bold mb-2">
+                1
+              </div>
+            </div>
+            <p className="text-sm font-bold text-white text-center line-clamp-1">{leaderboard[0]?.username}</p>
+            <p className="text-xs text-[#9ca3af]">{leaderboard[0]?.power_level.toLocaleString()}</p>
+          </div>
+
+          {/* 3rd Place */}
+          <div className="flex flex-col items-center pt-12">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#cd7f32] to-[#b87333] flex items-center justify-center text-white font-bold mb-2">
+              3
+            </div>
+            <p className="text-xs font-semibold text-white text-center line-clamp-1">{leaderboard[2]?.username}</p>
+            <p className="text-xs text-[#9ca3af]">{leaderboard[2]?.power_level.toLocaleString()}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Rest of Leaderboard */}
+      <div className="space-y-2">
+        {leaderboard.slice(3, 20).map((user: LeaderboardUser, index: number) => {
+          const rank = index + 4;
+          const isCurrentUser = user.username === currentUser.username;
+
+          return (
+            <div
+              key={rank}
+              className={`flex items-center justify-between rounded-lg border p-3 ${
+                isCurrentUser
+                  ? 'border-[#00d9ff]/50 bg-[#00d9ff]/5'
+                  : 'border-white/10 bg-white/[0.02]'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <div className={`flex items-center justify-center w-8 h-8 rounded-full ${
+                  isCurrentUser ? 'bg-[#00d9ff]/20 text-[#00d9ff]' : 'bg-white/5 text-[#9ca3af]'
+                } text-xs font-bold`}>
+                  #{rank}
+                </div>
+                <div>
+                  <p className={`text-sm font-semibold ${isCurrentUser ? 'text-[#00d9ff]' : 'text-white'}`}>
+                    {user.username}
+                  </p>
+                  <p className="text-xs" style={{ color: getTierColor(user.current_tier) }}>
+                    {user.current_tier} {user.current_belt}
+                  </p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="text-sm font-bold text-white">{user.power_level.toLocaleString()}</p>
+                <p className="text-xs text-[#9ca3af]">{user.total_calls} calls</p>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {leaderboard.length === 0 && (
+        <div className="text-center py-12">
+          <div className="text-4xl mb-3">🏆</div>
+          <p className="text-sm text-[#9ca3af]">No leaderboard data yet</p>
+          <p className="text-xs text-[#9ca3af] mt-1">Complete calls to earn power and climb the ranks!</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Notifications Tab Component
+function NotificationsTab({
+  notifications,
+  loading,
+  onMarkAsRead,
+  onMarkAllAsRead,
+}: {
+  notifications: Notification[];
+  loading: boolean;
+  onMarkAsRead: (id: string) => void;
+  onMarkAllAsRead: () => void;
+}) {
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#00d9ff] mx-auto mb-2"></div>
+          <p className="text-xs text-[#9ca3af]">Loading notifications...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (notifications.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <div className="text-4xl mb-3">🔔</div>
+        <p className="text-sm text-[#9ca3af]">No notifications yet</p>
+        <p className="text-xs text-[#9ca3af] mt-1">We&apos;ll notify you when you earn badges and level up!</p>
+      </div>
+    );
+  }
+
+  const unreadNotifications = notifications.filter(n => !n.read);
+
+  return (
+    <div className="space-y-3">
+      {/* Mark all as read button */}
+      {unreadNotifications.length > 0 && (
+        <button
+          onClick={onMarkAllAsRead}
+          className="w-full rounded-lg border border-[#00d9ff]/30 bg-[#00d9ff]/10 px-4 py-2 text-xs font-semibold text-[#00d9ff] transition hover:bg-[#00d9ff]/20"
+        >
+          Mark all as read
+        </button>
+      )}
+
+      {/* Notifications list */}
+      {notifications.map((notification) => {
+        const notificationIcons: Record<string, string> = {
+          badge_earned: '🏆',
+          belt_upgrade: '🥋',
+          power_gained: '⚡',
+          streak_milestone: '🔥',
+          level_up: '📈',
+        };
+
+        const icon = notificationIcons[notification.type] || '📬';
+
+        return (
+          <div
+            key={notification.id}
+            className={`rounded-lg border p-4 transition cursor-pointer ${
+              notification.read
+                ? 'border-white/10 bg-white/[0.02] opacity-60'
+                : 'border-[#00d9ff]/30 bg-[#00d9ff]/5'
+            }`}
+            onClick={() => !notification.read && onMarkAsRead(notification.id)}
+          >
+            <div className="flex items-start gap-3">
+              <div className="text-2xl">{icon}</div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-start justify-between mb-1">
+                  <h4 className="text-sm font-bold text-white">{notification.title}</h4>
+                  {!notification.read && (
+                    <div className="h-2 w-2 rounded-full bg-[#00d9ff] flex-shrink-0 ml-2 mt-1" />
+                  )}
+                </div>
+                <p className="text-xs text-[#9ca3af] mb-2">{notification.message}</p>
+                <p className="text-xs text-[#9ca3af]">
+                  {new Date(notification.created_at).toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    hour: 'numeric',
+                    minute: '2-digit',
+                  })}
+                </p>
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
   );
 }
 
@@ -433,43 +792,72 @@ function JourneyTab({ userData }: { userData: UserProfileData }) {
 
 // Statistics Tab Component
 function StatisticsTab({ statistics }: { statistics: Statistics }) {
+  const getScoreColor = (score: number) => {
+    if (score >= 80) return '#10b981'; // green
+    if (score >= 60) return '#f59e0b'; // yellow
+    return '#ef4444'; // red
+  };
+
   return (
     <div className="space-y-4">
-      <StatCard
-        label="Total Calls"
-        value={statistics.totalCalls.toLocaleString()}
-        icon="📞"
-      />
-      <StatCard
-        label="Total Minutes"
-        value={statistics.totalMinutes.toLocaleString()}
-        icon="⏱️"
-      />
-      <StatCard
-        label="Average Score"
-        value={`${statistics.averageScore.toFixed(1)}%`}
-        icon="⭐"
-      />
-      <StatCard
-        label="Objection Success Rate"
-        value={`${statistics.objectionSuccessRate.toFixed(1)}%`}
-        icon="🛡️"
-      />
-      <StatCard
-        label="Closing Rate"
-        value={`${statistics.closingRate.toFixed(1)}%`}
-        icon="🎯"
-      />
-      <StatCard
-        label="Average WPM"
-        value={statistics.averageWPM.toString()}
-        icon="💬"
-      />
-      <StatCard
-        label="Filler Word Average"
-        value={`${statistics.fillerWordAverage.toFixed(1)}/call`}
-        icon="🔇"
-      />
+      {/* Volume Stats */}
+      <div className="space-y-3">
+        <h3 className="text-xs font-semibold text-[#9ca3af] uppercase tracking-wide">Volume</h3>
+        <StatCard
+          label="Total Calls"
+          value={statistics.totalCalls.toLocaleString()}
+          icon="📞"
+        />
+        <StatCard
+          label="Total Minutes"
+          value={statistics.totalMinutes.toLocaleString()}
+          icon="⏱️"
+        />
+      </div>
+
+      {/* Performance Stats with Progress Bars */}
+      <div className="space-y-3">
+        <h3 className="text-xs font-semibold text-[#9ca3af] uppercase tracking-wide">Performance</h3>
+
+        <StatCardWithProgress
+          label="Average Score"
+          value={statistics.averageScore}
+          max={100}
+          icon="⭐"
+          color={getScoreColor(statistics.averageScore)}
+        />
+
+        <StatCardWithProgress
+          label="Objection Success Rate"
+          value={statistics.objectionSuccessRate}
+          max={100}
+          icon="🛡️"
+          color={getScoreColor(statistics.objectionSuccessRate)}
+        />
+
+        <StatCardWithProgress
+          label="Closing Rate"
+          value={statistics.closingRate}
+          max={100}
+          icon="🎯"
+          color={getScoreColor(statistics.closingRate)}
+        />
+      </div>
+
+      {/* Communication Stats */}
+      <div className="space-y-3">
+        <h3 className="text-xs font-semibold text-[#9ca3af] uppercase tracking-wide">Communication</h3>
+        <StatCard
+          label="Average WPM"
+          value={statistics.averageWPM.toString()}
+          icon="💬"
+        />
+        <StatCard
+          label="Filler Word Average"
+          value={`${statistics.fillerWordAverage.toFixed(1)}/call`}
+          icon="🔇"
+        />
+      </div>
     </div>
   );
 }
@@ -482,6 +870,44 @@ function StatCard({ label, value, icon }: { label: string; value: string; icon: 
         <span className="text-sm text-[#9ca3af]">{label}</span>
       </div>
       <span className="text-lg font-bold text-white">{value}</span>
+    </div>
+  );
+}
+
+function StatCardWithProgress({
+  label,
+  value,
+  max,
+  icon,
+  color,
+}: {
+  label: string;
+  value: number;
+  max: number;
+  icon: string;
+  color: string;
+}) {
+  const percentage = (value / max) * 100;
+
+  return (
+    <div className="rounded-lg border border-white/10 bg-white/[0.03] p-4">
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-3">
+          <span className="text-2xl">{icon}</span>
+          <span className="text-sm text-[#9ca3af]">{label}</span>
+        </div>
+        <span className="text-lg font-bold text-white">{value.toFixed(1)}%</span>
+      </div>
+      {/* Progress bar */}
+      <div className="h-2 w-full rounded-full bg-white/10 overflow-hidden">
+        <div
+          className="h-full rounded-full transition-all duration-500"
+          style={{
+            width: `${percentage}%`,
+            backgroundColor: color,
+          }}
+        />
+      </div>
     </div>
   );
 }

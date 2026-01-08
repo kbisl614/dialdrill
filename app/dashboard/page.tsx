@@ -42,8 +42,9 @@ function DashboardContent() {
   const [showQuickPractice, setShowQuickPractice] = useState(false);
   const [showObjectionLibrary, setShowObjectionLibrary] = useState(false);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
-  const [profileData, setProfileData] = useState<any>(null);
+  const [profileData, setProfileData] = useState<Record<string, unknown> | null>(null);
   const [profileLoading, setProfileLoading] = useState(false);
+  const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0);
 
   useEffect(() => {
     if (isLoaded && !isSignedIn) {
@@ -124,6 +125,13 @@ function DashboardContent() {
     }
   }, [showProfileDropdown, profileData]);
 
+  // Fetch unread notifications count on mount and periodically
+  useEffect(() => {
+    fetchUnreadNotificationsCount();
+    const interval = setInterval(fetchUnreadNotificationsCount, 30000); // Every 30 seconds
+    return () => clearInterval(interval);
+  }, []);
+
   async function fetchProfileData() {
     setProfileLoading(true);
     try {
@@ -139,6 +147,18 @@ function DashboardContent() {
       console.error('Error fetching profile:', error);
     } finally {
       setProfileLoading(false);
+    }
+  }
+
+  async function fetchUnreadNotificationsCount() {
+    try {
+      const response = await fetch('/api/notifications?unreadOnly=true');
+      if (response.ok) {
+        const data = await response.json();
+        setUnreadNotificationsCount(data.unreadCount);
+      }
+    } catch (error) {
+      console.error('Error fetching unread notifications count:', error);
     }
   }
 
@@ -274,7 +294,11 @@ function DashboardContent() {
 
           {/* Profile Avatar Button */}
           <button
-            onClick={() => setShowProfileDropdown(true)}
+            onClick={() => {
+              setShowProfileDropdown(true);
+              // Refresh notifications count when opening profile
+              fetchUnreadNotificationsCount();
+            }}
             className="relative h-10 w-10 rounded-full bg-gradient-to-br from-[#00d9ff] to-[#9d4edd] p-0.5 transition hover:scale-105"
           >
             <div className="h-full w-full rounded-full bg-[#1A1F2E] flex items-center justify-center">
@@ -282,6 +306,12 @@ function DashboardContent() {
                 {user?.firstName?.charAt(0) || user?.username?.charAt(0) || 'U'}
               </span>
             </div>
+            {/* Notification badge - show when there are unread notifications */}
+            {unreadNotificationsCount > 0 && (
+              <div className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white ring-2 ring-[#080d1a]">
+                {unreadNotificationsCount > 9 ? '9+' : unreadNotificationsCount}
+              </div>
+            )}
             {/* Streak badge - show when profile is loaded */}
             {profileData?.streak?.currentStreak > 0 && (
               <div className="absolute -bottom-1 -right-1 rounded-full bg-gradient-to-r from-orange-500 to-red-500 px-1.5 py-0.5 text-xs font-bold text-white">

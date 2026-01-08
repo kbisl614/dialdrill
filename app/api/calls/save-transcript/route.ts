@@ -4,6 +4,7 @@ import { pool } from '@/lib/db';
 import { scoreCall, isCallTooShort, generateShortCallScore } from '@/lib/scoring-engine';
 import { parseTranscript } from '@/lib/transcript-parser';
 import { matchAndSaveObjections } from '@/lib/objection-matcher';
+import { createNotification } from '@/lib/create-notification';
 
 interface TranscriptEntry {
   role: 'user' | 'agent';
@@ -144,12 +145,22 @@ export async function POST(request: Request) {
 
           console.log(`[Gamification] User earned ${powerGained} power (${basePower} base × ${streakMultiplier} multiplier)`);
 
+          // Send power gained notification
+          await createNotification({
+            userId: user.id,
+            type: 'power_gained',
+            title: '⚡ Power Gained!',
+            message: `You earned ${powerGained} power from completing a call! ${streakMultiplier > 1 ? `(${streakMultiplier}x streak bonus)` : ''}`,
+            metadata: { powerGained, basePower, streakMultiplier, durationMinutes },
+          });
+
           // Check and auto-upgrade belt if needed
+          const oldBelt = `${user.current_tier} ${user.current_belt}`;
           const newPowerLevel = user.power_level + powerGained;
-          await checkAndUpgradeBelt(user.id, newPowerLevel);
+          await checkAndUpgradeBelt(user.id, newPowerLevel, oldBelt);
 
           // Check and award badges
-          await checkAndAwardBadges(user.id, userId);
+          await checkAndAwardBadges(user.id);
         }
       } catch (gamificationError) {
         // Log but don't fail the request if gamification fails
@@ -229,7 +240,7 @@ const BELT_PROGRESSION = [
 ];
 
 // Update streak + multiplier when a call is logged (counts as activity for the day)
-async function updateStreak(dbPool: ReturnType<typeof pool>, user: any) {
+async function updateStreak(dbPool: ReturnType<typeof pool>, user: { id: string; last_login_date: Date | null; current_streak: number; longest_streak: number }) {
   const today = new Date();
   const todayUTC = Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate());
 
@@ -277,33 +288,51 @@ async function updateStreak(dbPool: ReturnType<typeof pool>, user: any) {
   return { currentStreak, longestStreak, streakMultiplier };
 }
 
-async function checkAndUpgradeBelt(userId: string, powerLevel: number) {
+async function checkAndUpgradeBelt(userId: string, powerLevel: number, oldBelt: string) {
   // Find correct belt for power level
   const belt = BELT_PROGRESSION.find(b => powerLevel >= b.min && powerLevel <= b.max);
 
   if (belt) {
+    const newBelt = `${belt.tier} ${belt.belt}`;
+
     await pool().query(
       `UPDATE users
        SET current_tier = $1, current_belt = $2
        WHERE id = $3`,
       [belt.tier, belt.belt, userId]
     );
+
     console.log(`[Gamification] Belt updated to ${belt.tier} ${belt.belt} (${powerLevel} power)`);
+
+    // Send notification if belt changed
+    if (newBelt !== oldBelt) {
+      await createNotification({
+        userId,
+        type: 'belt_upgrade',
+        title: '🥋 Belt Upgrade!',
+        message: `Congratulations! You've been promoted to ${belt.tier} ${belt.belt}!`,
+        metadata: { oldBelt, newBelt, powerLevel },
+      });
+
+      return true;
+    }
   }
+
+  return false;
 }
 
 // Badge definitions (same as in profile route)
 const ALL_BADGES = [
-  { id: 'badge_5_calls', requirement: 5, field: 'total_calls' },
-  { id: 'badge_10_calls', requirement: 10, field: 'total_calls' },
-  { id: 'badge_25_calls', requirement: 25, field: 'total_calls' },
-  { id: 'badge_50_calls', requirement: 50, field: 'total_calls' },
-  { id: 'badge_7_day_streak', requirement: 7, field: 'current_streak' },
-  { id: 'badge_14_day_streak', requirement: 14, field: 'current_streak' },
-  { id: 'badge_30_day_streak', requirement: 30, field: 'current_streak' },
+  { id: 'badge_5_calls', name: 'First Steps', requirement: 5, field: 'total_calls' },
+  { id: 'badge_10_calls', name: 'Building Momentum', requirement: 10, field: 'total_calls' },
+  { id: 'badge_25_calls', name: 'Quarter Century', requirement: 25, field: 'total_calls' },
+  { id: 'badge_50_calls', name: 'Halfway Master', requirement: 50, field: 'total_calls' },
+  { id: 'badge_7_day_streak', name: 'Week Warrior', requirement: 7, field: 'current_streak' },
+  { id: 'badge_14_day_streak', name: 'Fortnight Fighter', requirement: 14, field: 'current_streak' },
+  { id: 'badge_30_day_streak', name: 'Month Master', requirement: 30, field: 'current_streak' },
 ];
 
-async function checkAndAwardBadges(internalUserId: string, clerkUserId: string) {
+async function checkAndAwardBadges(internalUserId: string) {
   // Get current user stats
   const userResult = await pool().query(
     `SELECT total_calls, current_streak FROM users WHERE id = $1`,
@@ -342,6 +371,15 @@ async function checkAndAwardBadges(internalUserId: string, clerkUserId: string) 
         );
 
         console.log(`[Gamification] Badge awarded: ${badge.id}`);
+
+        // Send notification
+        await createNotification({
+          userId: internalUserId,
+          type: 'badge_earned',
+          title: '🏆 Badge Earned!',
+          message: `You've unlocked the "${badge.name}" badge!`,
+          metadata: { badgeId: badge.id, badgeName: badge.name, requirement: badge.requirement },
+        });
       }
     }
   }

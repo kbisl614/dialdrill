@@ -85,8 +85,23 @@ function getNextBelt(currentPower: number) {
   return BELT_PROGRESSION[currentIndex + 1];
 }
 
+interface UserForStreak {
+  id: string;
+  last_login_date: Date | null;
+  current_streak: number;
+  longest_streak: number;
+}
+
+interface BadgeStats {
+  totalCalls: number;
+  currentStreak: number;
+  objectionSuccessRate: number;
+  closingRate: number;
+  averageWPM: number;
+}
+
 // Calculate streak + multiplier based on last login (UTC)
-async function updateStreak(dbPool: ReturnType<typeof pool>, user: any) {
+async function updateStreak(dbPool: ReturnType<typeof pool>, user: UserForStreak) {
   const today = new Date();
   const todayUTC = Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate());
 
@@ -136,18 +151,18 @@ async function updateStreak(dbPool: ReturnType<typeof pool>, user: any) {
 
 // Badge definitions (sample - you'll expand this)
 const ALL_BADGES = [
-  { id: 'badge_5_calls', name: 'First Steps', description: 'Complete 5 total calls', category: 'volume', rarity: 'common' as const, unlockCondition: (stats: any) => stats.totalCalls >= 5 },
-  { id: 'badge_10_calls', name: 'Building Momentum', description: 'Complete 10 total calls', category: 'volume', rarity: 'common' as const, unlockCondition: (stats: any) => stats.totalCalls >= 10 },
-  { id: 'badge_25_calls', name: 'Quarter Century', description: 'Complete 25 total calls', category: 'volume', rarity: 'uncommon' as const, unlockCondition: (stats: any) => stats.totalCalls >= 25 },
-  { id: 'badge_50_calls', name: 'Halfway Master', description: 'Complete 50 total calls', category: 'volume', rarity: 'uncommon' as const, unlockCondition: (stats: any) => stats.totalCalls >= 50 },
-  { id: 'badge_7_day_streak', name: 'Week Warrior', description: '7 day login streak', category: 'streak', rarity: 'uncommon' as const, unlockCondition: (stats: any) => stats.currentStreak >= 7 },
-  { id: 'badge_14_day_streak', name: 'Fortnight Fighter', description: '14 day login streak', category: 'streak', rarity: 'rare' as const, unlockCondition: (stats: any) => stats.currentStreak >= 14 },
-  { id: 'badge_30_day_streak', name: 'Monthly Master', description: '30 day login streak', category: 'streak', rarity: 'rare' as const, unlockCondition: (stats: any) => stats.currentStreak >= 30 },
+  { id: 'badge_5_calls', name: 'First Steps', description: 'Complete 5 total calls', category: 'volume', rarity: 'common' as const, unlockCondition: (stats: BadgeStats) => stats.totalCalls >= 5 },
+  { id: 'badge_10_calls', name: 'Building Momentum', description: 'Complete 10 total calls', category: 'volume', rarity: 'common' as const, unlockCondition: (stats: BadgeStats) => stats.totalCalls >= 10 },
+  { id: 'badge_25_calls', name: 'Quarter Century', description: 'Complete 25 total calls', category: 'volume', rarity: 'uncommon' as const, unlockCondition: (stats: BadgeStats) => stats.totalCalls >= 25 },
+  { id: 'badge_50_calls', name: 'Halfway Master', description: 'Complete 50 total calls', category: 'volume', rarity: 'uncommon' as const, unlockCondition: (stats: BadgeStats) => stats.totalCalls >= 50 },
+  { id: 'badge_7_day_streak', name: 'Week Warrior', description: '7 day login streak', category: 'streak', rarity: 'uncommon' as const, unlockCondition: (stats: BadgeStats) => stats.currentStreak >= 7 },
+  { id: 'badge_14_day_streak', name: 'Fortnight Fighter', description: '14 day login streak', category: 'streak', rarity: 'rare' as const, unlockCondition: (stats: BadgeStats) => stats.currentStreak >= 14 },
+  { id: 'badge_30_day_streak', name: 'Monthly Master', description: '30 day login streak', category: 'streak', rarity: 'rare' as const, unlockCondition: (stats: BadgeStats) => stats.currentStreak >= 30 },
   { id: 'badge_speed_demon', name: 'Speed Demon', description: 'Complete 3 calls in one session', category: 'speed', rarity: 'uncommon' as const, unlockCondition: () => false }, // Track separately
   { id: 'badge_power_hour', name: 'Power Hour', description: 'Complete 10 calls in one day', category: 'speed', rarity: 'epic' as const, unlockCondition: () => false }, // Track separately
-  { id: 'badge_objection_70', name: 'Objection Handler', description: '70% objection success rate across 10 calls', category: 'objection', rarity: 'rare' as const, unlockCondition: (stats: any) => stats.objectionSuccessRate >= 70 && stats.totalCalls >= 10 },
-  { id: 'badge_closing_60', name: 'Deal Closer', description: '60% closing rate across 15 calls', category: 'closing', rarity: 'rare' as const, unlockCondition: (stats: any) => stats.closingRate >= 60 && stats.totalCalls >= 15 },
-  { id: 'badge_fluency_wpm', name: 'Smooth Talker', description: 'Maintain 120-150 WPM across 10 calls', category: 'fluency', rarity: 'rare' as const, unlockCondition: (stats: any) => stats.averageWPM >= 120 && stats.averageWPM <= 150 && stats.totalCalls >= 10 },
+  { id: 'badge_objection_70', name: 'Objection Handler', description: '70% objection success rate across 10 calls', category: 'objection', rarity: 'rare' as const, unlockCondition: (stats: BadgeStats) => stats.objectionSuccessRate >= 70 && stats.totalCalls >= 10 },
+  { id: 'badge_closing_60', name: 'Deal Closer', description: '60% closing rate across 15 calls', category: 'closing', rarity: 'rare' as const, unlockCondition: (stats: BadgeStats) => stats.closingRate >= 60 && stats.totalCalls >= 15 },
+  { id: 'badge_fluency_wpm', name: 'Smooth Talker', description: 'Maintain 120-150 WPM across 10 calls', category: 'fluency', rarity: 'rare' as const, unlockCondition: (stats: BadgeStats) => stats.averageWPM >= 120 && stats.averageWPM <= 150 && stats.totalCalls >= 10 },
 ];
 
 export async function GET() {

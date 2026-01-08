@@ -32,14 +32,6 @@ export default function SkillRadarChart({ categoryScores, maxScore = 10 }: Skill
     return `${x},${y}`;
   }).join(' ');
 
-  // Generate points for the outer boundary
-  const outerPoints = categories.map((_, index) => {
-    const angle = angleStep * index - Math.PI / 2;
-    const x = centerX + radius * Math.cos(angle);
-    const y = centerY + radius * Math.sin(angle);
-    return `${x},${y}`;
-  }).join(' ');
-
   return (
     <div className="relative">
       <svg width="300" height="300" viewBox="0 0 300 300" className="mx-auto">

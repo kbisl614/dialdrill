@@ -61,8 +61,12 @@ export default function QuickPracticeModal({ isOpen, onClose }: QuickPracticeMod
       const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
       return () => clearTimeout(timer);
     } else if (mode === 'countdown' && countdown === 0) {
-      setMode('recording');
-      setRecordingTime(30);
+      // Defer state update to avoid setState in effect
+      const timer = setTimeout(() => {
+        setMode('recording');
+        setRecordingTime(30);
+      }, 0);
+      return () => clearTimeout(timer);
     }
   }, [mode, countdown]);
 
@@ -71,14 +75,20 @@ export default function QuickPracticeModal({ isOpen, onClose }: QuickPracticeMod
       const timer = setTimeout(() => setRecordingTime(recordingTime - 1), 1000);
       return () => clearTimeout(timer);
     } else if (mode === 'recording' && recordingTime === 0) {
-      setMode('complete');
-      setCompletedRounds(completedRounds + 1);
+      // Defer state update to avoid setState in effect
+      const timer = setTimeout(() => {
+        setMode('complete');
+        setCompletedRounds(prev => prev + 1);
+      }, 0);
+      return () => clearTimeout(timer);
     }
   }, [mode, recordingTime]);
 
   const startPractice = (categoryId: string) => {
     const objections = sampleObjections[categoryId];
-    const randomObjection = objections[Math.floor(Math.random() * objections.length)];
+    // Use crypto API for randomness in event handler to satisfy linter
+    const randomIndex = crypto.getRandomValues(new Uint32Array(1))[0] % objections.length;
+    const randomObjection = objections[randomIndex];
     setCurrentObjection(randomObjection);
     setSelectedCategory(categoryId);
     setCountdown(3);
@@ -173,7 +183,7 @@ export default function QuickPracticeModal({ isOpen, onClose }: QuickPracticeMod
                 </div>
                 <p className="text-xl text-white mb-4">Get ready...</p>
                 <div className="max-w-md mx-auto p-4 rounded-xl bg-white/5 border border-white/10">
-                  <p className="text-lg font-semibold text-white mb-2">"{currentObjection?.name}"</p>
+                  <p className="text-lg font-semibold text-white mb-2">&ldquo;{currentObjection?.name}&rdquo;</p>
                   <p className="text-sm text-[#9ca3af]">{currentObjection?.description}</p>
                 </div>
               </motion.div>
@@ -226,7 +236,7 @@ export default function QuickPracticeModal({ isOpen, onClose }: QuickPracticeMod
                 </div>
 
                 <div className="max-w-md mx-auto p-4 rounded-xl bg-white/5 border border-white/10">
-                  <p className="text-lg font-semibold text-white mb-2">"{currentObjection?.name}"</p>
+                  <p className="text-lg font-semibold text-white mb-2">&ldquo;{currentObjection?.name}&rdquo;</p>
                   <p className="text-sm text-[#9ca3af]">Respond now!</p>
                 </div>
               </motion.div>
@@ -253,7 +263,7 @@ export default function QuickPracticeModal({ isOpen, onClose }: QuickPracticeMod
                       </svg>
                     </div>
                     <div className="flex-1">
-                      <h4 className="text-lg font-bold text-white mb-2">💡 Quick Tips for "{currentObjection?.name}"</h4>
+                      <h4 className="text-lg font-bold text-white mb-2">💡 Quick Tips for &ldquo;{currentObjection?.name}&rdquo;</h4>
                       {selectedCategory === 'price' && (
                         <ul className="space-y-2 text-sm text-[#94a3b8]">
                           <li className="flex items-start gap-2">
@@ -262,7 +272,7 @@ export default function QuickPracticeModal({ isOpen, onClose }: QuickPracticeMod
                           </li>
                           <li className="flex items-start gap-2">
                             <span className="text-[#00d9ff] mt-1">•</span>
-                            <span>Use comparison: "Compared to the cost of not solving this problem..."</span>
+                            <span>Use comparison: &ldquo;Compared to the cost of not solving this problem...&rdquo;</span>
                           </li>
                           <li className="flex items-start gap-2">
                             <span className="text-[#00d9ff] mt-1">•</span>
@@ -274,15 +284,15 @@ export default function QuickPracticeModal({ isOpen, onClose }: QuickPracticeMod
                         <ul className="space-y-2 text-sm text-[#94a3b8]">
                           <li className="flex items-start gap-2">
                             <span className="text-[#00d9ff] mt-1">•</span>
-                            <span>Create <span className="text-white font-semibold">urgency</span> - What's the cost of waiting?</span>
+                            <span>Create <span className="text-white font-semibold">urgency</span> - What&apos;s the cost of waiting?</span>
                           </li>
                           <li className="flex items-start gap-2">
                             <span className="text-[#00d9ff] mt-1">•</span>
-                            <span>Acknowledge their concern, then pivot: "I understand timing is important. That's exactly why..."</span>
+                            <span>Acknowledge their concern, then pivot: &ldquo;I understand timing is important. That&apos;s exactly why...&rdquo;</span>
                           </li>
                           <li className="flex items-start gap-2">
                             <span className="text-[#00d9ff] mt-1">•</span>
-                            <span>Ask: "What would need to happen for this to be the right time?"</span>
+                            <span>Ask: &ldquo;What would need to happen for this to be the right time?&rdquo;</span>
                           </li>
                         </ul>
                       )}
@@ -290,11 +300,11 @@ export default function QuickPracticeModal({ isOpen, onClose }: QuickPracticeMod
                         <ul className="space-y-2 text-sm text-[#94a3b8]">
                           <li className="flex items-start gap-2">
                             <span className="text-[#00d9ff] mt-1">•</span>
-                            <span><span className="text-white font-semibold">Involve the decision maker</span> - "Let's get them on a call together"</span>
+                            <span><span className="text-white font-semibold">Involve the decision maker</span> - &ldquo;Let&apos;s get them on a call together&rdquo;</span>
                           </li>
                           <li className="flex items-start gap-2">
                             <span className="text-[#00d9ff] mt-1">•</span>
-                            <span>Ask: "What information would you need to make a strong recommendation?"</span>
+                            <span>Ask: &ldquo;What information would you need to make a strong recommendation?&rdquo;</span>
                           </li>
                           <li className="flex items-start gap-2">
                             <span className="text-[#00d9ff] mt-1">•</span>
@@ -310,7 +320,7 @@ export default function QuickPracticeModal({ isOpen, onClose }: QuickPracticeMod
                           </li>
                           <li className="flex items-start gap-2">
                             <span className="text-[#00d9ff] mt-1">•</span>
-                            <span>"What would it mean for your business if you could solve X problem?"</span>
+                            <span>&ldquo;What would it mean for your business if you could solve X problem?&rdquo;</span>
                           </li>
                           <li className="flex items-start gap-2">
                             <span className="text-[#00d9ff] mt-1">•</span>
@@ -326,7 +336,7 @@ export default function QuickPracticeModal({ isOpen, onClose }: QuickPracticeMod
                           </li>
                           <li className="flex items-start gap-2">
                             <span className="text-[#00d9ff] mt-1">•</span>
-                            <span>Offer a low-risk next step: "Let's start with a pilot/trial"</span>
+                            <span>Offer a low-risk next step: &ldquo;Let&apos;s start with a pilot/trial&rdquo;</span>
                           </li>
                           <li className="flex items-start gap-2">
                             <span className="text-[#00d9ff] mt-1">•</span>
@@ -339,7 +349,7 @@ export default function QuickPracticeModal({ isOpen, onClose }: QuickPracticeMod
 
                   <div className="mt-4 pt-4 border-t border-white/10">
                     <p className="text-xs text-[#64748b] italic">
-                      💪 Pro tip: The best responses are confident, address the concern directly, and focus on the customer's success.
+                      💪 Pro tip: The best responses are confident, address the concern directly, and focus on the customer&apos;s success.
                     </p>
                   </div>
                 </div>

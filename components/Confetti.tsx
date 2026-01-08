@@ -9,25 +9,33 @@ interface ConfettiProps {
 }
 
 export default function Confetti({ show, onComplete }: ConfettiProps) {
-  const [pieces, setPieces] = useState<Array<{ id: number; x: number; rotation: number; color: string }>>([]);
+  const [key, setKey] = useState(0);
+
+  // Generate pieces once based on key - use pseudo-random but deterministic values
+  const pieces = show ? Array.from({ length: 50 }, (_, i) => ({
+    id: i + key * 100,
+    x: ((i * 7) % 100),
+    rotation: (i * 37) % 360,
+    color: ['#00d9ff', '#00ffea', '#a855f7', '#d8b4fe', '#fbbf24'][i % 5],
+    duration: 2 + ((i * 13) % 10) / 10
+  })) : [];
 
   useEffect(() => {
-    if (show) {
-      const newPieces = Array.from({ length: 50 }, (_, i) => ({
-        id: i,
-        x: Math.random() * 100,
-        rotation: Math.random() * 360,
-        color: ['#00d9ff', '#00ffea', '#a855f7', '#d8b4fe', '#fbbf24'][Math.floor(Math.random() * 5)]
-      }));
-      setPieces(newPieces);
+    if (!show) return;
 
-      const timer = setTimeout(() => {
-        setPieces([]);
-        if (onComplete) onComplete();
-      }, 3000);
+    // Defer key update to avoid setState in effect
+    const rafId = requestAnimationFrame(() => {
+      setKey(k => k + 1);
+    });
 
-      return () => clearTimeout(timer);
-    }
+    const timer = setTimeout(() => {
+      if (onComplete) onComplete();
+    }, 3000);
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      clearTimeout(timer);
+    };
   }, [show, onComplete]);
 
   return (
@@ -49,7 +57,7 @@ export default function Confetti({ show, onComplete }: ConfettiProps) {
             }}
             exit={{ opacity: 0 }}
             transition={{
-              duration: 2 + Math.random(),
+              duration: piece.duration,
               ease: 'easeIn'
             }}
             className="absolute w-3 h-3 rounded-sm"
