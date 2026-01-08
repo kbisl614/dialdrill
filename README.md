@@ -37,6 +37,11 @@ npm run dev
 
 Visit [http://localhost:3000](http://localhost:3000)
 
+### Font Note (no external fetch)
+- We removed Google Fonts. The app now uses a local/system font stack via Tailwind `font-sans`.
+- Nothing to download; builds work offline/network-restricted environments.
+- The root layout and globals already point to the system stack—no extra config needed.
+
 ## Features
 
 - ✅ Clerk authentication (sign-up/sign-in)

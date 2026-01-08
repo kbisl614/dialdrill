@@ -3,6 +3,12 @@
  * Run this once to add power level, streak, and badge tracking
  */
 
+import { config } from 'dotenv';
+import { resolve } from 'path';
+
+// Load environment variables from .env.local
+config({ path: resolve(process.cwd(), '.env.local') });
+
 import { pool } from '../db';
 
 export async function addGamificationColumns() {

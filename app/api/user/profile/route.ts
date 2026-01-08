@@ -85,6 +85,55 @@ function getNextBelt(currentPower: number) {
   return BELT_PROGRESSION[currentIndex + 1];
 }
 
+// Calculate streak + multiplier based on last login (UTC)
+async function updateStreak(dbPool: ReturnType<typeof pool>, user: any) {
+  const today = new Date();
+  const todayUTC = Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate());
+
+  const lastLogin = user.last_login_date ? new Date(user.last_login_date) : null;
+  const lastLoginUTC = lastLogin
+    ? Date.UTC(lastLogin.getUTCFullYear(), lastLogin.getUTCMonth(), lastLogin.getUTCDate())
+    : null;
+
+  let currentStreak = user.current_streak || 0;
+  let longestStreak = user.longest_streak || 0;
+
+  if (!lastLoginUTC) {
+    currentStreak = 1;
+  } else {
+    const diffDays = Math.floor((todayUTC - lastLoginUTC) / (1000 * 60 * 60 * 24));
+    if (diffDays === 0) {
+      // Already counted today
+    } else if (diffDays === 1) {
+      currentStreak += 1;
+    } else {
+      currentStreak = 1;
+    }
+  }
+
+  if (currentStreak > longestStreak) {
+    longestStreak = currentStreak;
+  }
+
+  let streakMultiplier = 1.0;
+  if (currentStreak >= 365) streakMultiplier = 2.5;
+  else if (currentStreak >= 180) streakMultiplier = 1.5;
+  else if (currentStreak >= 30) streakMultiplier = 1.17;
+  else if (currentStreak >= 14) streakMultiplier = 1.15;
+
+  await dbPool.query(
+    `UPDATE users
+     SET current_streak = $1,
+         longest_streak = $2,
+         last_login_date = NOW()::date,
+         streak_multiplier = $3
+     WHERE id = $4`,
+    [currentStreak, longestStreak, streakMultiplier, user.id]
+  );
+
+  return { currentStreak, longestStreak, streakMultiplier, lastLogin: new Date(todayUTC) };
+}
+
 // Badge definitions (sample - you'll expand this)
 const ALL_BADGES = [
   { id: 'badge_5_calls', name: 'First Steps', description: 'Complete 5 total calls', category: 'volume', rarity: 'common' as const, unlockCondition: (stats: any) => stats.totalCalls >= 5 },
@@ -142,6 +191,15 @@ export async function GET() {
     }
 
     const user = userResult.rows[0];
+
+    // Update streak on profile fetch (counts as a login)
+    const streakUpdate = await updateStreak(dbPool, user);
+
+    // Refresh user streak + multiplier values locally
+    user.current_streak = streakUpdate.currentStreak;
+    user.longest_streak = streakUpdate.longestStreak;
+    user.streak_multiplier = streakUpdate.streakMultiplier;
+    user.last_login_date = streakUpdate.lastLogin;
 
     // Get user statistics
     const statsResult = await dbPool.query(

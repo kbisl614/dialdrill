@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import PersonalitySelector, { type Personality } from '@/components/PersonalitySelector';
 import QuickPracticeModal from '@/components/QuickPracticeModal';
 import ObjectionLibraryModal from '@/components/ObjectionLibraryModal';
+import ProfileDropdownModal from '@/components/ProfileDropdownModal';
 import Sidebar from '@/components/Sidebar';
 import Breadcrumb from '@/components/Breadcrumb';
 import Link from 'next/link';
@@ -40,6 +41,9 @@ function DashboardContent() {
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
   const [showQuickPractice, setShowQuickPractice] = useState(false);
   const [showObjectionLibrary, setShowObjectionLibrary] = useState(false);
+  const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+  const [profileData, setProfileData] = useState<any>(null);
+  const [profileLoading, setProfileLoading] = useState(false);
 
   useEffect(() => {
     if (isLoaded && !isSignedIn) {
@@ -112,6 +116,31 @@ function DashboardContent() {
       setSelectedPersonalityId(availableIds[0]);
     }
   }, [selectionMode, entitlements, selectedPersonalityId]);
+
+  // Fetch profile data when modal opens
+  useEffect(() => {
+    if (showProfileDropdown && !profileData) {
+      fetchProfileData();
+    }
+  }, [showProfileDropdown, profileData]);
+
+  async function fetchProfileData() {
+    setProfileLoading(true);
+    try {
+      const response = await fetch('/api/user/profile');
+      if (response.ok) {
+        const data = await response.json();
+        setProfileData(data);
+      } else {
+        const errorData = await response.json();
+        console.error('Failed to fetch profile:', response.status, errorData);
+      }
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+    } finally {
+      setProfileLoading(false);
+    }
+  }
 
   async function handleStartCall() {
     const perfStart = performance.now();
@@ -239,7 +268,28 @@ function DashboardContent() {
       }`}>
       {/* Dashboard Content */}
       <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-12 py-12 sm:py-16">
-        <Breadcrumb items={[{ label: 'Dashboard' }]} />
+        {/* Header with Breadcrumb and Profile Avatar */}
+        <div className="flex items-center justify-between mb-8">
+          <Breadcrumb items={[{ label: 'Dashboard' }]} />
+
+          {/* Profile Avatar Button */}
+          <button
+            onClick={() => setShowProfileDropdown(true)}
+            className="relative h-10 w-10 rounded-full bg-gradient-to-br from-[#00d9ff] to-[#9d4edd] p-0.5 transition hover:scale-105"
+          >
+            <div className="h-full w-full rounded-full bg-[#1A1F2E] flex items-center justify-center">
+              <span className="text-sm font-bold text-white">
+                {user?.firstName?.charAt(0) || user?.username?.charAt(0) || 'U'}
+              </span>
+            </div>
+            {/* Streak badge - show when profile is loaded */}
+            {profileData?.streak?.currentStreak > 0 && (
+              <div className="absolute -bottom-1 -right-1 rounded-full bg-gradient-to-r from-orange-500 to-red-500 px-1.5 py-0.5 text-xs font-bold text-white">
+                🔥 {profileData.streak.currentStreak}
+              </div>
+            )}
+          </button>
+        </div>
 
         {/* Welcome Section */}
         <div className="mb-12">
@@ -445,6 +495,14 @@ function DashboardContent() {
       <ObjectionLibraryModal
         isOpen={showObjectionLibrary}
         onClose={() => setShowObjectionLibrary(false)}
+      />
+
+      {/* Profile Dropdown Modal */}
+      <ProfileDropdownModal
+        isOpen={showProfileDropdown}
+        onClose={() => setShowProfileDropdown(false)}
+        userData={profileData}
+        loading={profileLoading}
       />
 
       {showUpgradePrompt && entitlements?.plan === 'trial' && (
