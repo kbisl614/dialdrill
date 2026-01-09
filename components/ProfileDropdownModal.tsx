@@ -66,7 +66,7 @@ interface Statistics {
   fillerWordAverage: number;
 }
 
-type TabType = 'information' | 'notifications' | 'badges' | 'journey' | 'statistics' | 'leaderboard';
+type TabType = 'statistics' | 'notifications' | 'badges' | 'journey' | 'leaderboard';
 
 interface Notification {
   id: string;
@@ -97,12 +97,13 @@ interface LeaderboardData {
 }
 
 export default function ProfileDropdownModal({ isOpen, onClose, userData, loading = false }: ProfileDropdownModalProps) {
-  const [activeTab, setActiveTab] = useState<TabType>('information');
+  const [activeTab, setActiveTab] = useState<TabType>('statistics');
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [notificationsLoading, setNotificationsLoading] = useState(false);
   const [leaderboardData, setLeaderboardData] = useState<LeaderboardData | null>(null);
   const [leaderboardLoading, setLeaderboardLoading] = useState(false);
+  const [leaderboardError, setLeaderboardError] = useState(false);
 
   // Fetch notifications when modal opens
   useEffect(() => {
@@ -110,6 +111,7 @@ export default function ProfileDropdownModal({ isOpen, onClose, userData, loadin
       fetchNotifications();
       fetchLeaderboard();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
   async function fetchNotifications() {
@@ -163,9 +165,36 @@ export default function ProfileDropdownModal({ isOpen, onClose, userData, loadin
       if (response.ok) {
         const data = await response.json();
         setLeaderboardData(data);
+        setLeaderboardError(false);
+      } else {
+        // Silently fall back if the leaderboard API isn't available yet
+        setLeaderboardError(true);
+        // Set empty leaderboard data on error
+        setLeaderboardData({
+          leaderboard: [],
+          currentUser: {
+            username: userData?.username || 'Unknown',
+            powerLevel: userData?.currentPower || 0,
+            tier: userData?.currentBelt?.tier || 'Bronze',
+            belt: userData?.currentBelt?.belt || 'White',
+            rank: 0,
+          },
+        });
       }
-    } catch (error) {
-      console.error('Failed to fetch leaderboard:', error);
+    } catch {
+      // Silently fall back if the leaderboard API isn't available yet
+      setLeaderboardError(true);
+      // Set empty leaderboard data on error
+      setLeaderboardData({
+        leaderboard: [],
+        currentUser: {
+          username: userData?.username || 'Unknown',
+          powerLevel: userData?.currentPower || 0,
+          tier: userData?.currentBelt?.tier || 'Bronze',
+          belt: userData?.currentBelt?.belt || 'White',
+          rank: 0,
+        },
+      });
     } finally {
       setLeaderboardLoading(false);
     }
@@ -237,7 +266,7 @@ export default function ProfileDropdownModal({ isOpen, onClose, userData, loadin
                     style={{ backgroundColor: userData.currentBelt.color }}
                   />
                   <span className="text-sm font-semibold" style={{ color: userData.currentBelt.color }}>
-                    {userData.currentBelt.tier} {userData.currentBelt.belt}
+                    {userData.currentBelt.tier} {userData.currentBelt.belt} Belt
                   </span>
                 </div>
               </div>
@@ -280,10 +309,10 @@ export default function ProfileDropdownModal({ isOpen, onClose, userData, loadin
             <h3 className="text-sm font-semibold text-white mb-3">Next Milestone</h3>
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs text-[#9ca3af]">
-                {userData.currentBelt.tier} {userData.currentBelt.belt}
+                {userData.currentBelt.tier} {userData.currentBelt.belt} Belt
               </span>
               <span className="text-xs text-[#9ca3af]">
-                {userData.nextBelt.tier} {userData.nextBelt.belt}
+                {userData.nextBelt.tier} {userData.nextBelt.belt} Belt
               </span>
             </div>
             {/* Progress bar */}
@@ -317,7 +346,7 @@ export default function ProfileDropdownModal({ isOpen, onClose, userData, loadin
 
           {/* Tab Navigation */}
           <div className="mb-6 flex gap-2 border-b border-white/10 overflow-x-auto">
-            {(['information', 'notifications', 'badges', 'leaderboard', 'journey', 'statistics'] as TabType[]).map((tab) => (
+            {(['statistics', 'notifications', 'badges', 'leaderboard', 'journey'] as TabType[]).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -338,7 +367,7 @@ export default function ProfileDropdownModal({ isOpen, onClose, userData, loadin
           </div>
 
           {/* Tab Content */}
-          {activeTab === 'information' && <InformationTab userData={userData} />}
+          {activeTab === 'statistics' && <StatisticsTab statistics={userData.statistics} />}
           {activeTab === 'notifications' && (
             <NotificationsTab
               notifications={notifications}
@@ -352,10 +381,10 @@ export default function ProfileDropdownModal({ isOpen, onClose, userData, loadin
             <LeaderboardTab
               data={leaderboardData}
               loading={leaderboardLoading}
+              error={leaderboardError}
             />
           )}
           {activeTab === 'journey' && <JourneyTab userData={userData} />}
-          {activeTab === 'statistics' && <StatisticsTab statistics={userData.statistics} />}
         </div>
 
         {/* Scrollbar styles - ALWAYS VISIBLE */}
@@ -409,9 +438,11 @@ export default function ProfileDropdownModal({ isOpen, onClose, userData, loadin
 function LeaderboardTab({
   data,
   loading,
+  error,
 }: {
   data: LeaderboardData | null;
   loading: boolean;
+  error: boolean;
 }) {
   if (loading || !data) {
     return (
@@ -426,7 +457,36 @@ function LeaderboardTab({
 
   const { leaderboard, currentUser } = data;
 
+  if (error) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <div className="text-center space-y-2">
+          <p className="text-sm font-semibold text-white">Leaderboard unavailable</p>
+          <p className="text-xs text-[#9ca3af]">We’ll show rankings once the API is live.</p>
+        </div>
+      </div>
+    );
+  }
+
   const getTierColor = (tier: string) => {
+    const colors: Record<string, string> = {
+      'Bronze': '#cd7f32',
+      'Silver': '#c0c0c0',
+      'Gold': '#ffd700',
+      'Platinum': '#e5e4e2',
+      'Diamond': '#b9f2ff',
+      'Sales Master': '#ff6b6b',
+      'Sales Predator': '#8b00ff',
+    };
+    return colors[tier] || '#9ca3af';
+  };
+
+  const getAvatarUrl = (username: string) => {
+    // Generate DiceBear avatar URL based on username
+    return `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(username)}&backgroundColor=b6e3f4,c0aede,d1d4f9`;
+  };
+
+  const getBeltBorderColor = (tier: string) => {
     const colors: Record<string, string> = {
       'Bronze': '#cd7f32',
       'Silver': '#c0c0c0',
@@ -445,13 +505,17 @@ function LeaderboardTab({
       <div className="rounded-xl border-2 border-[#00d9ff]/50 bg-gradient-to-r from-[#00d9ff]/10 to-[#9d4edd]/10 p-4">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-10 h-10 rounded-full bg-[#00d9ff]/20 text-[#00d9ff] font-bold">
-              #{currentUser.rank}
-            </div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={getAvatarUrl(currentUser.username)}
+              alt={currentUser.username}
+              className="w-10 h-10 rounded-full border-2"
+              style={{ borderColor: getBeltBorderColor(currentUser.tier) }}
+            />
             <div>
               <p className="text-sm font-bold text-white">{currentUser.username}</p>
               <p className="text-xs" style={{ color: getTierColor(currentUser.tier) }}>
-                {currentUser.tier} {currentUser.belt}
+                {currentUser.tier} {currentUser.belt} Belt
               </p>
             </div>
           </div>
@@ -467,8 +531,17 @@ function LeaderboardTab({
         <div className="grid grid-cols-3 gap-2 mb-4">
           {/* 2nd Place */}
           <div className="flex flex-col items-center pt-8">
-            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#c0c0c0] to-[#a8a8a8] flex items-center justify-center text-white font-bold mb-2">
-              2
+            <div className="relative mb-2">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={getAvatarUrl(leaderboard[1]?.username)}
+                alt={leaderboard[1]?.username}
+                className="w-12 h-12 rounded-full border-2"
+                style={{ borderColor: getBeltBorderColor(leaderboard[1]?.current_tier) }}
+              />
+              <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-gradient-to-br from-[#c0c0c0] to-[#a8a8a8] flex items-center justify-center text-white text-xs font-bold">
+                2
+              </div>
             </div>
             <p className="text-xs font-semibold text-white text-center line-clamp-1">{leaderboard[1]?.username}</p>
             <p className="text-xs text-[#9ca3af]">{leaderboard[1]?.power_level.toLocaleString()}</p>
@@ -476,11 +549,18 @@ function LeaderboardTab({
 
           {/* 1st Place */}
           <div className="flex flex-col items-center">
-            <div className="relative">
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+            <div className="relative mb-2">
+              <div className="absolute -top-4 left-1/2 -translate-x-1/2">
                 <div className="text-2xl">👑</div>
               </div>
-              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#ffd700] to-[#ffaa00] flex items-center justify-center text-white font-bold mb-2">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={getAvatarUrl(leaderboard[0]?.username)}
+                alt={leaderboard[0]?.username}
+                className="w-16 h-16 rounded-full border-4"
+                style={{ borderColor: getBeltBorderColor(leaderboard[0]?.current_tier) }}
+              />
+              <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-gradient-to-br from-[#ffd700] to-[#ffaa00] flex items-center justify-center text-white text-sm font-bold">
                 1
               </div>
             </div>
@@ -490,8 +570,17 @@ function LeaderboardTab({
 
           {/* 3rd Place */}
           <div className="flex flex-col items-center pt-12">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#cd7f32] to-[#b87333] flex items-center justify-center text-white font-bold mb-2">
-              3
+            <div className="relative mb-2">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={getAvatarUrl(leaderboard[2]?.username)}
+                alt={leaderboard[2]?.username}
+                className="w-10 h-10 rounded-full border-2"
+                style={{ borderColor: getBeltBorderColor(leaderboard[2]?.current_tier) }}
+              />
+              <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-gradient-to-br from-[#cd7f32] to-[#b87333] flex items-center justify-center text-white text-xs font-bold">
+                3
+              </div>
             </div>
             <p className="text-xs font-semibold text-white text-center line-clamp-1">{leaderboard[2]?.username}</p>
             <p className="text-xs text-[#9ca3af]">{leaderboard[2]?.power_level.toLocaleString()}</p>
@@ -515,17 +604,26 @@ function LeaderboardTab({
               }`}
             >
               <div className="flex items-center gap-3">
-                <div className={`flex items-center justify-center w-8 h-8 rounded-full ${
-                  isCurrentUser ? 'bg-[#00d9ff]/20 text-[#00d9ff]' : 'bg-white/5 text-[#9ca3af]'
-                } text-xs font-bold`}>
-                  #{rank}
+                <div className="relative">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={getAvatarUrl(user.username)}
+                    alt={user.username}
+                    className="w-8 h-8 rounded-full border-2"
+                    style={{ borderColor: getBeltBorderColor(user.current_tier) }}
+                  />
+                  <div className={`absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold ${
+                    isCurrentUser ? 'bg-[#00d9ff] text-white' : 'bg-white/10 text-[#9ca3af]'
+                  }`}>
+                    {rank}
+                  </div>
                 </div>
                 <div>
                   <p className={`text-sm font-semibold ${isCurrentUser ? 'text-[#00d9ff]' : 'text-white'}`}>
                     {user.username}
                   </p>
                   <p className="text-xs" style={{ color: getTierColor(user.current_tier) }}>
-                    {user.current_tier} {user.current_belt}
+                    {user.current_tier} {user.current_belt} Belt
                   </p>
                 </div>
               </div>
@@ -645,40 +743,6 @@ function NotificationsTab({
   );
 }
 
-// Information Tab Component
-function InformationTab({ userData }: { userData: UserProfileData }) {
-  return (
-    <div className="space-y-4">
-      <InfoRow label="Email" value={userData.email} />
-      <InfoRow label="Member Since" value={userData.memberSince} />
-      <InfoRow
-        label="Current Streak"
-        value={`${userData.streak.currentStreak} days 🔥`}
-      />
-      <InfoRow
-        label="Longest Streak"
-        value={`${userData.streak.longestStreak} days`}
-      />
-      <InfoRow
-        label="Total Badges"
-        value={`${userData.badges.filter(b => b.earned).length} / ${userData.badges.length}`}
-      />
-      <InfoRow
-        label="Total Calls"
-        value={userData.statistics.totalCalls.toLocaleString()}
-      />
-    </div>
-  );
-}
-
-function InfoRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-center justify-between py-2 border-b border-white/5">
-      <span className="text-sm text-[#9ca3af]">{label}</span>
-      <span className="text-sm font-semibold text-white">{value}</span>
-    </div>
-  );
-}
 
 // Badges Tab Component
 function BadgesTab({ badges }: { badges: Badge[] }) {
@@ -742,16 +806,114 @@ function BadgesTab({ badges }: { badges: Badge[] }) {
   );
 }
 
+// Belt Icon SVG Component
+interface BeltIconProps {
+  tier: string;
+  belt: string;
+  isCurrent: boolean;
+}
+
+function BeltIcon({ tier, belt, isCurrent }: BeltIconProps) {
+  // Tier-specific border colors
+  const tierBorderColors: Record<string, string> = {
+    'Bronze': '#cd7f32',
+    'Silver': '#c0c0c0',
+    'Gold': '#fbbf24',
+    'Platinum': '#22d3ee',
+    'Diamond': '#0f4c81',
+    'Sales Master': '#9d4edd',
+    'Sales Predator': '#ef4444',
+  };
+
+  // Belt colors - consistent across all tiers
+  const beltColors: Record<string, { main: string; light: string; dark: string }> = {
+    'White': { main: '#ffffff', light: '#f8fafc', dark: '#e2e8f0' },
+    'Yellow': { main: '#facc15', light: '#fef08a', dark: '#eab308' },
+    'Orange': { main: '#fb923c', light: '#fdba74', dark: '#f97316' },
+    'Green': { main: '#22c55e', light: '#4ade80', dark: '#16a34a' },
+    'Blue': { main: '#3b82f6', light: '#60a5fa', dark: '#2563eb' },
+    'Brown': { main: '#92400e', light: '#b45309', dark: '#78350f' },
+    'Black': { main: '#0f172a', light: '#1e293b', dark: '#020617' },
+  };
+
+  const tierBorderColor = tierBorderColors[tier] || '#334155';
+  const beltColor = beltColors[belt] || { main: '#0f172a', light: '#1e293b', dark: '#020617' };
+  const gradientId = `belt-gradient-${tier.replace(/\s+/g, '-')}-${belt}`;
+
+  return (
+    <svg viewBox="0 0 80 30" className="w-full h-8" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        {/* Belt gradient - gives it depth and texture */}
+        <linearGradient id={gradientId} x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor={beltColor.light} />
+          <stop offset="50%" stopColor={beltColor.main} />
+          <stop offset="100%" stopColor={beltColor.dark} />
+        </linearGradient>
+      </defs>
+
+      {/* Tier border - thick outer border in tier color */}
+      <rect
+        x="3"
+        y="3"
+        width="74"
+        height="24"
+        rx="3"
+        ry="3"
+        fill="none"
+        stroke={tierBorderColor}
+        strokeWidth={isCurrent ? "4" : "3.5"}
+      />
+
+      {/* Belt body with gradient for 3D effect */}
+      <rect
+        x="8"
+        y="8"
+        width="64"
+        height="14"
+        rx="2"
+        ry="2"
+        fill={`url(#${gradientId})`}
+      />
+
+      {/* Belt texture lines for realistic look */}
+      <line x1="12" y1="10" x2="12" y2="20" stroke={beltColor.dark} strokeWidth="0.5" opacity="0.3" />
+      <line x1="20" y1="10" x2="20" y2="20" stroke={beltColor.dark} strokeWidth="0.5" opacity="0.3" />
+      <line x1="28" y1="10" x2="28" y2="20" stroke={beltColor.dark} strokeWidth="0.5" opacity="0.3" />
+      <line x1="36" y1="10" x2="36" y2="20" stroke={beltColor.dark} strokeWidth="0.5" opacity="0.3" />
+      <line x1="44" y1="10" x2="44" y2="20" stroke={beltColor.dark} strokeWidth="0.5" opacity="0.3" />
+      <line x1="52" y1="10" x2="52" y2="20" stroke={beltColor.dark} strokeWidth="0.5" opacity="0.3" />
+      <line x1="60" y1="10" x2="60" y2="20" stroke={beltColor.dark} strokeWidth="0.5" opacity="0.3" />
+      <line x1="68" y1="10" x2="68" y2="20" stroke={beltColor.dark} strokeWidth="0.5" opacity="0.3" />
+
+      {/* Current belt cyan glow */}
+      {isCurrent && (
+        <rect
+          x="3"
+          y="3"
+          width="74"
+          height="24"
+          rx="3"
+          ry="3"
+          fill="none"
+          stroke="#00d9ff"
+          strokeWidth="3"
+          opacity="0.9"
+        />
+      )}
+    </svg>
+  );
+}
+
 // Hero's Journey Tab Component
 function JourneyTab({ userData }: { userData: UserProfileData }) {
   const allBelts = [
     { tier: 'Bronze', belts: ['White', 'Yellow', 'Orange', 'Green', 'Blue', 'Brown', 'Black'], color: '#cd7f32' },
     { tier: 'Silver', belts: ['White', 'Yellow', 'Orange', 'Green', 'Blue', 'Brown', 'Black'], color: '#c0c0c0' },
     { tier: 'Gold', belts: ['White', 'Yellow', 'Orange', 'Green', 'Blue', 'Brown', 'Black'], color: '#ffd700' },
-    { tier: 'Platinum', belts: ['White', 'Yellow', 'Orange', 'Green', 'Blue', 'Brown', 'Black'], color: '#e5e4e2' },
-    { tier: 'Diamond', belts: ['White', 'Yellow', 'Orange', 'Green', 'Blue', 'Brown', 'Black'], color: '#b9f2ff' },
-    { tier: 'Sales Master', belts: ['White', 'Yellow', 'Orange', 'Green', 'Blue', 'Brown', 'Black'], color: '#ff6b6b' },
-    { tier: 'Sales Predator', belts: ['White', 'Yellow', 'Orange', 'Green', 'Blue', 'Brown', 'Black'], color: '#8b00ff' }
+    { tier: 'Platinum', belts: ['White', 'Yellow', 'Orange', 'Green', 'Blue', 'Brown', 'Black'], color: '#22d3ee' },
+    { tier: 'Diamond', belts: ['White', 'Yellow', 'Orange', 'Green', 'Blue', 'Brown', 'Black'], color: '#0f4c81' },
+    { tier: 'Sales Master', belts: ['White', 'Yellow', 'Orange', 'Green', 'Blue', 'Brown', 'Black'], color: '#9d4edd' },
+    { tier: 'Sales Predator', belts: ['White', 'Yellow', 'Orange', 'Green', 'Blue', 'Brown', 'Black'], color: '#ef4444' }
   ];
 
   return (
@@ -770,16 +932,16 @@ function JourneyTab({ userData }: { userData: UserProfileData }) {
               return (
                 <div
                   key={`${tierGroup.tier}-${belt}`}
-                  className={`aspect-square rounded-lg border flex items-center justify-center ${
+                  className={`aspect-square rounded-lg border flex items-center justify-center p-2 ${
                     isCurrentBelt
                       ? 'border-[#00d9ff] bg-[#00d9ff]/20 ring-2 ring-[#00d9ff]'
                       : 'border-white/10 bg-white/[0.02]'
                   }`}
                 >
-                  <div
-                    className="h-6 w-6 rounded-full"
-                    style={{ backgroundColor: isCurrentBelt ? tierGroup.color : '#ffffff20' }}
-                  />
+                  <div className="flex flex-col items-center gap-2 w-full">
+                    <BeltIcon tier={tierGroup.tier} belt={belt} isCurrent={isCurrentBelt} />
+                    <span className="text-[10px] text-center text-[#e2e8f0] font-semibold">{belt}</span>
+                  </div>
                 </div>
               );
             })}

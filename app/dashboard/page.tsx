@@ -27,6 +27,59 @@ interface Entitlements {
   lockedPersonalities?: Personality[];
 }
 
+interface UserProfileData {
+  username: string;
+  avatar: string;
+  email: string;
+  memberSince: string;
+  currentPower: number;
+  currentBelt: {
+    tier: string;
+    belt: string;
+    color: string;
+    minPower: number;
+    maxPower: number;
+  };
+  nextBelt: {
+    tier: string;
+    belt: string;
+    color: string;
+    minPower: number;
+    maxPower: number;
+  };
+  streak: {
+    currentStreak: number;
+    longestStreak: number;
+    lastLogin: string;
+  };
+  multiplier: {
+    active: boolean;
+    percentage: number;
+    daysToNext: number | null;
+    nextMultiplier: number | null;
+  };
+  badges: Array<{
+    id: string;
+    name: string;
+    description: string;
+    category: string;
+    rarity: 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
+    earned: boolean;
+    earnedDate?: string;
+    progress?: number;
+    total?: number;
+  }>;
+  statistics: {
+    totalCalls: number;
+    totalMinutes: number;
+    averageScore: number;
+    objectionSuccessRate: number;
+    closingRate: number;
+    averageWPM: number;
+    fillerWordAverage: number;
+  };
+}
+
 function DashboardContent() {
   const { isSignedIn, isLoaded } = useAuth();
   const { user } = useUser();
@@ -42,7 +95,7 @@ function DashboardContent() {
   const [showQuickPractice, setShowQuickPractice] = useState(false);
   const [showObjectionLibrary, setShowObjectionLibrary] = useState(false);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
-  const [profileData, setProfileData] = useState<Record<string, unknown> | null>(null);
+  const [profileData, setProfileData] = useState<UserProfileData | null>(null);
   const [profileLoading, setProfileLoading] = useState(false);
   const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0);
 
@@ -313,9 +366,9 @@ function DashboardContent() {
               </div>
             )}
             {/* Streak badge - show when profile is loaded */}
-            {profileData?.streak?.currentStreak > 0 && (
+            {(profileData?.streak?.currentStreak ?? 0) > 0 && (
               <div className="absolute -bottom-1 -right-1 rounded-full bg-gradient-to-r from-orange-500 to-red-500 px-1.5 py-0.5 text-xs font-bold text-white">
-                🔥 {profileData.streak.currentStreak}
+                🔥 {profileData?.streak?.currentStreak}
               </div>
             )}
           </button>
