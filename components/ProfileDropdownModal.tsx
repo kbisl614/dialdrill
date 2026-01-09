@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -528,24 +529,24 @@ function LeaderboardTab({
       </div>
 
       {/* Top 3 Podium */}
-      {leaderboard.length >= 3 && (
+      {leaderboard.length >= 3 && leaderboard[0] && leaderboard[1] && leaderboard[2] && (
         <div className="grid grid-cols-3 gap-2 mb-4">
           {/* 2nd Place */}
           <div className="flex flex-col items-center pt-8">
             <div className="relative mb-2">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={getAvatarUrl(leaderboard[1]?.username)}
-                alt={leaderboard[1]?.username}
+                src={getAvatarUrl(leaderboard[1].username)}
+                alt={leaderboard[1].username}
                 className="w-12 h-12 rounded-full border-2"
-                style={{ borderColor: getBeltBorderColor(leaderboard[1]?.current_tier) }}
+                style={{ borderColor: getBeltBorderColor(leaderboard[1].current_tier) }}
               />
               <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-gradient-to-br from-[#c0c0c0] to-[#a8a8a8] flex items-center justify-center text-white text-xs font-bold">
                 2
               </div>
             </div>
-            <p className="text-xs font-semibold text-white text-center line-clamp-1">{leaderboard[1]?.username}</p>
-            <p className="text-xs text-[#9ca3af]">{leaderboard[1]?.power_level.toLocaleString()}</p>
+            <p className="text-xs font-semibold text-white text-center line-clamp-1">{leaderboard[1].username}</p>
+            <p className="text-xs text-[#9ca3af]">{leaderboard[1].power_level.toLocaleString()}</p>
           </div>
 
           {/* 1st Place */}
@@ -556,17 +557,17 @@ function LeaderboardTab({
               </div>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={getAvatarUrl(leaderboard[0]?.username)}
-                alt={leaderboard[0]?.username}
+                src={getAvatarUrl(leaderboard[0].username)}
+                alt={leaderboard[0].username}
                 className="w-16 h-16 rounded-full border-4"
-                style={{ borderColor: getBeltBorderColor(leaderboard[0]?.current_tier) }}
+                style={{ borderColor: getBeltBorderColor(leaderboard[0].current_tier) }}
               />
               <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-gradient-to-br from-[#ffd700] to-[#ffaa00] flex items-center justify-center text-white text-sm font-bold">
                 1
               </div>
             </div>
-            <p className="text-sm font-bold text-white text-center line-clamp-1">{leaderboard[0]?.username}</p>
-            <p className="text-xs text-[#9ca3af]">{leaderboard[0]?.power_level.toLocaleString()}</p>
+            <p className="text-sm font-bold text-white text-center line-clamp-1">{leaderboard[0].username}</p>
+            <p className="text-xs text-[#9ca3af]">{leaderboard[0].power_level.toLocaleString()}</p>
           </div>
 
           {/* 3rd Place */}
@@ -574,17 +575,17 @@ function LeaderboardTab({
             <div className="relative mb-2">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={getAvatarUrl(leaderboard[2]?.username)}
-                alt={leaderboard[2]?.username}
+                src={getAvatarUrl(leaderboard[2].username)}
+                alt={leaderboard[2].username}
                 className="w-10 h-10 rounded-full border-2"
-                style={{ borderColor: getBeltBorderColor(leaderboard[2]?.current_tier) }}
+                style={{ borderColor: getBeltBorderColor(leaderboard[2].current_tier) }}
               />
               <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-gradient-to-br from-[#cd7f32] to-[#b87333] flex items-center justify-center text-white text-xs font-bold">
                 3
               </div>
             </div>
-            <p className="text-xs font-semibold text-white text-center line-clamp-1">{leaderboard[2]?.username}</p>
-            <p className="text-xs text-[#9ca3af]">{leaderboard[2]?.power_level.toLocaleString()}</p>
+            <p className="text-xs font-semibold text-white text-center line-clamp-1">{leaderboard[2].username}</p>
+            <p className="text-xs text-[#9ca3af]">{leaderboard[2].power_level.toLocaleString()}</p>
           </div>
         </div>
       )}
