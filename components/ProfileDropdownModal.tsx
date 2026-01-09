@@ -2,6 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Toast from './Toast';
 
 interface ProfileDropdownModalProps {
   isOpen: boolean;
@@ -105,6 +106,9 @@ export default function ProfileDropdownModal({ isOpen, onClose, userData, loadin
   const [leaderboardData, setLeaderboardData] = useState<LeaderboardData | null>(null);
   const [leaderboardLoading, setLeaderboardLoading] = useState(false);
   const [leaderboardError, setLeaderboardError] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [toastType, setToastType] = useState<'success' | 'error' | 'info'>('info');
+  const [showToast, setShowToast] = useState(false);
 
   // Fetch notifications when modal opens
   useEffect(() => {
@@ -133,29 +137,45 @@ export default function ProfileDropdownModal({ isOpen, onClose, userData, loadin
 
   async function markAsRead(notificationId: string) {
     try {
-      await fetch('/api/notifications', {
+      const response = await fetch('/api/notifications', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ notificationId }),
       });
+
+      if (!response.ok) {
+        throw new Error('Failed to mark notification as read');
+      }
+
       // Refresh notifications
       fetchNotifications();
     } catch (error) {
       console.error('Failed to mark notification as read:', error);
+      setToastMessage('Failed to mark notification as read. Please try again.');
+      setToastType('error');
+      setShowToast(true);
     }
   }
 
   async function markAllAsRead() {
     try {
-      await fetch('/api/notifications', {
+      const response = await fetch('/api/notifications', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ markAllRead: true }),
       });
+
+      if (!response.ok) {
+        throw new Error('Failed to mark all notifications as read');
+      }
+
       // Refresh notifications
       fetchNotifications();
     } catch (error) {
       console.error('Failed to mark all notifications as read:', error);
+      setToastMessage('Failed to mark all notifications as read. Please try again.');
+      setToastType('error');
+      setShowToast(true);
     }
   }
 
@@ -432,6 +452,14 @@ export default function ProfileDropdownModal({ isOpen, onClose, userData, loadin
           }
         `}</style>
       </div>
+
+      {/* Toast for error notifications */}
+      <Toast
+        message={toastMessage}
+        type={toastType}
+        show={showToast}
+        onClose={() => setShowToast(false)}
+      />
     </>
   );
 }
