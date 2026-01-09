@@ -18,7 +18,13 @@ export async function GET(request: Request) {
 
     // Get user's internal ID and rank
     const userResult = await dbPool.query(
-      `SELECT id, username, power_level, current_tier, current_belt, total_calls, current_streak
+      `SELECT id,
+              COALESCE(username, SPLIT_PART(email, '@', 1)) as username,
+              power_level,
+              current_tier,
+              current_belt,
+              total_calls,
+              current_streak
        FROM users
        WHERE clerk_id = $1`,
       [userId]
@@ -33,7 +39,7 @@ export async function GET(request: Request) {
     // Get top users by power level
     const leaderboardResult = await dbPool.query(
       `SELECT
-        username,
+        COALESCE(username, SPLIT_PART(email, '@', 1)) as username,
         power_level,
         current_tier,
         current_belt,
@@ -63,7 +69,7 @@ export async function GET(request: Request) {
     const contextResult = await dbPool.query(
       `WITH ranked_users AS (
         SELECT
-          username,
+          COALESCE(username, SPLIT_PART(email, '@', 1)) as username,
           power_level,
           current_tier,
           current_belt,
