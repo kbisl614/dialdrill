@@ -265,10 +265,17 @@ function DashboardContent() {
       console.log('Call started:', data);
 
       // Refresh entitlements after call starts
-      const entitlementsResponse = await fetch('/api/user/entitlements');
-      if (entitlementsResponse.ok) {
-        const updatedEntitlements = await entitlementsResponse.json();
-        setEntitlements(updatedEntitlements);
+      try {
+        const entitlementsResponse = await fetch('/api/user/entitlements');
+        if (entitlementsResponse.ok) {
+          const updatedEntitlements = await entitlementsResponse.json();
+          setEntitlements(updatedEntitlements);
+        } else {
+          console.warn('Failed to refresh entitlements after call start:', entitlementsResponse.status);
+        }
+      } catch (entitlementsError) {
+        // Log but don't block navigation - entitlements will refresh on next page load
+        console.error('Error refreshing entitlements:', entitlementsError);
       }
 
       const navStart = performance.now();
