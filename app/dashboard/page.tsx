@@ -2,7 +2,7 @@
 
 import { useAuth, useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import PersonalitySelector, { type Personality } from '@/components/PersonalitySelector';
 import QuickPracticeModal from '@/components/QuickPracticeModal';
 import ObjectionLibraryModal from '@/components/ObjectionLibraryModal';
@@ -171,21 +171,7 @@ function DashboardContent() {
     }
   }, [selectionMode, entitlements, selectedPersonalityId]);
 
-  // Fetch profile data when modal opens
-  useEffect(() => {
-    if (showProfileDropdown && !profileData) {
-      fetchProfileData();
-    }
-  }, [showProfileDropdown, profileData]);
-
-  // Fetch unread notifications count on mount and periodically
-  useEffect(() => {
-    fetchUnreadNotificationsCount();
-    const interval = setInterval(fetchUnreadNotificationsCount, 30000); // Every 30 seconds
-    return () => clearInterval(interval);
-  }, []);
-
-  async function fetchProfileData() {
+  const fetchProfileData = useCallback(async () => {
     setProfileLoading(true);
     try {
       const response = await fetch('/api/user/profile');
@@ -201,7 +187,21 @@ function DashboardContent() {
     } finally {
       setProfileLoading(false);
     }
-  }
+  }, []);
+
+  // Fetch profile data when modal opens
+  useEffect(() => {
+    if (showProfileDropdown && !profileData) {
+      fetchProfileData();
+    }
+  }, [showProfileDropdown, profileData, fetchProfileData]);
+
+  // Fetch unread notifications count on mount and periodically
+  useEffect(() => {
+    fetchUnreadNotificationsCount();
+    const interval = setInterval(fetchUnreadNotificationsCount, 30000); // Every 30 seconds
+    return () => clearInterval(interval);
+  }, []);
 
   async function fetchUnreadNotificationsCount() {
     try {
