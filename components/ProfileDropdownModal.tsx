@@ -220,11 +220,12 @@ export default function ProfileDropdownModal({ isOpen, onClose, userData, loadin
   }
 
   // Calculate progress to next belt
-  const progressPercentage =
-    ((userData.currentPower - userData.currentBelt.minPower) /
-    (userData.nextBelt.minPower - userData.currentBelt.minPower)) * 100;
+  const denominator = userData.nextBelt.minPower - userData.currentBelt.minPower;
+  const progressPercentage = denominator > 0
+    ? ((userData.currentPower - userData.currentBelt.minPower) / denominator) * 100
+    : 100; // If at max belt, show 100%
 
-  const powerToNextBelt = userData.nextBelt.minPower - userData.currentPower;
+  const powerToNextBelt = Math.max(0, userData.nextBelt.minPower - userData.currentPower);
 
   return (
     <>
