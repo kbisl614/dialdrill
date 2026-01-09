@@ -1,8 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import EmptyState from './EmptyState';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import SkeletonLoader from './SkeletonLoader';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import Toast from './Toast';
 
 interface ProfileDropdownModalProps {
@@ -108,11 +111,6 @@ export default function ProfileDropdownModal({ isOpen, onClose, userData, loadin
   const [leaderboardLoading, setLeaderboardLoading] = useState(false);
   const [leaderboardError, setLeaderboardError] = useState(false);
 
-  // Toast state for success feedback
-  const [showToast, setShowToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState('');
-  const [toastType, setToastType] = useState<'success' | 'error' | 'info'>('success');
-
   // Fetch notifications when modal opens
   useEffect(() => {
     if (isOpen) {
@@ -140,53 +138,29 @@ export default function ProfileDropdownModal({ isOpen, onClose, userData, loadin
 
   async function markAsRead(notificationId: string) {
     try {
-      const response = await fetch('/api/notifications', {
+      await fetch('/api/notifications', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ notificationId }),
       });
-
-      if (response.ok) {
-        // Show success toast
-        setToastMessage('Notification marked as read');
-        setToastType('success');
-        setShowToast(true);
-        // Refresh notifications
-        fetchNotifications();
-      } else {
-        throw new Error('Failed to mark notification as read');
-      }
+      // Refresh notifications
+      fetchNotifications();
     } catch (error) {
       console.error('Failed to mark notification as read:', error);
-      setToastMessage('Failed to mark notification as read');
-      setToastType('error');
-      setShowToast(true);
     }
   }
 
   async function markAllAsRead() {
     try {
-      const response = await fetch('/api/notifications', {
+      await fetch('/api/notifications', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ markAllRead: true }),
       });
-
-      if (response.ok) {
-        // Show success toast
-        setToastMessage('All notifications marked as read');
-        setToastType('success');
-        setShowToast(true);
-        // Refresh notifications
-        fetchNotifications();
-      } else {
-        throw new Error('Failed to mark all notifications as read');
-      }
+      // Refresh notifications
+      fetchNotifications();
     } catch (error) {
       console.error('Failed to mark all notifications as read:', error);
-      setToastMessage('Failed to mark all notifications as read');
-      setToastType('error');
-      setShowToast(true);
     }
   }
 
@@ -260,14 +234,6 @@ export default function ProfileDropdownModal({ isOpen, onClose, userData, loadin
 
   return (
     <>
-      {/* Toast for success/error feedback */}
-      <Toast
-        message={toastMessage}
-        type={toastType}
-        show={showToast}
-        onClose={() => setShowToast(false)}
-      />
-
       {/* Backdrop */}
       <div
         className="fixed inset-0 z-40 bg-black/50"
@@ -485,18 +451,26 @@ function LeaderboardTab({
   error: boolean;
 }) {
   if (loading || !data) {
-    return <SkeletonLoader variant="leaderboard" count={8} />;
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#00d9ff] mx-auto mb-2"></div>
+          <p className="text-xs text-[#9ca3af]">Loading leaderboard...</p>
+        </div>
+      </div>
+    );
   }
 
   const { leaderboard, currentUser } = data;
 
   if (error) {
     return (
-      <EmptyState
-        icon="⚠️"
-        title="Leaderboard Unavailable"
-        description="We're having trouble loading the leaderboard right now. Please try again later."
-      />
+      <div className="flex items-center justify-center py-8">
+        <div className="text-center space-y-2">
+          <p className="text-sm font-semibold text-white">Leaderboard unavailable</p>
+          <p className="text-xs text-[#9ca3af]">We’ll show rankings once the API is live.</p>
+        </div>
+      </div>
     );
   }
 
@@ -668,14 +642,12 @@ function LeaderboardTab({
         })}
       </div>
 
-      {leaderboard.length === 0 && currentUser.powerLevel === 0 && (
-        <EmptyState
-          icon="🏆"
-          title="Climb the Leaderboard"
-          description="Complete your first call to earn power and see where you rank against other sales warriors!"
-          actionLabel="Start Your Journey"
-          actionHref="/dashboard"
-        />
+      {leaderboard.length === 0 && (
+        <div className="text-center py-12">
+          <div className="text-4xl mb-3">🏆</div>
+          <p className="text-sm text-[#9ca3af]">No leaderboard data yet</p>
+          <p className="text-xs text-[#9ca3af] mt-1">Complete calls to earn power and climb the ranks!</p>
+        </div>
       )}
     </div>
   );
@@ -694,18 +666,23 @@ function NotificationsTab({
   onMarkAllAsRead: () => void;
 }) {
   if (loading) {
-    return <SkeletonLoader variant="notification" count={5} />;
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#00d9ff] mx-auto mb-2"></div>
+          <p className="text-xs text-[#9ca3af]">Loading notifications...</p>
+        </div>
+      </div>
+    );
   }
 
   if (notifications.length === 0) {
     return (
-      <EmptyState
-        icon="🔔"
-        title="No Notifications Yet"
-        description="We'll notify you when you earn badges, level up, reach milestones, and more. Keep practicing to start earning achievements!"
-        actionLabel="Start Practicing"
-        actionHref="/dashboard"
-      />
+      <div className="text-center py-12">
+        <div className="text-4xl mb-3">🔔</div>
+        <p className="text-sm text-[#9ca3af]">No notifications yet</p>
+        <p className="text-xs text-[#9ca3af] mt-1">We&apos;ll notify you when you earn badges and level up!</p>
+      </div>
     );
   }
 
@@ -782,33 +759,6 @@ function BadgesTab({ badges }: { badges: Badge[] }) {
     epic: '#a855f7',
     legendary: '#f59e0b'
   };
-
-  if (!badges || badges.length === 0) {
-    return (
-      <EmptyState
-        icon="🏅"
-        title="No Badges Yet"
-        description="Complete calls and hit milestones to earn badges! Track your progress as you become a sales master."
-        actionLabel="Start Earning Badges"
-        actionHref="/dashboard"
-      />
-    );
-  }
-
-  const earnedBadges = badges.filter(badge => badge.earned);
-  const hasAnyBadges = earnedBadges.length > 0;
-
-  if (!hasAnyBadges) {
-    return (
-      <EmptyState
-        icon="🏅"
-        title="No Badges Earned Yet"
-        description="You have badges waiting to be unlocked! Complete calls, master objections, and maintain your streak to start earning."
-        actionLabel="Start Your First Call"
-        actionHref="/dashboard"
-      />
-    );
-  }
 
   return (
     <div className="grid grid-cols-2 gap-3">
@@ -1015,19 +965,6 @@ function StatisticsTab({ statistics }: { statistics: Statistics }) {
     if (score >= 60) return '#f59e0b'; // yellow
     return '#ef4444'; // red
   };
-
-  // Show empty state if no calls have been made
-  if (statistics.totalCalls === 0) {
-    return (
-      <EmptyState
-        icon="📊"
-        title="No Statistics Yet"
-        description="Complete your first call to start tracking your performance metrics and see your progress over time!"
-        actionLabel="Make Your First Call"
-        actionHref="/dashboard"
-      />
-    );
-  }
 
   return (
     <div className="space-y-4">

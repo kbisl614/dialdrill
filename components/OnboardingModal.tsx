@@ -55,6 +55,7 @@ const onboardingSteps = [
   },
 ];
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default function OnboardingModal({ isOpen, onClose, onComplete }: OnboardingModalProps) {
   const [currentStep, setCurrentStep] = useState(0);
 

@@ -102,7 +102,6 @@ function DashboardContent() {
   const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0);
   const [showCallConfirmation, setShowCallConfirmation] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const [hasSeenOnboarding, setHasSeenOnboarding] = useState(false);
 
   useEffect(() => {
     if (isLoaded && !isSignedIn) {
@@ -193,9 +192,7 @@ function DashboardContent() {
   // Check if user has seen onboarding
   useEffect(() => {
     const onboardingComplete = localStorage.getItem('onboardingComplete');
-    if (onboardingComplete === 'true') {
-      setHasSeenOnboarding(true);
-    } else if (isLoaded && isSignedIn && entitlements) {
+    if (onboardingComplete !== 'true' && isLoaded && isSignedIn && entitlements) {
       // Show onboarding for new users
       setShowOnboarding(true);
     }
@@ -203,7 +200,6 @@ function DashboardContent() {
 
   function handleCompleteOnboarding() {
     localStorage.setItem('onboardingComplete', 'true');
-    setHasSeenOnboarding(true);
     setShowOnboarding(false);
   }
 
