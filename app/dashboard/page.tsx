@@ -209,9 +209,16 @@ function DashboardContent() {
       if (response.ok) {
         const data = await response.json();
         setUnreadNotificationsCount(data.unreadCount);
+      } else {
+        // Silently fail - notifications are non-critical
+        console.warn('Failed to fetch notifications:', response.status);
       }
     } catch (error) {
-      console.error('Error fetching unread notifications count:', error);
+      // Silently fail - notifications are non-critical
+      // Only log in development
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Error fetching unread notifications count:', error);
+      }
     }
   }
 
