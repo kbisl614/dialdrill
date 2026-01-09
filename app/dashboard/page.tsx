@@ -7,6 +7,8 @@ import PersonalitySelector, { type Personality } from '@/components/PersonalityS
 import QuickPracticeModal from '@/components/QuickPracticeModal';
 import ObjectionLibraryModal from '@/components/ObjectionLibraryModal';
 import ProfileDropdownModal from '@/components/ProfileDropdownModal';
+import CallStartConfirmationModal from '@/components/CallStartConfirmationModal';
+import OnboardingModal from '@/components/OnboardingModal';
 import Sidebar from '@/components/Sidebar';
 import Breadcrumb from '@/components/Breadcrumb';
 import Link from 'next/link';
@@ -98,6 +100,9 @@ function DashboardContent() {
   const [profileData, setProfileData] = useState<UserProfileData | null>(null);
   const [profileLoading, setProfileLoading] = useState(false);
   const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0);
+  const [showCallConfirmation, setShowCallConfirmation] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [hasSeenOnboarding, setHasSeenOnboarding] = useState(false);
 
   useEffect(() => {
     if (isLoaded && !isSignedIn) {
@@ -185,6 +190,23 @@ function DashboardContent() {
     return () => clearInterval(interval);
   }, []);
 
+  // Check if user has seen onboarding
+  useEffect(() => {
+    const onboardingComplete = localStorage.getItem('onboardingComplete');
+    if (onboardingComplete === 'true') {
+      setHasSeenOnboarding(true);
+    } else if (isLoaded && isSignedIn && entitlements) {
+      // Show onboarding for new users
+      setShowOnboarding(true);
+    }
+  }, [isLoaded, isSignedIn, entitlements]);
+
+  function handleCompleteOnboarding() {
+    localStorage.setItem('onboardingComplete', 'true');
+    setHasSeenOnboarding(true);
+    setShowOnboarding(false);
+  }
+
   async function fetchProfileData() {
     setProfileLoading(true);
     try {
@@ -215,10 +237,7 @@ function DashboardContent() {
     }
   }
 
-  async function handleStartCall() {
-    const perfStart = performance.now();
-    console.log('[PERF] Button click → Start call flow');
-
+  function handleStartCallClick() {
     // UI-level check
     if (!entitlements || !entitlements.canCall) {
       setError("You're out of call credits. Please upgrade to continue.");
@@ -230,6 +249,16 @@ function DashboardContent() {
       return;
     }
 
+    // Show confirmation modal
+    setError(null);
+    setShowCallConfirmation(true);
+  }
+
+  async function handleConfirmStartCall() {
+    const perfStart = performance.now();
+    console.log('[PERF] Button click → Start call flow');
+
+    setShowCallConfirmation(false);
     setStartingCall(true);
     setError(null);
 
@@ -515,8 +544,8 @@ function DashboardContent() {
           </div>
 
           <button
-            onClick={handleStartCall}
-            className="rounded-full bg-gradient-to-r from-[#00d9ff] to-[#00ffea] px-12 py-5 text-xl font-semibold text-[#080d1a] transition-all hover:scale-105 shadow-[0_0_40px_rgba(0,217,255,0.6)] hover:shadow-[0_0_60px_rgba(0,255,234,0.8)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+            onClick={handleStartCallClick}
+            className="rounded-full bg-gradient-to-r from-[#00d9ff] to-[#00ffea] px-12 py-5 text-xl font-semibold text-[#080d1a] transition-all hover:scale-105 shadow-[0_0_40px_rgba(0,217,255,0.6)] hover:shadow-[0_0_60px_rgba(0,255,234,0.8)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-3"
             disabled={
               !entitlements ||
               !entitlements.canCall ||
@@ -524,13 +553,18 @@ function DashboardContent() {
               (selectionMode === 'select' && !selectedPersonalityId)
             }
           >
-            {startingCall
-              ? 'Starting Call...'
-              : (!entitlements || !entitlements.canCall)
-              ? 'Out of Call Credits'
-              : selectionMode === 'select' && !selectedPersonalityId
-              ? 'Select a Personality'
-              : 'Start Call'}
+            {startingCall ? (
+              <>
+                <div className="h-5 w-5 animate-spin rounded-full border-2 border-[#080d1a] border-t-transparent" />
+                Starting Call...
+              </>
+            ) : (!entitlements || !entitlements.canCall) ? (
+              'Out of Call Credits'
+            ) : selectionMode === 'select' && !selectedPersonalityId ? (
+              'Select a Personality'
+            ) : (
+              'Start Call'
+            )}
           </button>
           {entitlements && !entitlements.canCall && entitlements.plan === 'trial' && (
             <div className="mt-6">
@@ -586,6 +620,34 @@ function DashboardContent() {
         onClose={() => setShowProfileDropdown(false)}
         userData={profileData}
         loading={profileLoading}
+      />
+
+      {/* Call Start Confirmation Modal */}
+      <CallStartConfirmationModal
+        isOpen={showCallConfirmation}
+        onClose={() => setShowCallConfirmation(false)}
+        onConfirm={handleConfirmStartCall}
+        personalityName={
+          selectionMode === 'random'
+            ? undefined
+            : unlockedPersonalities.find((p) => p.id === selectedPersonalityId)?.name
+        }
+        creditsRemaining={
+          entitlements?.plan === 'trial'
+            ? (entitlements.trialCallsRemaining ?? 0) - 1
+            : Math.floor((entitlements?.tokensRemaining ?? 0) / 1000)
+        }
+        plan={entitlements?.plan ?? 'trial'}
+        isOverage={entitlements?.isOverage ?? false}
+        isRandomMode={selectionMode === 'random'}
+        isLoading={startingCall}
+      />
+
+      {/* Onboarding Modal */}
+      <OnboardingModal
+        isOpen={showOnboarding}
+        onClose={() => setShowOnboarding(false)}
+        onComplete={handleCompleteOnboarding}
       />
 
       {showUpgradePrompt && entitlements?.plan === 'trial' && (
