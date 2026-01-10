@@ -198,8 +198,31 @@ function DashboardContent() {
     }
   }, [isLoaded, isSignedIn, entitlements]);
 
-  function handleCompleteOnboarding() {
+  async function handleCompleteOnboarding(userData?: {
+    role?: string;
+    experience?: string;
+    mainStruggles?: string[];
+    howFound?: string;
+    goals?: string;
+  }) {
+    // Save onboarding completion
     localStorage.setItem('onboardingComplete', 'true');
+
+    // If user provided data, save it to the backend
+    if (userData && Object.keys(userData).length > 0) {
+      try {
+        await fetch('/api/user/onboarding', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(userData),
+        });
+        console.log('Onboarding data saved:', userData);
+      } catch (error) {
+        console.error('Failed to save onboarding data:', error);
+        // Don't block completion if save fails
+      }
+    }
+
     setShowOnboarding(false);
   }
 
