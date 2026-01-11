@@ -182,7 +182,7 @@ export default function CallPage() {
             console.error(`[PERF] ${(timeoutTime - perfStart).toFixed(0)}ms - ❌ CONNECTION TIMEOUT (10s limit)`);
             console.error('[Call] Connection timeout after 10s');
             setStatus('error');
-            setError('Connection timeout - please try again');
+            setError('Connection timed out. Please check your internet and try again.');
           }
         }, 10000);
         mockTimeouts.push(connectionTimeout);
@@ -207,7 +207,7 @@ export default function CallPage() {
             onError: (error) => {
               console.error('[Call] ❌ WebSocket Error:', error);
               clearTimeout(connectionTimeout);
-              setError(typeof error === 'string' ? error : 'Connection error');
+              setError(typeof error === 'string' ? error : 'Connection lost. Please check your internet and try again.');
               setStatus('error');
             },
             onMessage: (message: { type?: string; text?: string; message?: string }) => {
@@ -246,7 +246,7 @@ export default function CallPage() {
       } catch (err) {
         console.error('[Call] Initialization error:', err);
         setStatus('error');
-        setError(err instanceof Error ? err.message : 'Failed to start call');
+        setError(err instanceof Error ? err.message : 'Unable to connect. Please try again.');
       }
     }
 

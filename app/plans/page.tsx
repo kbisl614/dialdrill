@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Sidebar from '@/components/Sidebar';
 import Breadcrumb from '@/components/Breadcrumb';
+import SkeletonLoader from '@/components/SkeletonLoader';
 import Link from 'next/link';
 import { SidebarProvider, useSidebar } from '@/components/SidebarContext';
 
@@ -50,7 +51,7 @@ function PlansPageContent() {
         setEntitlements(data);
       } catch (err) {
         console.error('Error fetching entitlements:', err);
-        setError('Failed to load your data. Please try refreshing the page.');
+        setError('We couldn\'t load your plan information. Please refresh the page or try again in a moment.');
       } finally {
         setLoading(false);
       }
@@ -87,7 +88,7 @@ function PlansPageContent() {
       window.location.href = url;
     } catch (err) {
       console.error('Error creating checkout session:', err);
-      setError('Failed to start upgrade process. Please try again.');
+      setError('We couldn\'t start the upgrade process. Please try again or contact support if the issue persists.');
     }
   }
 
@@ -120,18 +121,34 @@ function PlansPageContent() {
       window.location.href = url;
     } catch (err) {
       console.error('Error creating checkout session:', err);
-      setError('Failed to start purchase. Please try again.');
+      setError('We couldn\'t process your purchase. Please try again or contact support if the issue persists.');
     }
   }
 
   if (!isLoaded || loading) {
     return (
-      <div className="min-h-screen bg-[#080d1a] grid-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-[#00d9ff] border-r-transparent"></div>
-          <p className="mt-4 text-[#94a3b8]">Loading...</p>
-        </div>
-      </div>
+      <>
+        <Sidebar />
+        <main className="min-h-screen bg-[#080d1a] grid-background lg:pl-64">
+          <div className="mx-auto max-w-[1200px] px-4 sm:px-6 lg:px-12 py-12 sm:py-16">
+            {/* Header Skeleton */}
+            <div className="mb-12">
+              <SkeletonLoader variant="text" className="h-10 w-48 mb-4" />
+              <SkeletonLoader variant="text" className="h-6 w-96" />
+            </div>
+
+            {/* Current Plan Skeleton */}
+            <div className="mb-12">
+              <SkeletonLoader variant="stat" />
+            </div>
+
+            {/* Plans Grid Skeleton */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <SkeletonLoader variant="badge" count={2} />
+            </div>
+          </div>
+        </main>
+      </>
     );
   }
 

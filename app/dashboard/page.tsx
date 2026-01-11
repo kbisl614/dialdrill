@@ -9,6 +9,7 @@ import ObjectionLibraryModal from '@/components/ObjectionLibraryModal';
 import ProfileDropdownModal from '@/components/ProfileDropdownModal';
 import Sidebar from '@/components/Sidebar';
 import Breadcrumb from '@/components/Breadcrumb';
+import SkeletonLoader from '@/components/SkeletonLoader';
 import Link from 'next/link';
 import { SidebarProvider, useSidebar } from '@/components/SidebarContext';
 
@@ -118,7 +119,7 @@ function DashboardContent() {
         setEntitlements(data);
       } catch (err) {
         console.error('Error fetching entitlements:', err);
-        setError('Failed to load your data. Please try refreshing the page.');
+        setError('We couldn\'t load your dashboard. Please refresh the page or try again in a moment.');
       } finally {
         setLoading(false);
       }
@@ -280,7 +281,7 @@ function DashboardContent() {
       console.log(`[PERF] Total dashboard flow: ${(navStart - perfStart).toFixed(0)}ms`);
     } catch (err) {
       console.error('Error starting call:', err);
-      setError(err instanceof Error ? err.message : 'Failed to start call');
+      setError(err instanceof Error ? err.message : 'Something went wrong starting your call. Please try again.');
     } finally {
       setStartingCall(false);
     }
@@ -320,12 +321,33 @@ function DashboardContent() {
 
   if (!isLoaded || loading) {
     return (
-      <div className="min-h-screen bg-[#080d1a] grid-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-[#00d9ff] border-r-transparent"></div>
-          <p className="mt-4 text-[#94a3b8]">Loading...</p>
-        </div>
-      </div>
+      <>
+        <Sidebar />
+        <main className="min-h-screen bg-[#080d1a] grid-background lg:pl-64">
+          <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-12 py-12 sm:py-16">
+            {/* Header Skeleton */}
+            <div className="mb-12">
+              <SkeletonLoader variant="text" className="h-10 w-64 mb-4" />
+              <SkeletonLoader variant="text" className="h-6 w-96" />
+            </div>
+
+            {/* Stats Grid Skeleton */}
+            <div className="mb-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+              <SkeletonLoader variant="stat" count={3} />
+            </div>
+
+            {/* Start Call Button Skeleton */}
+            <SkeletonLoader variant="text" className="h-14 w-full max-w-md mx-auto mb-12" />
+
+            {/* Personalities Grid Skeleton */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[1, 2, 3, 4, 5, 6].map(i => (
+                <SkeletonLoader key={i} variant="badge" />
+              ))}
+            </div>
+          </div>
+        </main>
+      </>
     );
   }
 
