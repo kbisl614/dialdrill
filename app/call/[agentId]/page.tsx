@@ -33,6 +33,7 @@ export default function CallPage() {
   const [maxDuration] = useState<number>(initialMaxDuration);
   const [elapsedSeconds, setElapsedSeconds] = useState<number>(0);
   const [showTimeWarning, setShowTimeWarning] = useState(false);
+  const [micPermissionGranted, setMicPermissionGranted] = useState<boolean | null>(null);
   const isInitializedRef = useRef(false);
   const callStartTimeRef = useRef<number | null>(null);
   const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -60,9 +61,34 @@ export default function CallPage() {
     setStatus('disconnected');
   }, [conversation]);
 
+  // Check microphone permissions first
+  useEffect(() => {
+    async function checkMicPermission() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        // Permission granted, clean up the stream
+        stream.getTracks().forEach(track => track.stop());
+        setMicPermissionGranted(true);
+      } catch (err) {
+        console.error('[Call] Microphone permission denied:', err);
+        setMicPermissionGranted(false);
+        setError('Microphone access is required for calls. Please enable it in your browser settings.');
+        setStatus('error');
+      }
+    }
+
+    if (isLoaded && user) {
+      checkMicPermission();
+    }
+  }, [isLoaded, user]);
+
   useEffect(() => {
     // Prevent double initialization in React StrictMode
     if (!isLoaded || !user || isInitializedRef.current) return;
+
+    // Don't start call if mic permission not granted
+    if (micPermissionGranted === false) return;
+    if (micPermissionGranted === null) return; // Still checking
 
     let conv: Conversation | null = null;
     let isCancelled = false;
@@ -242,7 +268,7 @@ export default function CallPage() {
         }
       }
     };
-  }, [isLoaded, user, agentId]);
+  }, [isLoaded, user, agentId, micPermissionGranted]);
 
   // Timer effect for call duration enforcement
   useEffect(() => {
@@ -322,7 +348,13 @@ export default function CallPage() {
   async function handleEndCall() {
     endCall();
     await saveTranscriptToServer(elapsedSeconds);
-    router.push('/dashboard');
+
+    // Redirect to call summary page if we have a callLogId
+    if (callLogId) {
+      router.push(`/call-summary/${callLogId}`);
+    } else {
+      router.push('/dashboard');
+    }
   }
 
   function toggleMute() {
@@ -427,6 +459,46 @@ export default function CallPage() {
               {status === 'error' && 'Connection error'}
             </span>
           </div>
+
+          {/* Countdown Timer */}
+          {status === 'connected' && (
+            <div className="mt-6">
+              <div className="relative inline-flex items-center justify-center">
+                {/* SVG Circle Timer */}
+                <svg className="w-32 h-32 transform -rotate-90">
+                  {/* Background circle */}
+                  <circle
+                    cx="64"
+                    cy="64"
+                    r="56"
+                    stroke="#1f2937"
+                    strokeWidth="8"
+                    fill="none"
+                  />
+                  {/* Progress circle */}
+                  <circle
+                    cx="64"
+                    cy="64"
+                    r="56"
+                    stroke={timeRemaining <= 30 ? '#ef4444' : '#00d9ff'}
+                    strokeWidth="8"
+                    fill="none"
+                    strokeDasharray={`${2 * Math.PI * 56}`}
+                    strokeDashoffset={`${2 * Math.PI * 56 * (1 - timeRemaining / maxDuration)}`}
+                    strokeLinecap="round"
+                    className="transition-all duration-1000"
+                  />
+                </svg>
+                {/* Timer text */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <div className={`text-3xl font-bold font-mono ${timeRemaining <= 30 ? 'text-red-400' : 'text-white'}`}>
+                    {formatTime(timeRemaining)}
+                  </div>
+                  <div className="text-xs text-gray-400 mt-1">remaining</div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Controls */}
@@ -460,12 +532,14 @@ export default function CallPage() {
                   key={index}
                   className={`p-3 rounded-lg ${
                     item.role === 'user'
-                      ? 'bg-blue-900/20 border border-blue-500/30'
-                      : 'bg-gray-800'
+                      ? 'bg-[#00d9ff]/10 border border-[#00d9ff]/30'
+                      : 'bg-[#9d4edd]/10 border border-[#9d4edd]/30'
                   }`}
                 >
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="text-xs font-semibold text-gray-400">
+                    <span className={`text-xs font-semibold ${
+                      item.role === 'user' ? 'text-[#00d9ff]' : 'text-[#9d4edd]'
+                    }`}>
                       {item.role === 'user' ? 'You' : 'Prospect'}
                     </span>
                     <span className="text-xs text-gray-500">
