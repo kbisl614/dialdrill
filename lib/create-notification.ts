@@ -2,7 +2,7 @@ import { pool } from './db';
 
 export interface CreateNotificationParams {
   userId: string; // Internal user ID (UUID)
-  type: 'badge_earned' | 'belt_upgrade' | 'power_gained' | 'streak_milestone' | 'level_up';
+  type: 'badge_earned' | 'belt_upgrade' | 'power_gained' | 'streak_milestone' | 'level_up' | 'coaching_ready';
   title: string;
   message: string;
   metadata?: Record<string, string | number | boolean>;

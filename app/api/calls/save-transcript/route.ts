@@ -5,6 +5,8 @@ import { scoreCall, isCallTooShort, generateShortCallScore } from '@/lib/scoring
 import { parseTranscript } from '@/lib/transcript-parser';
 import { matchAndSaveObjections } from '@/lib/objection-matcher';
 import { createNotification } from '@/lib/create-notification';
+import { analyzeCallForCoaching, saveCoachingAnalysis } from '@/lib/ai-coach';
+import { analyzeVoiceMetrics, saveVoiceAnalytics } from '@/lib/voice-analytics';
 
 interface TranscriptEntry {
   role: 'user' | 'agent';
@@ -107,6 +109,62 @@ export async function POST(request: Request) {
       // Match and save triggered objections
       const signals = parseTranscript(normalizedTranscript);
       await matchAndSaveObjections(callLogId, signals);
+
+      // ========== PHASE 3: AI COACHING & VOICE ANALYTICS ==========
+      try {
+        // Only run AI analysis for calls that are long enough (>30 seconds)
+        if (!isCallTooShort(duration, normalizedTranscript)) {
+          console.log(`[AI Coach] Starting analysis for call ${callLogId}...`);
+
+          // 1. Generate voice analytics (always runs, doesn't require OpenAI)
+          const voiceAnalytics = analyzeVoiceMetrics(normalizedTranscript, duration);
+          await saveVoiceAnalytics(pool(), callLogId, voiceAnalytics);
+          console.log(`[Voice Analytics] Saved analytics for call ${callLogId}`);
+
+          // 2. Generate AI coaching insights (requires OpenAI API key)
+          if (process.env.OPENAI_API_KEY) {
+            // Get personality name for context
+            const personalityResult = await pool().query(
+              `SELECT p.name
+               FROM call_logs cl
+               JOIN personalities p ON cl.personality_id = p.id
+               WHERE cl.id = $1`,
+              [callLogId]
+            );
+            const personalityName = personalityResult.rows[0]?.name;
+
+            const coaching = await analyzeCallForCoaching(
+              normalizedTranscript,
+              score,
+              personalityName
+            );
+            await saveCoachingAnalysis(pool(), callLogId, coaching);
+            console.log(`[AI Coach] Saved coaching for call ${callLogId}`);
+
+            // Create notification for coaching insights
+            const userInternalId = await pool().query(
+              `SELECT id FROM users WHERE clerk_id = $1`,
+              [userId]
+            );
+            if (userInternalId.rows.length > 0) {
+              await createNotification({
+                userId: userInternalId.rows[0].id,
+                type: 'coaching_ready',
+                title: '🎓 Your Coaching Is Ready!',
+                message: `Get personalized feedback and improvement tips from your latest call.`,
+                metadata: { callLogId, overallScore: score.overallScore },
+              });
+            }
+          } else {
+            console.warn('[AI Coach] Skipping - OPENAI_API_KEY not configured');
+          }
+        } else {
+          console.log(`[AI Coach] Skipping - call too short (${duration}s)`);
+        }
+      } catch (aiError) {
+        // Log but don't fail the request if AI analysis fails
+        console.error('[API /calls/save-transcript] AI analysis failed:', aiError);
+      }
 
       // ========== GAMIFICATION: Award Power & Update Stats ==========
       try {

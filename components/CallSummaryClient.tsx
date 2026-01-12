@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import Confetti from 'react-confetti';
 import Link from 'next/link';
+import CoachingInsightsPanel from './CoachingInsightsPanel';
+import VoiceAnalyticsPanel from './VoiceAnalyticsPanel';
 
 interface CallSummaryClientProps {
   summary: {
@@ -293,6 +295,26 @@ export default function CallSummaryClient({ summary }: CallSummaryClientProps) {
               );
             })}
           </div>
+        </motion.div>
+
+        {/* AI Coaching Insights - Phase 3 */}
+        <motion.div
+          initial={{ y: 30, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 1.0 }}
+          className="mb-12"
+        >
+          <CoachingInsightsPanel callLogId={callLog.id} />
+        </motion.div>
+
+        {/* Voice Analytics - Phase 3 */}
+        <motion.div
+          initial={{ y: 30, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 1.1 }}
+          className="mb-12"
+        >
+          <VoiceAnalyticsPanel callLogId={callLog.id} />
         </motion.div>
 
         {/* CTAs */}
