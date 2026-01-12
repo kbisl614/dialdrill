@@ -34,10 +34,12 @@ export default function CallPage() {
   const [elapsedSeconds, setElapsedSeconds] = useState<number>(0);
   const [showTimeWarning, setShowTimeWarning] = useState(false);
   const [micPermissionGranted, setMicPermissionGranted] = useState<boolean | null>(null);
+  const [connectionQuality, setConnectionQuality] = useState<'excellent' | 'good' | 'poor' | 'unknown'>('unknown');
   const isInitializedRef = useRef(false);
   const callStartTimeRef = useRef<number | null>(null);
   const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const transcriptSavedRef = useRef(false);
+  const lastMessageTimeRef = useRef<number>(Date.now());
   const timeRemaining = Math.max(maxDuration - elapsedSeconds, 0);
 
   const endCall = useCallback(() => {
@@ -196,9 +198,11 @@ export default function CallPage() {
               console.log('[Call] ✅ WebSocket Connected!');
               clearTimeout(connectionTimeout);
               setStatus('connected');
+              setConnectionQuality('excellent');
 
               // Start call timer
               callStartTimeRef.current = Date.now();
+              lastMessageTimeRef.current = Date.now();
             },
             onDisconnect: () => {
               console.log('[Call] WebSocket Disconnected');
@@ -212,6 +216,20 @@ export default function CallPage() {
             },
             onMessage: (message: { type?: string; text?: string; message?: string }) => {
               console.log('[Call] Message received:', message);
+
+              // Update connection quality based on message timing
+              const now = Date.now();
+              const timeSinceLastMessage = now - lastMessageTimeRef.current;
+              lastMessageTimeRef.current = now;
+
+              // Determine quality based on latency
+              if (timeSinceLastMessage < 2000) {
+                setConnectionQuality('excellent');
+              } else if (timeSinceLastMessage < 5000) {
+                setConnectionQuality('good');
+              } else {
+                setConnectionQuality('poor');
+              }
 
               if (message.type === 'user_transcript' || message.type === 'agent_transcript') {
                 const role = message.type === 'user_transcript' ? 'user' : 'agent';
@@ -397,13 +415,32 @@ export default function CallPage() {
                 'text-gray-400'
               }>{status}</span>
               {status === 'connected' && (
-                <span className="ml-4">
-                  Time: <span className="text-white font-mono">{formatTime(elapsedSeconds)}</span>
-                  <span className="text-gray-500"> / {formatTime(maxDuration)}</span>
-                  <span className="ml-4 text-gray-400">
-                    Time left: <span className="text-white font-mono">{formatTime(timeRemaining)}</span>
+                <>
+                  <span className="ml-4">
+                    Connection:
+                    <span className={`ml-2 inline-flex items-center gap-1 ${
+                      connectionQuality === 'excellent' ? 'text-green-400' :
+                      connectionQuality === 'good' ? 'text-yellow-400' :
+                      connectionQuality === 'poor' ? 'text-red-400' :
+                      'text-gray-400'
+                    }`}>
+                      <span className={`w-2 h-2 rounded-full ${
+                        connectionQuality === 'excellent' ? 'bg-green-400' :
+                        connectionQuality === 'good' ? 'bg-yellow-400' :
+                        connectionQuality === 'poor' ? 'bg-red-400' :
+                        'bg-gray-400'
+                      } animate-pulse`}></span>
+                      {connectionQuality}
+                    </span>
                   </span>
-                </span>
+                  <span className="ml-4">
+                    Time: <span className="text-white font-mono">{formatTime(elapsedSeconds)}</span>
+                    <span className="text-gray-500"> / {formatTime(maxDuration)}</span>
+                    <span className="ml-4 text-gray-400">
+                      Time left: <span className="text-white font-mono">{formatTime(timeRemaining)}</span>
+                    </span>
+                  </span>
+                </>
               )}
             </p>
           </div>
