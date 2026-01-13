@@ -7,6 +7,7 @@ import PersonalitySelector, { type Personality } from '@/components/PersonalityS
 import QuickPracticeModal from '@/components/QuickPracticeModal';
 import ObjectionLibraryModal from '@/components/ObjectionLibraryModal';
 import ProfileDropdownModal from '@/components/ProfileDropdownModal';
+import OnboardingModal from '@/components/OnboardingModal';
 import Sidebar from '@/components/Sidebar';
 import Breadcrumb from '@/components/Breadcrumb';
 import SkeletonLoader from '@/components/SkeletonLoader';
@@ -99,6 +100,7 @@ function DashboardContent() {
   const [profileData, setProfileData] = useState<UserProfileData | null>(null);
   const [profileLoading, setProfileLoading] = useState(false);
   const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   useEffect(() => {
     if (isLoaded && !isSignedIn) {
@@ -186,6 +188,15 @@ function DashboardContent() {
     return () => clearInterval(interval);
   }, []);
 
+  // Check if user has seen onboarding
+  useEffect(() => {
+    const onboardingComplete = localStorage.getItem('onboardingComplete');
+    if (onboardingComplete !== 'true' && isLoaded && isSignedIn && entitlements) {
+      // Show onboarding for new users
+      setShowOnboarding(true);
+    }
+  }, [isLoaded, isSignedIn, entitlements]);
+
   async function fetchProfileData() {
     setProfileLoading(true);
     try {
@@ -213,6 +224,32 @@ function DashboardContent() {
       }
     } catch (error) {
       console.error('Error fetching unread notifications count:', error);
+    }
+  }
+
+  async function handleCompleteOnboarding(userData?: {
+    role?: string;
+    experience?: string;
+    mainStruggles?: string[];
+    howFound?: string;
+    goals?: string;
+  }) {
+    // Save onboarding completion
+    localStorage.setItem('onboardingComplete', 'true');
+    setShowOnboarding(false);
+
+    // If user provided data, save it to the backend
+    if (userData && Object.keys(userData).length > 0) {
+      try {
+        await fetch('/api/user/onboarding', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(userData),
+        });
+        console.log('Onboarding data saved:', userData);
+      } catch (error) {
+        console.error('Failed to save onboarding data:', error);
+      }
     }
   }
 
@@ -398,12 +435,9 @@ function DashboardContent() {
 
         {/* Welcome Section */}
         <div className="mb-12">
-          <h1 className="text-4xl font-extrabold text-white sm:text-5xl">
-            Welcome back, <span className="text-[#00d9ff]">{user?.firstName || user?.username || 'there'}</span>
+          <h1 className="text-4xl font-extrabold text-white sm:text-5xl mb-2 animate-fadeIn">
+            Hey <span className="bg-gradient-to-r from-[#00d9ff] to-[#00ffea] bg-clip-text text-transparent">{user?.firstName || user?.username || 'there'}</span> 👋
           </h1>
-          <p className="mt-4 text-xl text-[#94a3b8]">
-            Ready to practice your sales skills?
-          </p>
         </div>
 
         {error && (
@@ -412,161 +446,200 @@ function DashboardContent() {
           </div>
         )}
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-          {/* Credits Card */}
-          <div className="rounded-3xl border border-[#1e293b]/50 bg-gradient-to-br from-[rgba(15,23,42,0.6)] to-[rgba(5,9,17,0.8)] p-8 shadow-[0_20px_60px_rgba(0,0,0,0.7),0_0_40px_rgba(0,217,255,0.08)] backdrop-blur-xl">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-[#00d9ff]/30 to-[#00d9ff]/10 ring-2 ring-[#00d9ff]/30">
-                <svg className="h-7 w-7 text-[#00d9ff]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                </svg>
+        {/* Main Content - Full Width */}
+        <div className="space-y-6">
+          {/* Start Call Hero Section - Full Width */}
+          <div className="group rounded-3xl border border-[#1e293b]/50 bg-gradient-to-br from-[rgba(15,23,42,0.6)] to-[rgba(5,9,17,0.8)] p-8 md:p-12 shadow-[0_20px_60px_rgba(0,0,0,0.7),0_0_40px_rgba(0,217,255,0.08)] backdrop-blur-xl hover:shadow-[0_25px_70px_rgba(0,0,0,0.8),0_0_50px_rgba(0,217,255,0.12)] transition-all duration-500 hover:border-[#00d9ff]/30">
+              <div className="text-center mb-8">
+                <div className="inline-flex items-center justify-center w-16 h-16 mb-4 rounded-2xl bg-gradient-to-br from-[#00d9ff]/20 to-[#00ffea]/20 ring-2 ring-[#00d9ff]/30 group-hover:scale-110 transition-transform duration-300">
+                  <svg className="w-8 h-8 text-[#00d9ff]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                  </svg>
+                </div>
+                <h2 className="text-5xl font-extrabold text-white mb-2 bg-gradient-to-r from-white to-[#00d9ff] bg-clip-text text-transparent">
+                  Start Practice
+                </h2>
               </div>
-              <div>
-                <p className="text-sm font-medium text-[#94a3b8]">{creditsDisplay.label}</p>
-                <p className="text-4xl font-extrabold text-white tabular-nums">
-                  {creditsDisplay.value}
-                </p>
-                {creditsDisplay.subValue && (
-                  <p className="text-sm text-[#94a3b8] mt-1">{creditsDisplay.subValue}</p>
+
+              {/* Personality Selector Integrated */}
+              {shouldShowPersonalitySelector && (
+                <div className="mb-8">
+                  <PersonalitySelector
+                    unlockedPersonalities={unlockedPersonalities}
+                    lockedPersonalities={lockedPersonalities}
+                    selectionMode={selectionMode}
+                    selectedPersonalityId={selectedPersonalityId}
+                    onModeChange={(mode) => {
+                      setSelectionMode(mode);
+                      if (mode === 'random') {
+                        setShowUpgradePrompt(false);
+                      }
+                    }}
+                    onSelectPersonality={(id) => {
+                      setSelectedPersonalityId(id);
+                      setShowUpgradePrompt(false);
+                    }}
+                    onRequestUpgrade={() => {
+                      if (entitlements?.plan === 'trial') {
+                        setShowUpgradePrompt(true);
+                      }
+                    }}
+                  />
+                </div>
+              )}
+
+              {/* Start Call Button */}
+              <button
+                onClick={handleStartCall}
+                className="group/btn relative w-full rounded-2xl bg-gradient-to-r from-[#00d9ff] via-[#00ffea] to-[#00d9ff] bg-[length:200%_100%] px-12 py-6 text-2xl font-bold text-[#080d1a] transition-all duration-300 hover:bg-[position:100%_0] hover:scale-[1.03] shadow-[0_0_40px_rgba(0,217,255,0.6),inset_0_0_20px_rgba(255,255,255,0.2)] hover:shadow-[0_0_80px_rgba(0,255,234,1),inset_0_0_30px_rgba(255,255,255,0.3)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:bg-[position:0%_0] active:scale-[0.98]"
+                disabled={
+                  !entitlements ||
+                  !entitlements.canCall ||
+                  startingCall ||
+                  (selectionMode === 'select' && !selectedPersonalityId)
+                }
+              >
+                <span className="relative z-10 flex items-center justify-center gap-3">
+                  {startingCall ? (
+                    <>
+                      <svg className="animate-spin h-6 w-6" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Starting...
+                    </>
+                  ) : (!entitlements || !entitlements.canCall) ? (
+                    '🚫 No Credits'
+                  ) : selectionMode === 'select' && !selectedPersonalityId ? (
+                    '👆 Pick One'
+                  ) : (
+                    <>
+                      <span className="group-hover/btn:scale-110 transition-transform duration-300">🎯</span>
+                      Let&apos;s Go
+                      <svg className="w-6 h-6 group-hover/btn:translate-x-1 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                      </svg>
+                    </>
+                  )}
+                </span>
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover/btn:opacity-20 group-hover/btn:animate-shimmer"></div>
+              </button>
+
+              {entitlements && !entitlements.canCall && entitlements.plan === 'trial' && (
+                <div className="mt-6 text-center animate-fadeIn">
+                  <Link
+                    href="/plans"
+                    className="group/upgrade inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#a855f7] to-[#9333ea] px-8 py-4 text-lg font-bold text-white transition-all hover:scale-105 shadow-[0_0_30px_rgba(168,85,247,0.5)] hover:shadow-[0_0_50px_rgba(168,85,247,0.8)] active:scale-[0.98]"
+                  >
+                    <span className="group-hover/upgrade:scale-110 transition-transform duration-300">✨</span>
+                    Unlock More
+                    <svg className="w-5 h-5 group-hover/upgrade:translate-x-1 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                  </Link>
+                </div>
+              )}
+            </div>
+
+          {/* Quick Actions */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <button
+              onClick={() => setShowQuickPractice(true)}
+              className="group/quick relative overflow-hidden rounded-2xl border border-[#a855f7]/30 bg-gradient-to-br from-[#a855f7]/10 to-[#9333ea]/10 p-6 text-left transition-all duration-300 hover:scale-[1.03] hover:border-[#a855f7]/60 shadow-[0_0_20px_rgba(168,85,247,0.2)] hover:shadow-[0_0_40px_rgba(168,85,247,0.5)] active:scale-[0.99]"
+            >
+                <div className="absolute inset-0 bg-gradient-to-br from-[#a855f7]/0 to-[#a855f7]/20 opacity-0 group-hover/quick:opacity-100 transition-opacity duration-300"></div>
+                <div className="relative z-10">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-[#a855f7]/30 to-[#9333ea]/30 ring-2 ring-[#a855f7]/40 group-hover/quick:scale-110 group-hover/quick:rotate-3 transition-all duration-300">
+                      <svg className="h-5 w-5 text-[#d8b4fe]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                      </svg>
+                    </div>
+                    <h3 className="text-xl font-bold text-white group-hover/quick:text-[#d8b4fe] transition-colors duration-300">Quick Practice</h3>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-[#a855f7] font-semibold">
+                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#a855f7] animate-pulse"></span>
+                    30-sec drills
+                  </div>
+                </div>
+              </button>
+
+              <button
+                onClick={() => setShowObjectionLibrary(true)}
+                className="group/lib relative overflow-hidden rounded-2xl border border-[#00d9ff]/30 bg-gradient-to-br from-[#00d9ff]/10 to-[#00ffea]/10 p-6 text-left transition-all duration-300 hover:scale-[1.03] hover:border-[#00d9ff]/60 shadow-[0_0_20px_rgba(0,217,255,0.2)] hover:shadow-[0_0_40px_rgba(0,217,255,0.5)] active:scale-[0.99]"
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-[#00d9ff]/0 to-[#00d9ff]/20 opacity-0 group-hover/lib:opacity-100 transition-opacity duration-300"></div>
+                <div className="relative z-10">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-[#00d9ff]/30 to-[#00ffea]/30 ring-2 ring-[#00d9ff]/40 group-hover/lib:scale-110 group-hover/lib:-rotate-3 transition-all duration-300">
+                      <svg className="h-5 w-5 text-[#00d9ff]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                    </div>
+                    <h3 className="text-xl font-bold text-white group-hover/lib:text-[#00d9ff] transition-colors duration-300">Objection Library</h3>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-[#00d9ff] font-semibold">
+                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#00d9ff] animate-pulse"></span>
+                    35+ responses
+                  </div>
+                </div>
+            </button>
+
+            {/* Credits Card - Now as third quick action */}
+            <div className="group/credits rounded-2xl border border-[#1e293b]/50 bg-gradient-to-br from-[rgba(15,23,42,0.6)] to-[rgba(5,9,17,0.8)] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.7),0_0_40px_rgba(0,217,255,0.08)] backdrop-blur-xl hover:shadow-[0_25px_70px_rgba(0,0,0,0.8),0_0_50px_rgba(0,217,255,0.15)] transition-all duration-300 hover:border-[#00d9ff]/30 text-left">
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#00d9ff]/30 to-[#00d9ff]/10 ring-2 ring-[#00d9ff]/40 group-hover/credits:scale-110 group-hover/credits:rotate-6 transition-all duration-300">
+                    <svg className="h-5 w-5 text-[#00d9ff]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                    </svg>
+                  </div>
+                  <h3 className="text-xl font-bold text-white group-hover/credits:text-[#00d9ff] transition-colors duration-300">
+                    {creditsDisplay.label}
+                  </h3>
+                </div>
+                <div className="flex items-baseline gap-2 mb-3">
+                  <p className="text-4xl font-extrabold text-white tabular-nums">
+                    {creditsDisplay.value}
+                  </p>
+                  {creditsDisplay.subValue && (
+                    <span className="text-sm text-[#64748b] font-medium">{creditsDisplay.subValue}</span>
+                  )}
+                  <span className="text-xs text-[#64748b] ml-auto">
+                    {entitlements?.plan === 'trial' ? '🌱 Trial' : '⭐ Pro'}
+                  </span>
+                </div>
+                <div className="relative h-2.5 overflow-hidden rounded-full bg-white/5 ring-1 ring-[#1e293b]/50">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-[#00d9ff] via-[#00ffea] to-[#00d9ff] shadow-[0_0_20px_rgba(0,217,255,0.5)] transition-all duration-500 ease-out relative overflow-hidden"
+                    style={{ width: `${(creditsDisplay.current / creditsDisplay.max) * 100}%` }}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-40 animate-shimmer"></div>
+                  </div>
+                </div>
+                {creditsDisplay.isOverage && (
+                  <div className="mt-3 rounded-xl border border-yellow-500/30 bg-yellow-500/10 px-3 py-2 flex items-center gap-2 animate-fadeIn">
+                    <span className="text-lg">⚠️</span>
+                    <p className="text-xs text-yellow-300 font-medium">
+                      Overage: $1/min
+                    </p>
+                  </div>
+                )}
+                {entitlements?.plan === 'trial' && (
+                  <Link
+                    href="/plans"
+                    className="group/upgrade-btn mt-3 w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#a855f7] to-[#9333ea] px-4 py-3 text-sm font-bold text-white transition-all hover:scale-[1.03] shadow-[0_0_20px_rgba(168,85,247,0.4)] hover:shadow-[0_0_35px_rgba(168,85,247,0.7)] active:scale-[0.98]"
+                  >
+                    <span className="group-hover/upgrade-btn:scale-110 transition-transform duration-300">✨</span>
+                    Upgrade
+                    <svg className="w-4 h-4 group-hover/upgrade-btn:translate-x-0.5 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </Link>
                 )}
               </div>
             </div>
-            <div className="mt-4 h-3 overflow-hidden rounded-full bg-white/5 ring-1 ring-[#1e293b]/50">
-              <div
-                className="h-full rounded-full bg-gradient-to-r from-[#00d9ff] to-[#00ffea] shadow-[0_0_20px_rgba(0,217,255,0.4)] transition-all"
-                style={{ width: `${(creditsDisplay.current / creditsDisplay.max) * 100}%` }}
-              ></div>
-            </div>
-            {creditsDisplay.isOverage && (
-              <div className="mt-4 rounded-xl border border-yellow-500/20 bg-yellow-500/10 p-3">
-                <p className="text-sm text-yellow-400">
-                  Out of minutes - Additional calls billed at $1/min
-                </p>
-              </div>
-            )}
-
-            {/* Upgrade Button - Show for trial users */}
-            {entitlements?.plan === 'trial' && (
-              <Link
-                href="/plans"
-                className="mt-4 w-full block text-center rounded-xl bg-gradient-to-r from-[#a855f7] to-[#9333ea] px-6 py-3 text-sm font-semibold text-white transition-all hover:scale-[1.02] shadow-[0_0_20px_rgba(168,85,247,0.3)] hover:shadow-[0_0_30px_rgba(168,85,247,0.5)]"
-              >
-                View Plans
-              </Link>
-            )}
           </div>
-
-          {/* Account Info Card */}
-          <div className="rounded-3xl border border-[#1e293b]/50 bg-gradient-to-br from-[rgba(15,23,42,0.6)] to-[rgba(5,9,17,0.8)] p-8 shadow-[0_20px_60px_rgba(0,0,0,0.7)] backdrop-blur-xl">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-[#a855f7]/30 to-[#a855f7]/10 ring-2 ring-[#a855f7]/30">
-                <svg className="h-7 w-7 text-[#a855f7]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-[#94a3b8]">Account Type</p>
-                <p className="text-2xl font-extrabold text-white">
-                  {entitlements?.plan === 'trial' ? 'Trial' : 'Pro'}
-                </p>
-              </div>
-            </div>
-            <p className="text-sm text-[#64748b] mt-2">
-              {entitlements?.plan === 'trial'
-                ? 'Upgrade to Pro for more personalities and longer calls'
-                : 'Pro plan with all features unlocked'}
-            </p>
-          </div>
-        </div>
-
-        {shouldShowPersonalitySelector && (
-          <div className="mb-12">
-            <PersonalitySelector
-              unlockedPersonalities={unlockedPersonalities}
-              lockedPersonalities={lockedPersonalities}
-              selectionMode={selectionMode}
-              selectedPersonalityId={selectedPersonalityId}
-              onModeChange={(mode) => {
-                setSelectionMode(mode);
-                if (mode === 'random') {
-                  setShowUpgradePrompt(false);
-                }
-              }}
-              onSelectPersonality={(id) => {
-                setSelectedPersonalityId(id);
-                setShowUpgradePrompt(false);
-              }}
-              onRequestUpgrade={() => {
-                if (entitlements?.plan === 'trial') {
-                  setShowUpgradePrompt(true);
-                }
-              }}
-            />
-          </div>
-        )}
-
-        {/* Start Call CTA */}
-        <div className="rounded-3xl border border-[#1e293b]/50 bg-gradient-to-br from-[rgba(15,23,42,0.6)] to-[rgba(5,9,17,0.8)] p-12 shadow-[0_20px_60px_rgba(0,0,0,0.7),0_0_40px_rgba(0,217,255,0.08)] backdrop-blur-xl text-center">
-          <h2 className="text-3xl font-extrabold text-white mb-4">
-            Ready to practice?
-          </h2>
-          <p className="text-lg text-[#94a3b8] mb-8 max-w-2xl mx-auto">
-            Start a new AI-powered sales call simulation and master objection handling in real-time.
-          </p>
-
-          <div className="mb-6 flex flex-wrap justify-center gap-3">
-            <button
-              onClick={() => setShowQuickPractice(true)}
-              className="inline-flex items-center gap-2 rounded-full border border-[#a855f7]/30 bg-gradient-to-r from-[#a855f7]/20 to-[#9333ea]/20 px-6 py-3 text-sm font-semibold text-[#d8b4fe] transition hover:scale-105 shadow-[0_0_20px_rgba(168,85,247,0.3)] hover:shadow-[0_0_30px_rgba(168,85,247,0.5)]"
-            >
-              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-              ⚡ Quick Practice (30sec drills)
-            </button>
-            <button
-              onClick={() => setShowObjectionLibrary(true)}
-              className="inline-flex items-center gap-2 rounded-full border border-[#00d9ff]/30 bg-[#00d9ff]/10 px-6 py-3 text-sm font-semibold text-[#00d9ff] transition hover:bg-[#00d9ff]/20 hover:border-[#00d9ff]/50"
-            >
-              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              📖 View Objection Library
-            </button>
-          </div>
-
-          <button
-            onClick={handleStartCall}
-            className="rounded-full bg-gradient-to-r from-[#00d9ff] to-[#00ffea] px-12 py-5 text-xl font-semibold text-[#080d1a] transition-all hover:scale-105 shadow-[0_0_40px_rgba(0,217,255,0.6)] hover:shadow-[0_0_60px_rgba(0,255,234,0.8)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-            disabled={
-              !entitlements ||
-              !entitlements.canCall ||
-              startingCall ||
-              (selectionMode === 'select' && !selectedPersonalityId)
-            }
-          >
-            {startingCall
-              ? 'Starting Call...'
-              : (!entitlements || !entitlements.canCall)
-              ? 'Out of Call Credits'
-              : selectionMode === 'select' && !selectedPersonalityId
-              ? 'Select a Personality'
-              : 'Start Call'}
-          </button>
-          {entitlements && !entitlements.canCall && entitlements.plan === 'trial' && (
-            <div className="mt-6">
-              <p className="text-sm text-[#94a3b8] mb-4">
-                You&apos;re out of call credits. Please upgrade to continue.
-              </p>
-              <Link
-                href="/plans"
-                className="inline-block rounded-full bg-gradient-to-r from-[#a855f7] to-[#9333ea] px-8 py-3 text-base font-semibold text-white transition-all hover:scale-105 shadow-[0_0_30px_rgba(168,85,247,0.4)] hover:shadow-[0_0_40px_rgba(168,85,247,0.6)]"
-              >
-                View Plans
-              </Link>
-            </div>
-          )}
         </div>
 
         {/* Quick Stats - Hidden until user has call history */}
@@ -608,6 +681,16 @@ function DashboardContent() {
         onClose={() => setShowProfileDropdown(false)}
         userData={profileData}
         loading={profileLoading}
+      />
+
+      {/* Onboarding Modal */}
+      <OnboardingModal
+        isOpen={showOnboarding}
+        onClose={() => {
+          localStorage.setItem('onboardingComplete', 'true');
+          setShowOnboarding(false);
+        }}
+        onComplete={handleCompleteOnboarding}
       />
 
       {showUpgradePrompt && entitlements?.plan === 'trial' && (

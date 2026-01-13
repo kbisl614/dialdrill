@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 
 export type Personality = {
   id: string;
@@ -43,6 +43,8 @@ export default function PersonalitySelector({
   onSelectPersonality,
   onRequestUpgrade,
 }: PersonalitySelectorProps) {
+  const [hoveredPersonality, setHoveredPersonality] = useState<string | null>(null);
+
   const allPersonalities = useMemo(
     () => [...unlockedPersonalities, ...lockedPersonalities],
     [lockedPersonalities, unlockedPersonalities]
@@ -54,119 +56,147 @@ export default function PersonalitySelector({
   );
 
   return (
-    <section className="rounded-3xl border border-white/10 bg-white/[0.03] p-8 shadow-[0_20px_60px_rgba(0,0,0,0.5)] backdrop-blur-xl">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+    <section>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-wide text-[#2dd4e6]">Choose Your Call Style</p>
-          <h2 className="mt-1 text-3xl font-extrabold text-white">Pick a personality or let us randomize it</h2>
-          <p className="mt-2 text-sm text-[#9ca3af]">
-            Select the persona you want to practice with, or keep training fresh with randomized calls.
-          </p>
+          <h3 className="text-lg font-bold text-white mb-1">Training Mode</h3>
+          <p className="text-xs text-[#64748b]">Pick specific or randomize</p>
         </div>
-        <div className="flex rounded-full border border-white/10 bg-white/5 p-1">
+        <div className="flex rounded-xl border border-white/10 bg-white/5 p-1 gap-1">
           <button
-            className={`flex-1 rounded-full px-5 py-2 text-sm font-semibold transition ${
+            className={`group relative rounded-lg px-4 py-2.5 text-xs font-bold transition-all ${
               selectionMode === 'select'
-                ? 'bg-white text-[#020817] shadow-[0_0_20px_rgba(255,255,255,0.3)]'
-                : 'text-white/70'
+                ? 'bg-gradient-to-r from-[#00d9ff] to-[#00ffea] text-[#080d1a] shadow-[0_0_20px_rgba(0,217,255,0.4)]'
+                : 'text-white/60 hover:text-white/90'
             }`}
             onClick={() => onModeChange('select')}
           >
-            Select Personality
+            <span className="flex items-center gap-1.5">
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+              Pick One
+            </span>
           </button>
           <button
-            className={`flex-1 rounded-full px-5 py-2 text-sm font-semibold transition ${
+            className={`group relative rounded-lg px-4 py-2.5 text-xs font-bold transition-all ${
               selectionMode === 'random'
-                ? 'bg-white text-[#020817] shadow-[0_0_20px_rgba(255,255,255,0.3)]'
-                : 'text-white/70'
+                ? 'bg-gradient-to-r from-[#00d9ff] to-[#00ffea] text-[#080d1a] shadow-[0_0_20px_rgba(0,217,255,0.4)]'
+                : 'text-white/60 hover:text-white/90'
             }`}
             onClick={() => onModeChange('random')}
           >
-            Randomized (Best for Training)
+            <span className="flex items-center gap-1.5">
+              🎲
+              Surprise Me
+            </span>
           </button>
         </div>
       </div>
 
       {selectionMode === 'random' ? (
-        <div className="mt-8 rounded-2xl border border-[#2dd4e6]/20 bg-[#061124] p-6 text-left">
-          <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#2dd4e6]/20 text-2xl">
+        <div className="rounded-xl border border-[#00d9ff]/20 bg-gradient-to-br from-[#00d9ff]/5 to-transparent p-5">
+          <div className="flex items-start gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#00d9ff]/20 text-xl flex-shrink-0">
               🎲
             </div>
             <div>
-              <p className="text-lg font-semibold text-white">Random Personality Mode</p>
-              <p className="text-sm text-[#9ca3af]">
-                We&apos;ll automatically pick one of your {unlockedPersonalities.length} unlocked personalities for each call.
+              <p className="text-sm font-bold text-white mb-1">Random Mode Active</p>
+              <p className="text-xs text-[#94a3b8] leading-relaxed">
+                Each call picks from your {unlockedPersonalities.length} unlocked personalities. Keeps you sharp.
               </p>
             </div>
           </div>
-          <ul className="mt-4 list-disc pl-6 text-sm text-[#9ca3af]">
-            <li>Keeps training unpredictable and closer to real sales floors.</li>
-            <li>Rotates through every persona you have access to.</li>
-            <li>Great if you don&apos;t have a strong preference or need variety.</li>
-          </ul>
         </div>
       ) : (
-        <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {allPersonalities.map((personality) => {
-            const isUnlocked = unlockedIds.has(personality.id);
-            const isSelected = selectedPersonalityId === personality.id;
-            const icon = personalityIcons[personality.name] || '🗣️';
-            return (
-              <button
-                type="button"
-                key={personality.id}
-                onClick={() => (isUnlocked ? onSelectPersonality(personality.id) : onRequestUpgrade())}
-                aria-disabled={!isUnlocked}
-                className={`relative flex h-full flex-col rounded-2xl border p-5 text-left transition ${
-                  isUnlocked
-                    ? 'border-white/10 bg-white/[0.04] hover:border-[#2dd4e6]/60 hover:bg-white/[0.07]'
-                    : 'border-white/5 bg-black/20 opacity-60 hover:opacity-80'
-                } ${isSelected ? 'ring-2 ring-[#2dd4e6] shadow-[0_0_25px_rgba(45,212,230,0.3)]' : ''}`}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-3xl">{icon}</span>
-                  <span
-                    className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                      personality.isBoss
-                        ? 'bg-[#a855f7]/20 text-[#d8b4fe]'
-                        : 'bg-[#2dd4e6]/20 text-[#99f6e4]'
-                    }`}
+        <div className="relative">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+            {allPersonalities.map((personality) => {
+              const isUnlocked = unlockedIds.has(personality.id);
+              const isSelected = selectedPersonalityId === personality.id;
+              const icon = personalityIcons[personality.name] || '🗣️';
+              const isHovered = hoveredPersonality === personality.id;
+              return (
+                <div key={personality.id} className="relative">
+                  <button
+                    type="button"
+                    onClick={() => (isUnlocked ? onSelectPersonality(personality.id) : onRequestUpgrade())}
+                    onMouseEnter={() => setHoveredPersonality(personality.id)}
+                    onMouseLeave={() => setHoveredPersonality(null)}
+                    aria-disabled={!isUnlocked}
+                    className={`group relative flex flex-col items-center rounded-xl border p-4 text-center transition-all duration-200 w-full ${
+                      isUnlocked
+                        ? 'border-white/10 bg-white/[0.04] hover:border-[#00d9ff]/50 hover:bg-white/[0.07] hover:scale-105'
+                        : 'border-white/5 bg-black/20 opacity-50 hover:opacity-70'
+                    } ${isSelected ? 'ring-2 ring-[#00d9ff] shadow-[0_0_20px_rgba(0,217,255,0.4)] scale-105' : ''}`}
                   >
-                    {personality.isBoss ? 'Boss' : 'Core'}
-                  </span>
-                </div>
-                <h3 className="mt-4 text-xl font-bold text-white">{personality.name}</h3>
-                <p className="mt-2 text-sm text-[#9ca3af]">{personality.description}</p>
-                {!isUnlocked && (
-                  <div className="mt-4 rounded-xl border border-white/10 bg-black/30 p-3 text-center text-sm text-white">
-                    <span className="inline-flex items-center gap-2">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth={1.5}
-                        stroke="currentColor"
-                        className="h-5 w-5"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75M5.25 10.5h13.5c.414 0 .75.336.75.75v8.25A2.25 2.25 0 0117.25 21h-10.5A2.25 2.25 0 014.5 19.5V11.25c0-.414.336-.75.75-.75z"
-                        />
+                    {!isUnlocked && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/60 rounded-xl backdrop-blur-sm z-10">
+                        <div className="flex flex-col items-center gap-1">
+                          <svg className="w-5 h-5 text-white/80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                          </svg>
+                          <span className="text-[10px] font-semibold text-white/80">Pro</span>
+                        </div>
+                      </div>
+                    )}
+                    <div className="text-3xl mb-2 group-hover:scale-110 transition-transform duration-200">
+                      {icon}
+                    </div>
+                    <h3 className="text-sm font-bold text-white leading-tight mb-1">{personality.name}</h3>
+                    {personality.isBoss && (
+                      <span className="inline-block rounded-full bg-[#a855f7]/20 px-2 py-0.5 text-[9px] font-bold text-[#d8b4fe]">
+                        BOSS
+                      </span>
+                    )}
+                    {isSelected && (
+                      <div className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-[#00d9ff] shadow-[0_0_15px_rgba(0,217,255,0.6)] z-20">
+                        <svg className="w-3 h-3 text-[#080d1a]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                        </svg>
+                      </div>
+                    )}
+                    {/* Info Icon */}
+                    <div className="absolute bottom-2 right-2 flex items-center justify-center w-5 h-5 rounded-full bg-[#00d9ff]/20 group-hover:bg-[#00d9ff]/30 transition-colors">
+                      <svg className="w-3 h-3 text-[#00d9ff]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
-                      Upgrade to unlock
-                    </span>
-                  </div>
-                )}
-                {isUnlocked && isSelected && (
-                  <p className="mt-4 text-sm font-semibold text-[#2dd4e6]">Selected</p>
-                )}
-              </button>
-            );
-          })}
+                    </div>
+                  </button>
+
+                  {/* Tooltip */}
+                  {isHovered && (
+                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-30 animate-fadeIn pointer-events-none">
+                      <div className="rounded-xl border border-[#00d9ff]/30 bg-[#0a0f1a] p-3 shadow-[0_0_30px_rgba(0,217,255,0.3)] backdrop-blur-xl max-w-[200px]">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-2xl">{icon}</span>
+                          <div>
+                            <h4 className="text-sm font-bold text-white leading-tight">{personality.name}</h4>
+                            {personality.isBoss && (
+                              <span className="inline-block rounded-full bg-[#a855f7]/20 px-1.5 py-0.5 text-[8px] font-bold text-[#d8b4fe]">
+                                BOSS
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <p className="text-xs text-[#94a3b8] leading-relaxed">
+                          {personality.description}
+                        </p>
+                        {/* Arrow */}
+                        <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-[1px]">
+                          <div className="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-[#00d9ff]/30"></div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
     </section>
   );
 }
+

@@ -31,6 +31,8 @@ function PlansPageContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const shouldShowMinutePackages = entitlements?.plan === 'paid' && ((entitlements.tokensRemaining ?? 0) <= 0 || entitlements.isOverage);
+  const totalTrialsAvailable = 2;
+  const trialsUsed = Math.min(entitlements?.trialPurchasesCount ?? 0, totalTrialsAvailable);
 
   useEffect(() => {
     if (isLoaded && !isSignedIn) {
@@ -179,7 +181,12 @@ function PlansPageContent() {
             <div className="mt-8 inline-block rounded-2xl border border-[#00d9ff]/30 bg-[#00d9ff]/10 px-6 py-3">
               <p className="text-sm text-[#00d9ff] font-semibold">
                 Current Plan: {entitlements.plan === 'trial' ? 'Trial' : 'Pro'}
-                {entitlements.plan === 'trial' && ` • ${entitlements.trialPurchasesCount}/2 trials used`}
+                {entitlements.plan === 'trial' && (
+                  <>
+                    {' • '}2 trials available
+                    {' • '}{trialsUsed}/{totalTrialsAvailable} used
+                  </>
+                )}
               </p>
             </div>
           )}
@@ -207,11 +214,7 @@ function PlansPageContent() {
               </div>
               {entitlements && (
                 <p className="text-sm text-[#64748b] mt-2">
-                  {entitlements.trialPurchasesCount === 0
-                    ? 'First trial - 2 trials available total'
-                    : entitlements.trialPurchasesCount === 1
-                    ? '1 trial used - 1 more available'
-                    : '2 trials used - No more trials available'}
+                  2 trials available • {trialsUsed}/{totalTrialsAvailable} used
                 </p>
               )}
             </div>
