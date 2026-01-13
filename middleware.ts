@@ -1,3 +1,4 @@
+import { NextResponse } from 'next/server';
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 
 const isPublicRoute = createRouteMatcher([
@@ -13,7 +14,8 @@ export default clerkMiddleware(async (auth, request) => {
   // If user is signed in and trying to access public routes, redirect to dashboard
   if (userId && isPublicRoute(request)) {
     const url = new URL('/dashboard', request.url);
-    return Response.redirect(url);
+    // Use NextResponse so Clerk can append headers without hitting immutable errors
+    return NextResponse.redirect(url);
   }
 });
 
