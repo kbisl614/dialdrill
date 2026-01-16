@@ -1,0 +1,62 @@
+{
+  "validation": {
+    "commands": [
+      "npm run verify-build"
+    ],
+    "required_pass": "all"
+  },
+  "execution": {
+    "max_iterations": 5,
+    "auto_commit": true,
+    "commit_message_format": "Ralph: {{story_id}} - {{title}}"
+  },
+  "safety": {
+    "forbidden_paths": [
+      ".env",
+      ".env.local",
+      ".env.*",
+      "node_modules/",
+      "package-lock.json",
+      "yarn.lock",
+      "pnpm-lock.yaml",
+      ".git/",
+      ".github/",
+      ".next/",
+      "out/",
+      "dist/",
+      ".turbo/",
+      ".vercel/",
+      "scripts/verify-build.sh",
+      "next.config.js",
+      "next.config.ts",
+      "middleware.ts",
+      "vercel.json",
+      "tsconfig.json",
+      "eslint.config.mjs"
+    ],
+    "forbidden_operations": [
+      "force-push",
+      "rewrite-history",
+      "delete-migrations",
+      "drop-table",
+      "truncate",
+      "reset-database",
+      "npm-install-new-deps",
+      "refactor-unrelated-code",
+      "cleanup-unrelated-code"
+    ],
+    "high_blast_radius": [
+      "app/layout.tsx",
+      "package.json",
+      "globals.css",
+      "tailwind.config.ts",
+      "tailwind.config.js"
+    ]
+  },
+  "context": {
+    "tech_stack": "Next.js App Router, React, Tailwind CSS, PostgreSQL (Neon), Clerk auth, Vercel",
+    "project_type": "full-stack",
+    "database_pattern": "raw SQL via pg Pool from lib/db.ts",
+    "auth_pattern": "auth() from @clerk/nextjs/server in each route handler"
+  }
+}
