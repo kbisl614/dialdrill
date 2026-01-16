@@ -30,7 +30,7 @@ export async function GET(request: Request) {
 
     const currentUser = userResult.rows[0];
 
-    // Get top users by power level
+    // Get top users by power level (filter out users who opted out of leaderboard)
     const leaderboardResult = await dbPool.query(
       `SELECT
         username,
@@ -44,22 +44,24 @@ export async function GET(request: Request) {
         ROW_NUMBER() OVER (ORDER BY power_level DESC) as rank
        FROM users
        WHERE power_level > 0
+         AND (show_on_leaderboard IS NULL OR show_on_leaderboard = TRUE)
        ORDER BY power_level DESC
        LIMIT $1`,
       [limit]
     );
 
-    // Get current user's rank
+    // Get current user's rank (only counting visible users)
     const userRankResult = await dbPool.query(
       `SELECT COUNT(*) + 1 as rank
        FROM users
-       WHERE power_level > $1`,
+       WHERE power_level > $1
+         AND (show_on_leaderboard IS NULL OR show_on_leaderboard = TRUE)`,
       [currentUser.power_level]
     );
 
     const userRank = parseInt(userRankResult.rows[0].rank);
 
-    // Get user's position in context (users around them)
+    // Get user's position in context (users around them, only visible)
     const contextResult = await dbPool.query(
       `WITH ranked_users AS (
         SELECT
@@ -72,6 +74,7 @@ export async function GET(request: Request) {
           ROW_NUMBER() OVER (ORDER BY power_level DESC) as rank
         FROM users
         WHERE power_level > 0
+          AND (show_on_leaderboard IS NULL OR show_on_leaderboard = TRUE)
       )
       SELECT * FROM ranked_users
       WHERE rank BETWEEN $1 - 2 AND $1 + 2
