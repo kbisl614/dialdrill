@@ -60,8 +60,16 @@ export async function GET(
     const profileUser = profileResult.rows[0];
     const isOwner = profileUser.id === requesterId;
 
+    // Defensive handling: validate and sanitize profile_visibility
+    let profileVisibility = profileUser.profile_visibility || 'public';
+    if (profileVisibility !== 'public' && profileVisibility !== 'private') {
+      console.warn(
+        `[API /profile/[id]] WARNING: Invalid profile_visibility value "${profileVisibility}" for user ${id}. Falling back to "public".`
+      );
+      profileVisibility = 'public';
+    }
+
     // Privacy check: if profile is private and requester is not owner, return 404
-    const profileVisibility = profileUser.profile_visibility || 'public';
     if (profileVisibility === 'private' && !isOwner) {
       console.log('[API /profile/[id]] Private profile access denied');
       return NextResponse.json({ error: 'Profile not found' }, { status: 404 });

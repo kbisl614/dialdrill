@@ -32,9 +32,18 @@ export async function GET() {
 
     const user = result.rows[0];
 
+    // Defensive handling: validate and sanitize profile_visibility
+    let profileVisibility = user.profile_visibility || 'public';
+    if (profileVisibility !== 'public' && profileVisibility !== 'private') {
+      console.warn(
+        `[API /privacy] WARNING: Invalid profile_visibility value "${profileVisibility}" for user. Falling back to "public".`
+      );
+      profileVisibility = 'public';
+    }
+
     // Return privacy settings with defaults if NULL
     const privacySettings = {
-      profile_visibility: user.profile_visibility || 'public',
+      profile_visibility: profileVisibility,
       show_stats_publicly: user.show_stats_publicly !== null ? user.show_stats_publicly : true,
       show_on_leaderboard: user.show_on_leaderboard !== null ? user.show_on_leaderboard : true
     };
