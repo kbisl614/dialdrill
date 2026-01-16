@@ -1,0 +1,112 @@
+{
+  "feature": "Phase 5.1 Privacy Foundation",
+  "stories": [
+    {
+      "id": "story-001",
+      "title": "Database Migration for Privacy Columns",
+      "description": "Create migration file lib/migrations/add-privacy-columns.ts that adds profile_visibility, show_stats_publicly, show_on_leaderboard, and privacy_updated_at columns to the users table with safe defaults.",
+      "acceptance_criteria": [
+        "Migration file exists at lib/migrations/add-privacy-columns.ts",
+        "Adds profile_visibility TEXT DEFAULT 'public' CHECK (profile_visibility IN ('public', 'private'))",
+        "Adds show_stats_publicly BOOLEAN DEFAULT TRUE",
+        "Adds show_on_leaderboard BOOLEAN DEFAULT TRUE",
+        "Adds privacy_updated_at TIMESTAMP",
+        "Migration follows existing pattern in lib/migrations/",
+        "npm run verify-build passes"
+      ],
+      "passes": true,
+      "order": 1,
+      "dependencies": []
+    },
+    {
+      "id": "story-002",
+      "title": "Privacy Settings API Route",
+      "description": "Create app/api/privacy/route.ts with GET (read settings) and PATCH (update settings) handlers. Must use auth() from Clerk and pool() from lib/db.ts.",
+      "acceptance_criteria": [
+        "Route file exists at app/api/privacy/route.ts",
+        "GET returns { profile_visibility, show_stats_publicly, show_on_leaderboard }",
+        "GET returns 401 if no userId from auth()",
+        "PATCH accepts partial updates for any of the 3 settings",
+        "PATCH validates profile_visibility is 'public' or 'private'",
+        "PATCH updates privacy_updated_at timestamp on change",
+        "PATCH returns updated settings on success",
+        "PATCH returns 400 for invalid values with clear error message",
+        "npm run verify-build passes"
+      ],
+      "passes": true,
+      "order": 2,
+      "dependencies": ["story-001"]
+    },
+    {
+      "id": "story-003",
+      "title": "Privacy Settings UI Page",
+      "description": "Create app/settings/privacy/page.tsx with 3 toggles, helper text, save feedback, and private profile warning. Follow existing component patterns.",
+      "acceptance_criteria": [
+        "Page exists at app/settings/privacy/page.tsx",
+        "Page loads without console errors",
+        "Shows 3 toggle controls for each privacy setting",
+        "Each toggle has helper text explaining what it affects",
+        "Fetches current settings from GET /api/privacy on load",
+        "Toggling calls PATCH /api/privacy and shows 'Saved' feedback",
+        "Failed save shows error message and reverts toggle state",
+        "When profile_visibility is 'private', shows warning: 'Others won't be able to view your profile'",
+        "Page is responsive on mobile",
+        "npm run verify-build passes"
+      ],
+      "passes": true,
+      "order": 3,
+      "dependencies": ["story-002"]
+    },
+    {
+      "id": "story-004",
+      "title": "Leaderboard Privacy Enforcement",
+      "description": "Modify app/api/leaderboard/route.ts to filter out users where show_on_leaderboard = false. Ranks must recalculate excluding hidden users.",
+      "acceptance_criteria": [
+        "Users with show_on_leaderboard = false do not appear in leaderboard results",
+        "Rank numbers are sequential with no gaps from filtered users",
+        "Empty leaderboard (all users hidden) returns empty array, not error",
+        "No private users leak through pagination or sorting",
+        "Filtering happens server-side in SQL query, not post-fetch",
+        "npm run verify-build passes"
+      ],
+      "passes": true,
+      "order": 4,
+      "dependencies": ["story-001"]
+    },
+    {
+      "id": "story-005",
+      "title": "Profile API with Privacy Enforcement",
+      "description": "Create app/api/profile/[id]/route.ts that enforces profile_visibility and show_stats_publicly rules. Use UUID for profile ID.",
+      "acceptance_criteria": [
+        "Route exists at app/api/profile/[id]/route.ts",
+        "GET returns 401 if no userId from auth()",
+        "GET returns 404 if profile_visibility = 'private' AND requester is not owner",
+        "Owner can always view their own profile regardless of visibility",
+        "When show_stats_publicly = false AND requester is not owner, response excludes: total_calls, total_minutes",
+        "Response always includes belt, tier, badges, power_level regardless of stats setting",
+        "GET returns 404 for non-existent user ID",
+        "npm run verify-build passes"
+      ],
+      "passes": true,
+      "order": 5,
+      "dependencies": ["story-001"]
+    },
+    {
+      "id": "story-006",
+      "title": "Edge Cases and Defensive Handling",
+      "description": "Add defensive handling for new users without privacy values, invalid DB values, and empty result sets across all privacy-related code.",
+      "acceptance_criteria": [
+        "New user with NULL privacy columns uses defaults (public, true, true)",
+        "Invalid profile_visibility value in DB falls back to 'public' and logs warning",
+        "Leaderboard with zero visible users returns empty array cleanly",
+        "Profile API handles missing user gracefully with 404",
+        "Privacy settings page handles user with no settings row (new user)",
+        "No unhandled promise rejections or uncaught exceptions",
+        "npm run verify-build passes"
+      ],
+      "passes": true,
+      "order": 6,
+      "dependencies": ["story-003", "story-004", "story-005"]
+    }
+  ]
+}
