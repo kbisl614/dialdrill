@@ -39,10 +39,19 @@
   --color-border-subtle: #1e293b;
   --color-border-medium: #334155;
 
-  /* Custom shadows - Updated for darker bg */
-  --shadow-glow-cyan: 0 0 80px rgba(6, 217, 215, 0.25);
-  --shadow-glow-purple: 0 0 80px rgba(168, 85, 247, 0.25);
+  /* Custom shadows - MAXIMUM IMPACT glow values */
+  --shadow-glow-cyan: 0 0 100px rgba(6, 217, 215, 0.4);
+  --shadow-glow-purple: 0 0 100px rgba(168, 85, 247, 0.4);
   --shadow-card: 0 20px 60px rgba(0, 0, 0, 0.7), 0 0 40px rgba(6, 217, 215, 0.08);
+  --shadow-card-hover: 0 25px 80px rgba(0, 0, 0, 0.8), 0 0 60px rgba(6, 217, 215, 0.15);
+
+  /* React Bits custom properties */
+  --rb-primary: #00d9ff;
+  --rb-primary-glow: rgba(0, 217, 255, 0.4);
+  --rb-secondary: #a855f7;
+  --rb-secondary-glow: rgba(168, 85, 247, 0.3);
+  --rb-background: #080d1a;
+  --rb-surface: rgba(15, 23, 42, 0.6);
 }
 
 body {
@@ -152,4 +161,98 @@ body {
 
 .animate-fadeIn {
   animation: fadeIn 0.6s ease-out;
+}
+
+/* React Bits Component Support */
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+/* Enhanced glow pulse for maximum impact */
+@keyframes glow-pulse {
+  0%, 100% {
+    box-shadow: 0 0 60px rgba(0, 217, 255, 0.4), 0 0 100px rgba(0, 217, 255, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 80px rgba(0, 217, 255, 0.6), 0 0 120px rgba(0, 217, 255, 0.3);
+  }
+}
+
+.animate-glow-pulse {
+  animation: glow-pulse 2s ease-in-out infinite;
+}
+
+/* Shimmer slide animation for buttons */
+@keyframes shimmer-slide {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.animate-shimmer-slide {
+  animation: shimmer-slide 2s ease-in-out infinite;
+}
+
+/* Text glitch flicker effect */
+@keyframes glitch-flicker {
+  0%, 100% { opacity: 1; }
+  5% { opacity: 0.8; }
+  10% { opacity: 1; }
+  15% { opacity: 0.9; }
+  20% { opacity: 1; }
+}
+
+.animate-glitch-flicker {
+  animation: glitch-flicker 0.5s ease-in-out;
+}
+
+/* Float animation for cards */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Scale bounce for badges */
+@keyframes scale-bounce {
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.animate-scale-bounce {
+  animation: scale-bounce 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* Enhanced border glow */
+.border-glow-cyan {
+  box-shadow: 0 0 0 1px rgba(0, 217, 255, 0.3), 0 0 20px rgba(0, 217, 255, 0.2);
+}
+
+.border-glow-cyan:hover {
+  box-shadow: 0 0 0 2px rgba(0, 217, 255, 0.5), 0 0 40px rgba(0, 217, 255, 0.3);
+}
+
+.border-glow-purple {
+  box-shadow: 0 0 0 1px rgba(168, 85, 247, 0.3), 0 0 20px rgba(168, 85, 247, 0.2);
+}
+
+.border-glow-purple:hover {
+  box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.5), 0 0 40px rgba(168, 85, 247, 0.3);
 }
