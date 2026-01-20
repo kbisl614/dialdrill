@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+// Removed reactbits.dev components - using simple alternatives
 
 export type Personality = {
   id: string;
@@ -119,51 +120,63 @@ export default function PersonalitySelector({
               const isHovered = hoveredPersonality === personality.id;
               return (
                 <div key={personality.id} className="relative">
-                  <button
-                    type="button"
+                  <div
                     onClick={() => (isUnlocked ? onSelectPersonality(personality.id) : onRequestUpgrade())}
-                    onMouseEnter={() => setHoveredPersonality(personality.id)}
-                    onMouseLeave={() => setHoveredPersonality(null)}
-                    aria-disabled={!isUnlocked}
-                    className={`group relative flex flex-col items-center rounded-xl border p-4 text-center transition-all duration-200 w-full ${
+                    className={`relative rounded-xl border-2 transition-all duration-300 w-full ${
+                      !isUnlocked ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'
+                    } ${
+                      isSelected
+                        ? 'border-[#00d9ff] shadow-[0_0_30px_rgba(0,217,255,0.5)] ring-2 ring-[#00d9ff]'
+                        : isUnlocked
+                        ? 'border-[#00d9ff] shadow-[0_0_20px_rgba(0,217,255,0.3)]'
+                        : 'border-[#1e293b]'
+                    } ${
                       isUnlocked
-                        ? 'border-white/10 bg-white/[0.04] hover:border-[#00d9ff]/50 hover:bg-white/[0.07] hover:scale-105'
-                        : 'border-white/5 bg-black/20 opacity-50 hover:opacity-70'
-                    } ${isSelected ? 'ring-2 ring-[#00d9ff] shadow-[0_0_20px_rgba(0,217,255,0.4)] scale-105' : ''}`}
+                        ? 'bg-gradient-to-br from-[rgba(15,23,42,0.6)] to-[rgba(5,9,17,0.8)]'
+                        : 'bg-gradient-to-br from-[rgba(0,0,0,0.4)] to-[rgba(0,0,0,0.6)]'
+                    } ${isHovered && isUnlocked ? 'scale-105 -translate-y-1' : ''}`}
                   >
-                    {!isUnlocked && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-black/60 rounded-xl backdrop-blur-sm z-10">
-                        <div className="flex flex-col items-center gap-1">
-                          <svg className="w-5 h-5 text-white/80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                          </svg>
-                          <span className="text-[10px] font-semibold text-white/80">Pro</span>
+                    <div
+                      className="relative flex flex-col items-center p-4 text-center"
+                      onMouseEnter={() => setHoveredPersonality(personality.id)}
+                      onMouseLeave={() => setHoveredPersonality(null)}
+                    >
+                      {!isUnlocked && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/60 rounded-xl backdrop-blur-sm z-10">
+                          <div className="flex flex-col items-center gap-1">
+                            <svg className="w-5 h-5 text-white/80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                            </svg>
+                            <span className="text-[10px] font-semibold text-white/80">Pro</span>
+                          </div>
                         </div>
+                      )}
+                      <div className="text-3xl mb-2 transition-transform duration-200">
+                        {icon}
                       </div>
-                    )}
-                    <div className="text-3xl mb-2 group-hover:scale-110 transition-transform duration-200">
-                      {icon}
-                    </div>
-                    <h3 className="text-sm font-bold text-white leading-tight mb-1">{personality.name}</h3>
-                    {personality.isBoss && (
-                      <span className="inline-block rounded-full bg-[#a855f7]/20 px-2 py-0.5 text-[9px] font-bold text-[#d8b4fe]">
-                        BOSS
-                      </span>
-                    )}
-                    {isSelected && (
-                      <div className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-[#00d9ff] shadow-[0_0_15px_rgba(0,217,255,0.6)] z-20">
-                        <svg className="w-3 h-3 text-[#080d1a]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                      <h3 className="text-sm font-bold text-white leading-tight mb-1">
+                        {personality.name}
+                      </h3>
+                      {personality.isBoss && (
+                        <span className="inline-block rounded-full bg-[#a855f7]/20 px-2 py-0.5 text-[9px] font-bold text-[#d8b4fe] shadow-[0_0_10px_rgba(168,85,247,0.4)]">
+                          BOSS
+                        </span>
+                      )}
+                      {isSelected && (
+                        <div className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-[#00d9ff] shadow-[0_0_20px_rgba(0,217,255,0.8)] z-20">
+                          <svg className="w-3 h-3 text-[#080d1a]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                          </svg>
+                        </div>
+                      )}
+                      {/* Info Icon */}
+                      <div className="absolute bottom-2 right-2 flex items-center justify-center w-5 h-5 rounded-full bg-[#00d9ff]/20 transition-colors">
+                        <svg className="w-3 h-3 text-[#00d9ff]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                       </div>
-                    )}
-                    {/* Info Icon */}
-                    <div className="absolute bottom-2 right-2 flex items-center justify-center w-5 h-5 rounded-full bg-[#00d9ff]/20 group-hover:bg-[#00d9ff]/30 transition-colors">
-                      <svg className="w-3 h-3 text-[#00d9ff]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
                     </div>
-                  </button>
+                  </div>
 
                   {/* Tooltip */}
                   {isHovered && (

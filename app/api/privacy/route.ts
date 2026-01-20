@@ -1,15 +1,16 @@
 import { auth } from '@clerk/nextjs/server';
 import { pool } from '@/lib/db';
 import { NextResponse } from 'next/server';
+import { logger } from '@/lib/logger';
 
 export async function GET() {
-  console.log('[API /privacy] GET request received');
+  logger.api('/privacy', 'GET request received');
 
   try {
     const { userId } = await auth();
 
     if (!userId) {
-      console.log('[API /privacy] No userId found');
+      logger.api('/privacy', 'Unauthorized - no userId');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -35,9 +36,10 @@ export async function GET() {
     // Defensive handling: validate and sanitize profile_visibility
     let profileVisibility = user.profile_visibility || 'public';
     if (profileVisibility !== 'public' && profileVisibility !== 'private') {
-      console.warn(
-        `[API /privacy] WARNING: Invalid profile_visibility value "${profileVisibility}" for user. Falling back to "public".`
-      );
+      logger.warn('[API /privacy] Invalid profile_visibility value', { 
+        value: profileVisibility, 
+        userId 
+      });
       profileVisibility = 'public';
     }
 
@@ -48,25 +50,30 @@ export async function GET() {
       show_on_leaderboard: user.show_on_leaderboard !== null ? user.show_on_leaderboard : true
     };
 
-    console.log('[API /privacy] Settings retrieved successfully');
+    logger.api('/privacy', 'Settings retrieved successfully', { userId });
     return NextResponse.json(privacySettings);
   } catch (error) {
-    console.error('[API /privacy] GET ERROR:', error);
+    logger.apiError('/privacy', error, { route: '/privacy', method: 'GET' });
     return NextResponse.json(
-      { error: 'Internal server error', details: error instanceof Error ? error.message : String(error) },
+      { 
+        error: 'Internal server error',
+        ...(process.env.NODE_ENV !== 'production' && {
+          details: error instanceof Error ? error.message : String(error)
+        })
+      },
       { status: 500 }
     );
   }
 }
 
 export async function PATCH(request: Request) {
-  console.log('[API /privacy] PATCH request received');
+  logger.api('/privacy', 'PATCH request received');
 
   try {
     const { userId } = await auth();
 
     if (!userId) {
-      console.log('[API /privacy] No userId found');
+      logger.api('/privacy', 'Unauthorized - no userId');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -138,7 +145,7 @@ export async function PATCH(request: Request) {
         return NextResponse.json({ error: 'User not found' }, { status: 404 });
       }
 
-      console.log('[API /privacy] Settings updated successfully');
+      logger.api('/privacy', 'Settings updated successfully', { userId });
       return NextResponse.json(result.rows[0]);
     }
 
@@ -159,9 +166,14 @@ export async function PATCH(request: Request) {
 
     return NextResponse.json(result.rows[0]);
   } catch (error) {
-    console.error('[API /privacy] PATCH ERROR:', error);
+    logger.apiError('/privacy', error, { route: '/privacy', method: 'PATCH' });
     return NextResponse.json(
-      { error: 'Internal server error', details: error instanceof Error ? error.message : String(error) },
+      { 
+        error: 'Internal server error',
+        ...(process.env.NODE_ENV !== 'production' && {
+          details: error instanceof Error ? error.message : String(error)
+        })
+      },
       { status: 500 }
     );
   }

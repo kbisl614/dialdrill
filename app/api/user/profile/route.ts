@@ -306,9 +306,12 @@ export async function GET() {
       };
     });
 
-    // Build response
+    // Build response - safely extract username from email
+    const emailParts = user.email?.split('@') || [];
+    const username = emailParts[0] || 'User';
+
     const profileData = {
-      username: user.email.split('@')[0] || 'User',
+      username,
       avatar: '',
       email: user.email,
       memberSince: user.member_since || 'January 2025',

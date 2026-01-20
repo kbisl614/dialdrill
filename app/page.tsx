@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useAuth, SignUpButton, SignInButton } from '@clerk/nextjs';
 import { motion, useInView, useScroll, useTransform } from 'framer-motion';
 import Link from 'next/link';
+// Removed reactbits.dev components - using simple alternatives
 
 type Testimonial = {
   name: string;
@@ -261,6 +262,7 @@ function HeroSection({ isSignedIn }: { isSignedIn: boolean }) {
 
   return (
     <section ref={ref} className="relative overflow-hidden pt-24 pb-16 lg:pt-28 lg:pb-24">
+      {/* Simple gradient background - removed ChromaGrid */}
       <motion.div style={{ y }} className="radial-glow" />
       <div className="relative z-10 mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-12">
         {/* Pill Badge */}
@@ -291,7 +293,7 @@ function HeroSection({ isSignedIn }: { isSignedIn: boolean }) {
               transition={{ duration: 0.8, delay: 0.3 }}
               className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl"
             >
-              Less awkward calls.{' '}
+              <span className="text-white">Less awkward calls.</span>{' '}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00d9ff] to-[#00ffea]">Stronger closes.</span>
             </motion.h1>
             <motion.p

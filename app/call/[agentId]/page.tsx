@@ -446,6 +446,7 @@ export default function CallPage() {
           </div>
           <button
             onClick={handleEndCall}
+            aria-label="End call"
             className="px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition-colors"
           >
             End Call

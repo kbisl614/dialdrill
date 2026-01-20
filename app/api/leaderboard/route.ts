@@ -51,15 +51,17 @@ export async function GET(request: Request) {
     );
 
     // Get current user's rank (only counting visible users)
+    // Handle null power_level gracefully
+    const userPowerLevel = currentUser.power_level || 0;
     const userRankResult = await dbPool.query(
       `SELECT COUNT(*) + 1 as rank
        FROM users
        WHERE power_level > $1
          AND (show_on_leaderboard IS NULL OR show_on_leaderboard = TRUE)`,
-      [currentUser.power_level]
+      [userPowerLevel]
     );
 
-    const userRank = parseInt(userRankResult.rows[0].rank);
+    const userRank = parseInt(userRankResult.rows[0]?.rank || '0', 10);
 
     // Get user's position in context (users around them, only visible)
     const contextResult = await dbPool.query(

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
 import SmoothScrollProvider from "@/components/SmoothScrollProvider";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -14,14 +15,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
-      <html lang="en">
-        <body className="antialiased font-sans">
-          <SmoothScrollProvider>
-            {children}
-          </SmoothScrollProvider>
-        </body>
-      </html>
-    </ClerkProvider>
+    <html lang="en">
+      <body className="antialiased font-sans">
+        <ClerkProvider>
+          <ErrorBoundary>
+            <SmoothScrollProvider>
+              {children}
+            </SmoothScrollProvider>
+          </ErrorBoundary>
+        </ClerkProvider>
+      </body>
+    </html>
   );
 }

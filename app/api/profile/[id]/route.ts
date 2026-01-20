@@ -1,18 +1,19 @@
 import { auth } from '@clerk/nextjs/server';
 import { pool } from '@/lib/db';
 import { NextResponse } from 'next/server';
+import { logger } from '@/lib/logger';
 
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  console.log('[API /profile/[id]] GET request received');
+  logger.api('/profile/[id]', 'GET request received');
 
   try {
     const { userId } = await auth();
 
     if (!userId) {
-      console.log('[API /profile/[id]] No userId found');
+      logger.api('/profile/[id]', 'Unauthorized - no userId');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -63,15 +64,16 @@ export async function GET(
     // Defensive handling: validate and sanitize profile_visibility
     let profileVisibility = profileUser.profile_visibility || 'public';
     if (profileVisibility !== 'public' && profileVisibility !== 'private') {
-      console.warn(
-        `[API /profile/[id]] WARNING: Invalid profile_visibility value "${profileVisibility}" for user ${id}. Falling back to "public".`
-      );
+      logger.warn('[API /profile/[id]] Invalid profile_visibility value', { 
+        value: profileVisibility, 
+        profileId: id 
+      });
       profileVisibility = 'public';
     }
 
     // Privacy check: if profile is private and requester is not owner, return 404
     if (profileVisibility === 'private' && !isOwner) {
-      console.log('[API /profile/[id]] Private profile access denied');
+      logger.api('/profile/[id]', 'Private profile access denied', { profileId: id, userId });
       return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
     }
 
@@ -171,12 +173,17 @@ export async function GET(
       };
     }
 
-    console.log('[API /profile/[id]] Profile retrieved successfully');
+    logger.api('/profile/[id]', 'Profile retrieved successfully', { profileId: id, userId });
     return NextResponse.json(profileData);
   } catch (error) {
-    console.error('[API /profile/[id]] GET ERROR:', error);
+    logger.apiError('/profile/[id]', error, { route: '/profile/[id]', method: 'GET' });
     return NextResponse.json(
-      { error: 'Internal server error', details: error instanceof Error ? error.message : String(error) },
+      { 
+        error: 'Internal server error',
+        ...(process.env.NODE_ENV !== 'production' && {
+          details: error instanceof Error ? error.message : String(error)
+        })
+      },
       { status: 500 }
     );
   }

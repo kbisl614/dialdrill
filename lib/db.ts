@@ -1,35 +1,39 @@
 import { Pool } from 'pg';
+import { logger } from './logger';
 
 let pool: Pool | null = null;
 
 function getPool(): Pool {
   if (!pool) {
-    console.log('[DB] Initializing database connection pool');
-    console.log('[DB] DATABASE_URL exists:', !!process.env.DATABASE_URL);
+    logger.debug('[DB] Initializing database connection pool', { 
+      hasDatabaseUrl: !!process.env.DATABASE_URL 
+    });
     pool = new Pool({
       connectionString: process.env.DATABASE_URL,
     });
 
     pool.on('connect', () => {
-      console.log('[DB] New client connected to database');
+      logger.debug('[DB] New client connected to database');
     });
 
     pool.on('error', (err: Error) => {
-      console.error('[DB] Unexpected database error:', err);
+      logger.error('[DB] Unexpected database error', err);
     });
   }
   return pool;
 }
 
 export async function initializeDatabase() {
-  console.log('[DB] Starting database initialization...');
+  logger.info('[DB] Starting database initialization');
 
   try {
     const dbPool = getPool();
 
     // Test connection first
     const testResult = await dbPool.query('SELECT NOW()');
-    console.log('[DB] Connection test successful. Current time:', testResult.rows[0].now);
+    logger.debug('[DB] Connection test successful', { 
+      currentTime: testResult.rows[0].now 
+    });
 
     // Create users table
     await dbPool.query(`
@@ -41,16 +45,17 @@ export async function initializeDatabase() {
         created_at TIMESTAMP DEFAULT NOW()
       );
     `);
-    console.log('[DB] Users table created/verified successfully');
+    logger.debug('[DB] Users table created/verified');
 
     // Check if table has any data
     const countResult = await dbPool.query('SELECT COUNT(*) FROM users');
-    console.log('[DB] Current user count:', countResult.rows[0].count);
+    logger.debug('[DB] Current user count', { 
+      count: countResult.rows[0].count 
+    });
 
-    console.log('[DB] Database initialization complete ✓');
+    logger.info('[DB] Database initialization complete');
   } catch (error) {
-    console.error('[DB] Error initializing database:', error);
-    console.error('[DB] Error details:', error instanceof Error ? error.message : String(error));
+    logger.error('[DB] Error initializing database', error);
     throw error;
   }
 }

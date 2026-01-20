@@ -13,6 +13,7 @@ import Breadcrumb from '@/components/Breadcrumb';
 import SkeletonLoader from '@/components/SkeletonLoader';
 import Link from 'next/link';
 import { SidebarProvider, useSidebar } from '@/components/SidebarContext';
+// Removed reactbits.dev components - using simple alternatives
 
 // Force dynamic rendering for this page
 export const dynamic = 'force-dynamic';
@@ -115,13 +116,30 @@ function DashboardContent() {
       try {
         const response = await fetch('/api/user/entitlements');
         if (!response.ok) {
-          throw new Error('Failed to fetch entitlements');
+          // Handle 401 (unauthorized) gracefully - user needs to sign in
+          if (response.status === 401) {
+            setError('Please sign in to view your dashboard.');
+            return;
+          }
+          // Handle other errors
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.error || `Failed to fetch entitlements (${response.status})`);
         }
         const data = await response.json();
         setEntitlements(data);
+        setError(null); // Clear any previous errors on success
       } catch (err) {
-        console.error('Error fetching entitlements:', err);
-        setError('We couldn\'t load your dashboard. Please refresh the page or try again in a moment.');
+        // Only log in development to avoid console noise
+        if (process.env.NODE_ENV !== 'production') {
+          console.warn('[Dashboard] Error fetching entitlements:', err);
+        }
+        // Set user-friendly error message
+        const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+        if (errorMessage.includes('Unauthorized') || errorMessage.includes('401')) {
+          setError('Please sign in to view your dashboard.');
+        } else {
+          setError('We couldn\'t load your dashboard. Please refresh the page or try again in a moment.');
+        }
       } finally {
         setLoading(false);
       }
@@ -220,10 +238,22 @@ function DashboardContent() {
       const response = await fetch('/api/notifications?unreadOnly=true');
       if (response.ok) {
         const data = await response.json();
-        setUnreadNotificationsCount(data.unreadCount);
+        setUnreadNotificationsCount(data.unreadCount || 0);
+      } else {
+        // Silently handle errors - don't break UI if notifications fail
+        // Only log in development
+        if (process.env.NODE_ENV !== 'production') {
+          console.warn('[Dashboard] Failed to fetch notifications:', response.status, response.statusText);
+        }
+        setUnreadNotificationsCount(0);
       }
     } catch (error) {
-      console.error('Error fetching unread notifications count:', error);
+      // Silently handle network errors - don't break UI
+      // Only log in development
+      if (process.env.NODE_ENV !== 'production') {
+        console.warn('[Dashboard] Error fetching unread notifications count:', error);
+      }
+      setUnreadNotificationsCount(0);
     }
   }
 
@@ -435,8 +465,10 @@ function DashboardContent() {
 
         {/* Welcome Section */}
         <div className="mb-12">
-          <h1 className="text-4xl font-extrabold text-white sm:text-5xl mb-2 animate-fadeIn">
-            Hey <span className="bg-gradient-to-r from-[#00d9ff] to-[#00ffea] bg-clip-text text-transparent">{user?.firstName || user?.username || 'there'}</span> 👋
+          <h1 className="text-4xl font-extrabold text-white sm:text-5xl mb-2">
+            <span className="bg-gradient-to-r from-white via-[#00d9ff] to-[#00ffea] bg-clip-text text-transparent">
+              Hey {user?.firstName || user?.username || 'there'} 👋
+            </span>
           </h1>
         </div>
 
@@ -488,10 +520,10 @@ function DashboardContent() {
                 </div>
               )}
 
-              {/* Start Call Button */}
+              {/* Start Call Button - Enhanced with Maximum Impact */}
               <button
                 onClick={handleStartCall}
-                className="group/btn relative w-full rounded-2xl bg-gradient-to-r from-[#00d9ff] via-[#00ffea] to-[#00d9ff] bg-[length:200%_100%] px-12 py-6 text-2xl font-bold text-[#080d1a] transition-all duration-300 hover:bg-[position:100%_0] hover:scale-[1.03] shadow-[0_0_40px_rgba(0,217,255,0.6),inset_0_0_20px_rgba(255,255,255,0.2)] hover:shadow-[0_0_80px_rgba(0,255,234,1),inset_0_0_30px_rgba(255,255,255,0.3)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:bg-[position:0%_0] active:scale-[0.98]"
+                className="btn-glow group relative inline-flex items-center justify-center w-full rounded-full bg-gradient-to-r from-[#00d9ff] to-[#00ffea] px-12 py-6 text-2xl font-semibold text-[#080d1a] transition-all hover:scale-105 hover:-translate-y-0.5 shadow-[0_0_40px_rgba(0,217,255,0.6)] hover:shadow-[0_0_60px_rgba(0,255,234,0.8)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:translate-y-0"
                 disabled={
                   !entitlements ||
                   !entitlements.canCall ||
@@ -499,30 +531,27 @@ function DashboardContent() {
                   (selectionMode === 'select' && !selectedPersonalityId)
                 }
               >
-                <span className="relative z-10 flex items-center justify-center gap-3">
-                  {startingCall ? (
-                    <>
-                      <svg className="animate-spin h-6 w-6" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Starting...
-                    </>
-                  ) : (!entitlements || !entitlements.canCall) ? (
-                    '🚫 No Credits'
-                  ) : selectionMode === 'select' && !selectedPersonalityId ? (
-                    '👆 Pick One'
-                  ) : (
-                    <>
-                      <span className="group-hover/btn:scale-110 transition-transform duration-300">🎯</span>
-                      Let&apos;s Go
-                      <svg className="w-6 h-6 group-hover/btn:translate-x-1 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                      </svg>
-                    </>
-                  )}
-                </span>
-                <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover/btn:opacity-20 group-hover/btn:animate-shimmer"></div>
+                {startingCall ? (
+                  <>
+                    <svg className="animate-spin h-6 w-6 mr-3" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Starting...
+                  </>
+                ) : (!entitlements || !entitlements.canCall) ? (
+                  '🚫 No Credits'
+                ) : selectionMode === 'select' && !selectedPersonalityId ? (
+                  '👆 Pick One'
+                ) : (
+                  <>
+                    <span className="text-2xl">🎯</span>
+                    Let&apos;s Go
+                    <svg className="w-6 h-6 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                  </>
+                )}
               </button>
 
               {entitlements && !entitlements.canCall && entitlements.plan === 'trial' && (

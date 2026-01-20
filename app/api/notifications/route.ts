@@ -1,6 +1,7 @@
 import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import { pool } from '@/lib/db';
+import { logger } from '@/lib/logger';
 
 // GET /api/notifications - Get user's notifications
 export async function GET(request: Request) {
@@ -8,6 +9,7 @@ export async function GET(request: Request) {
     const { userId } = await auth();
 
     if (!userId) {
+      logger.api('/notifications', 'Unauthorized - no userId', { method: 'GET' });
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -54,11 +56,13 @@ export async function GET(request: Request) {
       unreadCount: parseInt(unreadCountResult.rows[0].count),
     });
   } catch (error) {
-    console.error('[API /notifications] ERROR:', error);
+    logger.apiError('/notifications', error, { route: '/notifications', method: 'GET' });
     return NextResponse.json(
       {
         error: 'Internal server error',
-        details: error instanceof Error ? error.message : String(error),
+        ...(process.env.NODE_ENV !== 'production' && {
+          details: error instanceof Error ? error.message : String(error)
+        })
       },
       { status: 500 }
     );
@@ -71,6 +75,7 @@ export async function POST(request: Request) {
     const { userId } = await auth();
 
     if (!userId) {
+      logger.api('/notifications', 'Unauthorized - no userId', { method: 'POST' });
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -118,11 +123,13 @@ export async function POST(request: Request) {
       );
     }
   } catch (error) {
-    console.error('[API /notifications] ERROR:', error);
+    logger.apiError('/notifications', error, { route: '/notifications', method: 'POST' });
     return NextResponse.json(
       {
         error: 'Internal server error',
-        details: error instanceof Error ? error.message : String(error),
+        ...(process.env.NODE_ENV !== 'production' && {
+          details: error instanceof Error ? error.message : String(error)
+        })
       },
       { status: 500 }
     );

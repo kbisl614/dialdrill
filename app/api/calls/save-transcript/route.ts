@@ -7,6 +7,7 @@ import { matchAndSaveObjections } from '@/lib/objection-matcher';
 import { createNotification } from '@/lib/create-notification';
 import { analyzeCallForCoaching, saveCoachingAnalysis } from '@/lib/ai-coach';
 import { analyzeVoiceMetrics, saveVoiceAnalytics } from '@/lib/voice-analytics';
+import { logger } from '@/lib/logger';
 
 interface TranscriptEntry {
   role: 'user' | 'agent';
@@ -114,12 +115,12 @@ export async function POST(request: Request) {
       try {
         // Only run AI analysis for calls that are long enough (>30 seconds)
         if (!isCallTooShort(duration, normalizedTranscript)) {
-          console.log(`[AI Coach] Starting analysis for call ${callLogId}...`);
+          logger.debug('[AI Coach] Starting analysis', { callLogId });
 
           // 1. Generate voice analytics (always runs, doesn't require OpenAI)
           const voiceAnalytics = analyzeVoiceMetrics(normalizedTranscript, duration);
           await saveVoiceAnalytics(pool(), callLogId, voiceAnalytics);
-          console.log(`[Voice Analytics] Saved analytics for call ${callLogId}`);
+          logger.debug('[Voice Analytics] Saved analytics', { callLogId });
 
           // 2. Generate AI coaching insights (requires OpenAI API key)
           if (process.env.OPENAI_API_KEY) {
@@ -139,7 +140,7 @@ export async function POST(request: Request) {
               personalityName
             );
             await saveCoachingAnalysis(pool(), callLogId, coaching);
-            console.log(`[AI Coach] Saved coaching for call ${callLogId}`);
+            logger.debug('[AI Coach] Saved coaching', { callLogId });
 
             // Create notification for coaching insights
             const userInternalId = await pool().query(
@@ -156,14 +157,14 @@ export async function POST(request: Request) {
               });
             }
           } else {
-            console.warn('[AI Coach] Skipping - OPENAI_API_KEY not configured');
+            logger.debug('[AI Coach] Skipping - OPENAI_API_KEY not configured', { callLogId });
           }
         } else {
-          console.log(`[AI Coach] Skipping - call too short (${duration}s)`);
+          logger.debug('[AI Coach] Skipping - call too short', { callLogId, duration });
         }
       } catch (aiError) {
         // Log but don't fail the request if AI analysis fails
-        console.error('[API /calls/save-transcript] AI analysis failed:', aiError);
+        logger.apiError('/calls/save-transcript', aiError, { route: '/calls/save-transcript', step: 'ai-analysis', callLogId });
       }
 
       // ========== GAMIFICATION: Award Power & Update Stats ==========
@@ -201,7 +202,7 @@ export async function POST(request: Request) {
             [durationMinutes, powerGained, user.id]
           );
 
-          console.log(`[Gamification] User earned ${powerGained} power (${basePower} base × ${streakMultiplier} multiplier)`);
+          logger.debug('[Gamification] User earned power', { userId: user.id, powerGained, basePower, streakMultiplier });
 
           // Send power gained notification
           await createNotification({
@@ -222,20 +223,22 @@ export async function POST(request: Request) {
         }
       } catch (gamificationError) {
         // Log but don't fail the request if gamification fails
-        console.error('[API /calls/save-transcript] Gamification failed:', gamificationError);
+        logger.apiError('/calls/save-transcript', gamificationError, { route: '/calls/save-transcript', step: 'gamification' });
       }
     } catch (scoreError) {
       // Log but don't fail the request if scoring fails
-      console.error('[API /calls/save-transcript] Scoring failed:', scoreError);
+      logger.apiError('/calls/save-transcript', scoreError, { route: '/calls/save-transcript', step: 'scoring' });
     }
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('[API /calls/save-transcript] ERROR:', error);
+    logger.apiError('/calls/save-transcript', error, { route: '/calls/save-transcript' });
     return NextResponse.json(
       {
         error: 'Internal server error',
-        details: error instanceof Error ? error.message : String(error),
+        ...(process.env.NODE_ENV !== 'production' && {
+          details: error instanceof Error ? error.message : String(error)
+        }),
       },
       { status: 500 }
     );
@@ -360,7 +363,7 @@ async function checkAndUpgradeBelt(userId: string, powerLevel: number, oldBelt: 
       [belt.tier, belt.belt, userId]
     );
 
-    console.log(`[Gamification] Belt updated to ${belt.tier} ${belt.belt} (${powerLevel} power)`);
+    logger.debug('[Gamification] Belt updated', { userId, belt: `${belt.tier} ${belt.belt}`, powerLevel });
 
     // Send notification if belt changed
     if (newBelt !== oldBelt) {
@@ -428,7 +431,7 @@ async function checkAndAwardBadges(internalUserId: string) {
           [internalUserId]
         );
 
-        console.log(`[Gamification] Badge awarded: ${badge.id}`);
+        logger.debug('[Gamification] Badge awarded', { userId: internalUserId, badgeId: badge.id, badgeName: badge.name });
 
         // Send notification
         await createNotification({

@@ -1,15 +1,16 @@
 import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import { getEntitlements } from '@/lib/entitlements';
+import { logger } from '@/lib/logger';
 
 export async function GET() {
-  console.log('[API /user/entitlements] Request received');
+  logger.api('/user/entitlements', 'Request received');
 
   try {
     const { userId } = await auth();
 
     if (!userId) {
-      console.log('[API /user/entitlements] No userId found');
+      logger.api('/user/entitlements', 'Unauthorized - no userId');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -17,12 +18,10 @@ export async function GET() {
     // This will create the user if they don't exist yet
     const entitlements = await getEntitlements(userId);
 
-    console.log('[API /user/entitlements] Entitlements loaded:', {
+    logger.api('/user/entitlements', 'Entitlements loaded successfully', {
       plan: entitlements.plan,
       canCall: entitlements.canCall,
-      trialCallsRemaining: entitlements.trialCallsRemaining,
-      tokensRemaining: entitlements.tokensRemaining,
-      isOverage: entitlements.isOverage,
+      userId,
     });
 
     // Return full entitlements object
@@ -50,11 +49,13 @@ export async function GET() {
       subscriptionStatus: entitlements.subscriptionStatus,
     });
   } catch (error) {
-    console.error('[API /user/entitlements] ERROR:', error);
+    logger.apiError('/user/entitlements', error, { route: '/user/entitlements' });
     return NextResponse.json(
       {
         error: 'Internal server error',
-        details: error instanceof Error ? error.message : String(error),
+        ...(process.env.NODE_ENV !== 'production' && {
+          details: error instanceof Error ? error.message : String(error)
+        })
       },
       { status: 500 }
     );

@@ -3,14 +3,24 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
+import Toast from '@/components/Toast';
 
 // ⚠️ PASTE YOUR LOOM VIDEO EMBED URL HERE ⚠️
-// Example format: "https://www.loom.com/embed/YOUR_VIDEO_ID"
+// To get your Loom embed URL:
+// 1. Upload your video to Loom
+// 2. Click "Share" → "Embed"
+// 3. Copy the embed URL (format: "https://www.loom.com/embed/YOUR_VIDEO_ID")
+// 4. Paste it below, replacing "PASTE_LOOM_LINK_HERE"
 const LOOM_VIDEO_URL = "PASTE_LOOM_LINK_HERE";
 
 export default function HowItWorksPage() {
   const { isSignedIn } = useAuth();
   const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const [toast, setToast] = useState<{ show: boolean; message: string; type: 'success' | 'error' | 'info' }>({
+    show: false,
+    message: '',
+    type: 'error',
+  });
 
   async function handleStartTrial() {
     if (isSignedIn) {
@@ -36,13 +46,23 @@ export default function HowItWorksPage() {
       window.location.href = url;
     } catch (error) {
       console.error('[How It Works] Checkout failed:', error);
-      alert('Failed to start checkout. Please try again.');
       setCheckoutLoading(false);
+      setToast({
+        show: true,
+        message: 'Failed to start checkout. Please try again.',
+        type: 'error',
+      });
     }
   }
 
   return (
     <main className="min-h-screen bg-[#080d1a] grid-background">
+      <Toast
+        message={toast.message}
+        type={toast.type}
+        show={toast.show}
+        onClose={() => setToast({ ...toast, show: false })}
+      />
       {/* Header */}
       <header className="border-b border-[#1e293b]/50 bg-[#080d1a]/80 backdrop-blur-xl sticky top-0 z-50">
         <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-12">

@@ -267,7 +267,7 @@ export default async function PerformancePage() {
                   return (
                     <Link
                       key={call.callLogId}
-                      href="/history"
+                      href={`/call-summary/${call.callLogId}`}
                       className="block rounded-xl border border-[#1e293b]/50 bg-white/[0.03] p-4 transition hover:bg-white/[0.06] hover:border-[#334155]"
                     >
                       <div className="flex items-center justify-between">

@@ -93,15 +93,15 @@ async function getCallSummary(callLogId: string, userId: string): Promise<CallSu
     return {
       callLog: {
         id: row.id,
-        created_at: row.created_at,
-        duration_seconds: row.duration_seconds,
-        personality_name: row.personality_name,
-        personality_description: row.personality_description,
+        created_at: row.created_at || new Date().toISOString(),
+        duration_seconds: row.duration_seconds || 0,
+        personality_name: row.personality_name || 'Unknown',
+        personality_description: row.personality_description || '',
         transcript,
       },
       score: {
-        overall_score: parseFloat(row.overall_score) || 0,
-        category_scores: row.category_scores || [],
+        overall_score: row.overall_score != null ? parseFloat(String(row.overall_score)) || 0 : 0,
+        category_scores: Array.isArray(row.category_scores) ? row.category_scores : [],
       },
       gamification,
     };

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+// Removed reactbits.dev components - using simple alternatives
 
 interface ProfileDropdownModalProps {
   isOpen: boolean;
@@ -245,7 +246,7 @@ export default function ProfileDropdownModal({ isOpen, onClose, userData, loadin
                 <div className="h-16 w-16 rounded-full bg-gradient-to-br from-[#00d9ff] to-[#9d4edd] p-0.5">
                   <div className="h-full w-full rounded-full bg-[#1A1F2E] flex items-center justify-center">
                     <span className="text-2xl font-bold text-white">
-                      {userData.username.charAt(0).toUpperCase()}
+                      {(userData.username?.charAt(0) || 'U').toUpperCase()}
                     </span>
                   </div>
                 </div>
@@ -287,9 +288,9 @@ export default function ProfileDropdownModal({ isOpen, onClose, userData, loadin
           {/* Power Level Display */}
           <div className="text-center">
             <p className="text-sm text-[#9ca3af] mb-1">Power Level</p>
-            <p className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#00d9ff] to-[#9d4edd]">
+            <span className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#00d9ff] to-[#9d4edd]">
               {userData.currentPower.toLocaleString()}
-            </p>
+            </span>
           </div>
         </div>
 
@@ -345,32 +346,29 @@ export default function ProfileDropdownModal({ isOpen, onClose, userData, loadin
           )}
 
           {/* Tab Navigation */}
-          <div className="mb-6 flex gap-2 border-b border-white/10 overflow-x-auto">
-            {(['statistics', 'notifications', 'badges', 'leaderboard', 'journey'] as TabType[]).map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`pb-3 px-4 text-sm font-semibold transition border-b-2 whitespace-nowrap relative ${
-                  activeTab === tab
-                    ? 'border-[#00d9ff] text-[#00d9ff]'
-                    : 'border-transparent text-[#9ca3af] hover:text-white'
-                }`}
-              >
-                <span className="flex items-center gap-2">
-                  {tab === 'notifications' && (
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                    </svg>
-                  )}
-                  {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                </span>
-                {tab === 'notifications' && unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
-                    {unreadCount > 9 ? '9+' : unreadCount}
-                  </span>
-                )}
-              </button>
-            ))}
+          <div className="mb-6 relative">
+            <div className="flex gap-2 overflow-x-auto">
+              {[
+                { id: 'statistics', label: 'Stats', icon: '📊' },
+                { id: 'notifications', label: unreadCount > 0 ? `Alerts (${unreadCount > 9 ? '9+' : unreadCount})` : 'Alerts', icon: '🔔' },
+                { id: 'badges', label: 'Badges', icon: '🏆' },
+                { id: 'leaderboard', label: 'Ranks', icon: '👑' },
+                { id: 'journey', label: 'Journey', icon: '🥋' },
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id as TabType)}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
+                    activeTab === tab.id
+                      ? 'bg-[#00d9ff] text-[#080d1a] shadow-[0_0_20px_rgba(0,217,255,0.5)]'
+                      : 'bg-[#1e293b] text-[#9ca3af] hover:bg-[#334155] hover:text-white'
+                  }`}
+                >
+                  <span>{tab.icon}</span>
+                  <span>{tab.label}</span>
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Tab Content */}

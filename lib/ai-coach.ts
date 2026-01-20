@@ -194,17 +194,39 @@ Rules:
 - Only include category feedback for categories that are relevant to this call
 - Confidence score should reflect how clear the coaching recommendations are (0.0-1.0)`;
 
-    // Call OpenAI API
-    const response = await openai.chat.completions.create({
-      model: process.env.OPENAI_MODEL || 'gpt-4-turbo',
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userPrompt },
-      ],
-      response_format: { type: 'json_object' },
-      temperature: 0.7,
-      max_tokens: 4000,
-    });
+    // Call OpenAI API with retry and circuit breaker protection
+    const { retryWithCircuitBreaker } = await import('./retry');
+    const response = await retryWithCircuitBreaker(
+      'openai-coaching',
+      () => openai.chat.completions.create({
+        model: process.env.OPENAI_MODEL || 'gpt-4-turbo',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt },
+        ],
+        response_format: { type: 'json_object' },
+        temperature: 0.7,
+        max_tokens: 4000,
+      }),
+      {
+        maxAttempts: 3,
+        initialDelay: 1000,
+        maxDelay: 5000,
+        backoffMultiplier: 2,
+        retryableErrors: [
+          { status: 500 },
+          { status: 502 },
+          { status: 503 },
+          { status: 429 }, // Rate limit - retry after delay
+          { message: 'timeout' },
+          { code: 'ECONNRESET' },
+        ],
+      },
+      {
+        failureThreshold: 5,
+        resetTimeout: 60000, // 1 minute
+      }
+    );
 
     const processingTime = Date.now() - startTime;
     const analysisResult = JSON.parse(response.choices[0].message.content || '{}');
@@ -235,7 +257,7 @@ Rules:
 
     return coaching;
   } catch (error) {
-    console.error('[AI Coach] Error analyzing call:', error);
+    // Error logging handled by retry/circuit breaker wrapper
     throw error;
   }
 }

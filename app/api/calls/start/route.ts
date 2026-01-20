@@ -3,20 +3,20 @@ import { pool } from '@/lib/db';
 import { NextResponse } from 'next/server';
 import { getRandomAgentId } from '@/lib/agent-selector';
 import { getEntitlements, deductCallCredit } from '@/lib/entitlements';
+import { logger } from '@/lib/logger';
 
 export async function POST(request: Request) {
   const perfStart = Date.now();
-  console.log('[API /calls/start] Request received');
+  logger.api('/calls/start', 'Request received');
 
   try {
     const authStart = Date.now();
     const { userId } = await auth();
     const authEnd = Date.now();
-    console.log(`[PERF-API] ${authEnd - perfStart}ms - Clerk auth completed (took ${authEnd - authStart}ms)`);
-    console.log('[API /calls/start] Auth result - userId:', userId);
+    logger.perf('/calls/start:auth', authEnd - authStart, { route: '/calls/start' });
 
     if (!userId) {
-      console.log('[API /calls/start] No userId found - returning 401');
+      logger.api('/calls/start', 'Unauthorized - no userId');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -28,16 +28,14 @@ export async function POST(request: Request) {
     const entitlementsStart = Date.now();
     const entitlements = await getEntitlements(userId);
     const entitlementsEnd = Date.now();
-    console.log(`[PERF-API] ${entitlementsEnd - perfStart}ms - Entitlements loaded (took ${entitlementsEnd - entitlementsStart}ms)`);
-    console.log('[API /calls/start] Entitlements:', {
-      plan: entitlements.plan,
-      canCall: entitlements.canCall,
-      isOverage: entitlements.isOverage,
+    logger.perf('/calls/start:entitlements', entitlementsEnd - entitlementsStart, { 
+      route: '/calls/start',
+      plan: entitlements.plan 
     });
 
     // Check if user can make a call
     if (!entitlements.canCall) {
-      console.log('[API /calls/start] User cannot make calls');
+      logger.api('/calls/start', 'User cannot make calls', { userId });
 
       let errorMessage = "You're out of call credits.";
       if (entitlements.canBuyAnotherTrial) {
@@ -67,7 +65,7 @@ export async function POST(request: Request) {
       }
       agentId = personality.agentId;
       personalityId = personality.id;
-      console.log('[Call] User selected personality:', personality.name);
+      logger.debug('[Call] User selected personality', { personality: personality.name });
     } else {
       // Random selection from unlocked personalities
       const randomPersonality = entitlements.unlockedPersonalities[
@@ -75,17 +73,19 @@ export async function POST(request: Request) {
       ];
       agentId = randomPersonality?.agentId || getRandomAgentId();
       personalityId = randomPersonality?.id || null;
-      console.log('[Call] Randomly selected personality:', randomPersonality?.name || 'default');
+      logger.debug('[Call] Randomly selected personality', { 
+        personality: randomPersonality?.name || 'default' 
+      });
     }
 
     // Deduct credits
     const deductStart = Date.now();
     const deductionResult = await deductCallCredit(userId);
     const deductEnd = Date.now();
-    console.log(`[PERF-API] ${deductEnd - perfStart}ms - Credit deducted (took ${deductEnd - deductStart}ms)`);
+    logger.perf('/calls/start:deduct', deductEnd - deductStart, { route: '/calls/start' });
 
     if (!deductionResult.success) {
-      console.log('[API /calls/start] Failed to deduct credits');
+      logger.api('/calls/start', 'Failed to deduct credits', { userId });
       return NextResponse.json({
         error: 'Failed to deduct credits. Please try again.'
       }, { status: 500 });
@@ -107,8 +107,8 @@ export async function POST(request: Request) {
     callLogId = logResult.rows[0]?.id || null;
 
     const totalTime = Date.now() - perfStart;
-    console.log(`[PERF-API] ${totalTime}ms - ✅ /calls/start TOTAL TIME`);
-    console.log('[API /calls/start] Success - call started');
+    logger.perf('/calls/start:total', totalTime, { route: '/calls/start' });
+    logger.api('/calls/start', 'Call started successfully', { userId, callLogId });
 
     return NextResponse.json({
       agentId,
@@ -119,14 +119,14 @@ export async function POST(request: Request) {
       callLogId,
     });
   } catch (error) {
-    console.error('[API /calls/start] ERROR:', error);
-    console.error('[API /calls/start] Error stack:', error instanceof Error ? error.stack : 'No stack trace');
-    console.error('[API /calls/start] Error message:', error instanceof Error ? error.message : String(error));
+    logger.apiError('/calls/start', error, { route: '/calls/start' });
 
     return NextResponse.json(
       {
         error: 'Internal server error',
-        details: error instanceof Error ? error.message : String(error)
+        ...(process.env.NODE_ENV !== 'production' && {
+          details: error instanceof Error ? error.message : String(error)
+        })
       },
       { status: 500 }
     );
