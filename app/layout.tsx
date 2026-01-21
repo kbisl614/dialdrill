@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import SmoothScrollProvider from "@/components/SmoothScrollProvider";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import "./globals.css";
@@ -23,6 +24,7 @@ export default function RootLayout({
               {children}
             </SmoothScrollProvider>
           </ErrorBoundary>
+          <SpeedInsights />
         </ClerkProvider>
       </body>
     </html>
