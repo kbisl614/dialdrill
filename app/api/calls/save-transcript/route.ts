@@ -188,11 +188,14 @@ export async function POST(request: Request) {
           user.current_streak = streakUpdate.currentStreak;
           user.streak_multiplier = streakUpdate.streakMultiplier;
 
-          // Base power: 5 per call + 2 per minute
-          const basePower = 5 + (durationMinutes * 2);
-          const powerGained = Math.round(basePower * streakMultiplier);
+          // Only award power if call duration is 90 seconds or more
+          const durationSeconds = parsedDuration || 0;
+          const powerGained = durationSeconds >= 90
+            ? Math.round((5 + (durationMinutes * 2)) * streakMultiplier)
+            : 0;
+          const basePower = durationSeconds >= 90 ? 5 + (durationMinutes * 2) : 0;
 
-          // Update user stats
+          // Update user stats (always increment calls/minutes, but only add power if >= 90 seconds)
           await pool().query(
             `UPDATE users
              SET total_calls = total_calls + 1,
@@ -202,21 +205,27 @@ export async function POST(request: Request) {
             [durationMinutes, powerGained, user.id]
           );
 
-          logger.debug('[Gamification] User earned power', { userId: user.id, powerGained, basePower, streakMultiplier });
+          if (powerGained > 0) {
+            logger.debug('[Gamification] User earned power', { userId: user.id, powerGained, basePower, streakMultiplier, durationSeconds });
 
-          // Send power gained notification
-          await createNotification({
-            userId: user.id,
-            type: 'power_gained',
-            title: '⚡ Power Gained!',
-            message: `You earned ${powerGained} power from completing a call! ${streakMultiplier > 1 ? `(${streakMultiplier}x streak bonus)` : ''}`,
-            metadata: { powerGained, basePower, streakMultiplier, durationMinutes },
-          });
+            // Send power gained notification only if power was earned
+            await createNotification({
+              userId: user.id,
+              type: 'power_gained',
+              title: '⚡ Power Gained!',
+              message: `You earned ${powerGained} power from completing a call! ${streakMultiplier > 1 ? `(${streakMultiplier}x streak bonus)` : ''}`,
+              metadata: { powerGained, basePower, streakMultiplier, durationMinutes, durationSeconds },
+            });
+          } else {
+            logger.debug('[Gamification] Call too short for power', { userId: user.id, durationSeconds });
+          }
 
-          // Check and auto-upgrade belt if needed
-          const oldBelt = `${user.current_tier} ${user.current_belt}`;
-          const newPowerLevel = user.power_level + powerGained;
-          await checkAndUpgradeBelt(user.id, newPowerLevel, oldBelt);
+          // Check and auto-upgrade belt if needed (only if power was gained)
+          if (powerGained > 0) {
+            const oldBelt = `${user.current_tier} ${user.current_belt}`;
+            const newPowerLevel = user.power_level + powerGained;
+            await checkAndUpgradeBelt(user.id, newPowerLevel, oldBelt);
+          }
 
           // Check and award badges
           await checkAndAwardBadges(user.id);

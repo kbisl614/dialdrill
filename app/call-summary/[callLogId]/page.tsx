@@ -80,10 +80,13 @@ async function getCallSummary(callLogId: string, userId: string): Promise<CallSu
       }
     }
 
-    // TODO: Get actual gamification data from database
-    // For now, return mock data structure
+    // Calculate power gained - only if call was 90+ seconds
+    const durationSeconds = row.duration_seconds || 0;
+    const powerGained = durationSeconds >= 90 ? Math.floor(row.overall_score * 10) : 0;
+    
+    // TODO: Get actual gamification data from database (badges, belt upgrades)
     const gamification = {
-      powerGained: Math.floor(row.overall_score * 10), // Mock calculation
+      powerGained,
       badgesUnlocked: [], // TODO: Query from badge system
       beltUpgrade: {
         upgraded: false, // TODO: Check if user upgraded

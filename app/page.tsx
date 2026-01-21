@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useAuth, SignUpButton, SignInButton } from '@clerk/nextjs';
 import { motion, useInView, useScroll, useTransform } from 'framer-motion';
 import Link from 'next/link';
-import { BlurText, ChromaGrid, ShimmerButton } from '@/components/ui/react-bits';
+import { BlurText, GalaxyBackground, ShimmerButton } from '@/components/ui/react-bits';
 
 type Testimonial = {
   name: string;
@@ -262,13 +262,10 @@ function HeroSection({ isSignedIn }: { isSignedIn: boolean }) {
 
   return (
     <section ref={ref} className="relative overflow-hidden pt-24 pb-16 lg:pt-28 lg:pb-24">
-      {/* Interactive ChromaGrid Background */}
-      <ChromaGrid
-        colors={['#00d9ff', '#a855f7', '#00ffea', '#9333ea']}
-        cellSize={80}
-        opacity={0.03}
-        interactive={true}
-        animationSpeed={4}
+      {/* Galaxy Background - Brand Colors with Readability Protection */}
+      <GalaxyBackground
+        starCount={200}
+        nebulaIntensity={0.12}
         className="z-0"
       />
       <motion.div style={{ y }} className="radial-glow" />
