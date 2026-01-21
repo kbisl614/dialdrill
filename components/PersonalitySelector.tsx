@@ -182,27 +182,30 @@ export default function PersonalitySelector({
                     </div>
                   </TiltCard>
 
-                  {/* Tooltip */}
+                  {/* Enhanced Info Card on Hover */}
                   {isHovered && (
-                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-30 animate-fadeIn pointer-events-none">
-                      <div className="rounded-xl border border-[#00d9ff]/30 bg-[#0a0f1a] p-3 shadow-[0_0_30px_rgba(0,217,255,0.3)] backdrop-blur-xl max-w-[200px]">
-                        <div className="flex items-center gap-2 mb-2">
-                          <span className="text-2xl">{icon}</span>
-                          <div>
-                            <h4 className="text-sm font-bold text-white leading-tight">{personality.name}</h4>
+                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 z-30 pointer-events-none">
+                      <div className="rounded-2xl border-2 border-[#00d9ff]/40 bg-gradient-to-br from-[#0a0f1a] to-[#1a1f2e] p-5 shadow-[0_0_40px_rgba(0,217,255,0.4)] backdrop-blur-xl max-w-[280px] min-w-[260px] animate-fadeIn">
+                        {/* Header with Icon and Name */}
+                        <div className="flex items-start gap-3 mb-3 pb-3 border-b border-[#00d9ff]/20">
+                          <div className="text-3xl flex-shrink-0">{icon}</div>
+                          <div className="flex-1 min-w-0">
+                            <h4 className="text-base font-bold text-white leading-tight mb-1.5">{personality.name}</h4>
                             {personality.isBoss && (
-                              <span className="inline-block rounded-full bg-[#a855f7]/20 px-1.5 py-0.5 text-[8px] font-bold text-[#d8b4fe]">
-                                BOSS
+                              <span className="inline-block rounded-full bg-[#a855f7]/30 px-2 py-0.5 text-[10px] font-bold text-[#d8b4fe] border border-[#a855f7]/50">
+                                BOSS MODE
                               </span>
                             )}
                           </div>
                         </div>
-                        <p className="text-xs text-[#94a3b8] leading-relaxed">
+                        {/* Description */}
+                        <p className="text-sm text-[#cbd5e1] leading-relaxed whitespace-normal">
                           {personality.description}
                         </p>
                         {/* Arrow */}
-                        <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-[1px]">
-                          <div className="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-[#00d9ff]/30"></div>
+                        <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-[2px]">
+                          <div className="w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-t-[8px] border-t-[#0a0f1a]"></div>
+                          <div className="absolute top-[-1px] left-1/2 -translate-x-1/2 w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-t-[8px] border-t-[#00d9ff]/40"></div>
                         </div>
                       </div>
                     </div>

@@ -13,7 +13,7 @@ import Breadcrumb from '@/components/Breadcrumb';
 import SkeletonLoader from '@/components/SkeletonLoader';
 import Link from 'next/link';
 import { SidebarProvider, useSidebar } from '@/components/SidebarContext';
-import { BlurText, ShimmerButton } from '@/components/ui/react-bits';
+import { BlurText } from '@/components/ui/react-bits';
 
 // Force dynamic rendering for this page
 export const dynamic = 'force-dynamic';
@@ -524,13 +524,9 @@ function DashboardContent() {
               )}
 
               {/* Start Call Button - Enhanced with Maximum Impact */}
-              <ShimmerButton
+              <button
                 onClick={handleStartCall}
-                shimmerColor="#00ffea"
-                shimmerDuration="1.5s"
-                background="linear-gradient(90deg, #00d9ff, #00ffea, #00d9ff)"
-                borderRadius="1rem"
-                className="w-full px-12 py-6 text-2xl text-[#080d1a] disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full rounded-full bg-gradient-to-r from-[#00d9ff] to-[#00ffea] px-6 py-3 text-base font-semibold text-[#080d1a] transition-all hover:scale-[1.02] hover:shadow-[0_0_30px_rgba(0,217,255,0.5)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2"
                 disabled={
                   !entitlements ||
                   !entitlements.canCall ||
@@ -540,26 +536,32 @@ function DashboardContent() {
               >
                 {startingCall ? (
                   <>
-                    <svg className="animate-spin h-6 w-6" fill="none" viewBox="0 0 24 24">
+                    <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    Starting...
+                    <span>Starting...</span>
                   </>
                 ) : (!entitlements || !entitlements.canCall) ? (
-                  '🚫 No Credits'
+                  <>
+                    <span>🚫</span>
+                    <span>No Credits</span>
+                  </>
                 ) : selectionMode === 'select' && !selectedPersonalityId ? (
-                  '👆 Pick One'
+                  <>
+                    <span>👆</span>
+                    <span>Pick One</span>
+                  </>
                 ) : (
                   <>
-                    <span className="text-2xl">🎯</span>
-                    Let&apos;s Go
-                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    <span>🎯</span>
+                    <span>Start Call</span>
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
                   </>
                 )}
-              </ShimmerButton>
+              </button>
 
               {entitlements && !entitlements.canCall && entitlements.plan === 'trial' && (
                 <div className="mt-6 text-center animate-fadeIn">

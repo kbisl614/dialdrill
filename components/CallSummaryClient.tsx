@@ -324,9 +324,18 @@ export default function CallSummaryClient({ summary }: CallSummaryClientProps) {
           transition={{ delay: 1.2 }}
           className="flex flex-col sm:flex-row gap-4 justify-center"
         >
+          <Link
+            href="/dashboard"
+            className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#00d9ff] to-[#00ffea] px-8 py-4 text-lg font-semibold text-[#080d1a] transition hover:scale-105 hover:shadow-[0_0_30px_rgba(0,217,255,0.5)] shadow-lg"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Back to Dashboard
+          </Link>
           <button
             onClick={() => router.push('/dashboard')}
-            className="rounded-full bg-gradient-to-r from-[#00d9ff] to-[#00ffea] px-8 py-4 text-lg font-semibold text-[#080d1a] transition hover:scale-105 shadow-lg"
+            className="rounded-full bg-white/10 hover:bg-white/20 border border-white/20 px-8 py-4 text-lg font-semibold text-white transition hover:scale-105"
           >
             Practice Again
           </button>
