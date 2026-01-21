@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-// Removed reactbits.dev components - using simple alternatives
+import { PillNavigation, AnimatedNumber, LetterGlitch, Spotlight } from '@/components/ui/react-bits';
 
 interface ProfileDropdownModalProps {
   isOpen: boolean;
@@ -288,9 +288,13 @@ export default function ProfileDropdownModal({ isOpen, onClose, userData, loadin
           {/* Power Level Display */}
           <div className="text-center">
             <p className="text-sm text-[#9ca3af] mb-1">Power Level</p>
-            <span className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#00d9ff] to-[#9d4edd]">
-              {userData.currentPower.toLocaleString()}
-            </span>
+            <AnimatedNumber
+              value={userData.currentPower}
+              duration={2000}
+              className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#00d9ff] to-[#9d4edd]"
+              formatOptions={{ useGrouping: true }}
+              springConfig={{ stiffness: 80, damping: 25 }}
+            />
           </div>
         </div>
 
@@ -345,30 +349,27 @@ export default function ProfileDropdownModal({ isOpen, onClose, userData, loadin
             </div>
           )}
 
-          {/* Tab Navigation */}
+          {/* Tab Navigation - Enhanced with PillNavigation */}
           <div className="mb-6 relative">
-            <div className="flex gap-2 overflow-x-auto">
-              {[
-                { id: 'statistics', label: 'Stats', icon: '📊' },
-                { id: 'notifications', label: unreadCount > 0 ? `Alerts (${unreadCount > 9 ? '9+' : unreadCount})` : 'Alerts', icon: '🔔' },
-                { id: 'badges', label: 'Badges', icon: '🏆' },
-                { id: 'leaderboard', label: 'Ranks', icon: '👑' },
-                { id: 'journey', label: 'Journey', icon: '🥋' },
-              ].map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id as TabType)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
-                    activeTab === tab.id
-                      ? 'bg-[#00d9ff] text-[#080d1a] shadow-[0_0_20px_rgba(0,217,255,0.5)]'
-                      : 'bg-[#1e293b] text-[#9ca3af] hover:bg-[#334155] hover:text-white'
-                  }`}
-                >
-                  <span>{tab.icon}</span>
-                  <span>{tab.label}</span>
-                </button>
-              ))}
-            </div>
+            <PillNavigation
+              tabs={[
+                { id: 'statistics', label: 'Stats', icon: <span>📊</span> },
+                {
+                  id: 'notifications',
+                  label: unreadCount > 0 ? `Alerts (${unreadCount > 9 ? '9+' : unreadCount})` : 'Alerts',
+                  icon: <span>🔔</span>
+                },
+                { id: 'badges', label: 'Badges', icon: <span>🏆</span> },
+                { id: 'leaderboard', label: 'Ranks', icon: <span>👑</span> },
+                { id: 'journey', label: 'Journey', icon: <span>🥋</span> },
+              ]}
+              activeTab={activeTab}
+              onTabChange={(tabId) => setActiveTab(tabId as TabType)}
+              pillColor="#00d9ff"
+              textColor="rgba(156, 163, 175, 1)"
+              activeTextColor="#080d1a"
+              className="w-full"
+            />
           </div>
 
           {/* Tab Content */}
