@@ -25,7 +25,7 @@ export default function GalaxyBackground({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const starsRef = useRef<Star[]>([]);
-  const animationFrameRef = useRef<number>();
+  const animationFrameRef = useRef<number | undefined>(undefined);
 
   // Initialize stars
   useEffect(() => {
@@ -144,12 +144,12 @@ export default function GalaxyBackground({
         className={`fixed inset-0 pointer-events-none ${className}`}
         style={{ zIndex: 0 }}
       />
-      {/* Subtle dark overlay to ensure text readability */}
+      {/* Subtle dark overlay to ensure text readability - protects hero area */}
       <div
         className="fixed inset-0 pointer-events-none"
         style={{
           zIndex: 1,
-          background: 'radial-gradient(ellipse at center top, transparent 0%, rgba(8, 13, 26, 0.4) 50%, rgba(8, 13, 26, 0.7) 100%)',
+          background: 'radial-gradient(ellipse 120% 60% at 50% 35%, rgba(8, 13, 26, 0.5) 0%, rgba(8, 13, 26, 0.3) 40%, transparent 70%)',
         }}
       />
     </>
