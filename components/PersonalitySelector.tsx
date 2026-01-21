@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-// Removed reactbits.dev components - using simple alternatives
+import { TiltCard, LetterGlitch } from '@/components/ui/react-bits';
 
 export type Personality = {
   id: string;
@@ -120,21 +120,15 @@ export default function PersonalitySelector({
               const isHovered = hoveredPersonality === personality.id;
               return (
                 <div key={personality.id} className="relative">
-                  <div
+                  <TiltCard
+                    tiltAmount={isUnlocked ? 18 : 5}
+                    glowColor={isSelected ? 'rgba(0, 217, 255, 0.5)' : personality.isBoss ? 'rgba(168, 85, 247, 0.4)' : 'rgba(0, 217, 255, 0.3)'}
+                    spotlightSize={300}
+                    borderColor={isSelected ? '#00d9ff' : isUnlocked ? '#00d9ff' : '#1e293b'}
+                    backgroundColor={isUnlocked ? 'rgba(15, 23, 42, 0.6)' : 'rgba(0, 0, 0, 0.4)'}
+                    disabled={!isUnlocked}
                     onClick={() => (isUnlocked ? onSelectPersonality(personality.id) : onRequestUpgrade())}
-                    className={`relative rounded-xl border-2 transition-all duration-300 w-full ${
-                      !isUnlocked ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'
-                    } ${
-                      isSelected
-                        ? 'border-[#00d9ff] shadow-[0_0_30px_rgba(0,217,255,0.5)] ring-2 ring-[#00d9ff]'
-                        : isUnlocked
-                        ? 'border-[#00d9ff] shadow-[0_0_20px_rgba(0,217,255,0.3)]'
-                        : 'border-[#1e293b]'
-                    } ${
-                      isUnlocked
-                        ? 'bg-gradient-to-br from-[rgba(15,23,42,0.6)] to-[rgba(5,9,17,0.8)]'
-                        : 'bg-gradient-to-br from-[rgba(0,0,0,0.4)] to-[rgba(0,0,0,0.6)]'
-                    } ${isHovered && isUnlocked ? 'scale-105 -translate-y-1' : ''}`}
+                    className={`w-full cursor-pointer ${isSelected ? 'ring-2 ring-[#00d9ff]' : ''}`}
                   >
                     <div
                       className="relative flex flex-col items-center p-4 text-center"
@@ -155,7 +149,17 @@ export default function PersonalitySelector({
                         {icon}
                       </div>
                       <h3 className="text-sm font-bold text-white leading-tight mb-1">
-                        {personality.name}
+                        {isHovered && isUnlocked ? (
+                          <LetterGlitch
+                            text={personality.name}
+                            glitchColors={personality.isBoss ? ['#a855f7', '#d946ef', '#9333ea'] : ['#00d9ff', '#00ffea', '#a855f7']}
+                            speed={40}
+                            trigger="always"
+                            intensity="high"
+                          />
+                        ) : (
+                          personality.name
+                        )}
                       </h3>
                       {personality.isBoss && (
                         <span className="inline-block rounded-full bg-[#a855f7]/20 px-2 py-0.5 text-[9px] font-bold text-[#d8b4fe] shadow-[0_0_10px_rgba(168,85,247,0.4)]">
@@ -176,7 +180,7 @@ export default function PersonalitySelector({
                         </svg>
                       </div>
                     </div>
-                  </div>
+                  </TiltCard>
 
                   {/* Tooltip */}
                   {isHovered && (

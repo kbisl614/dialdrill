@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useAuth, SignUpButton, SignInButton } from '@clerk/nextjs';
 import { motion, useInView, useScroll, useTransform } from 'framer-motion';
 import Link from 'next/link';
-// Removed reactbits.dev components - using simple alternatives
+import { BlurText, ChromaGrid, ShimmerButton } from '@/components/ui/react-bits';
 
 type Testimonial = {
   name: string;
@@ -262,7 +262,15 @@ function HeroSection({ isSignedIn }: { isSignedIn: boolean }) {
 
   return (
     <section ref={ref} className="relative overflow-hidden pt-24 pb-16 lg:pt-28 lg:pb-24">
-      {/* Simple gradient background - removed ChromaGrid */}
+      {/* Interactive ChromaGrid Background */}
+      <ChromaGrid
+        colors={['#00d9ff', '#a855f7', '#00ffea', '#9333ea']}
+        cellSize={80}
+        opacity={0.03}
+        interactive={true}
+        animationSpeed={4}
+        className="z-0"
+      />
       <motion.div style={{ y }} className="radial-glow" />
       <div className="relative z-10 mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-12">
         {/* Pill Badge */}
@@ -293,8 +301,18 @@ function HeroSection({ isSignedIn }: { isSignedIn: boolean }) {
               transition={{ duration: 0.8, delay: 0.3 }}
               className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl"
             >
-              <span className="text-white">Less awkward calls.</span>{' '}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00d9ff] to-[#00ffea]">Stronger closes.</span>
+              <BlurText
+                text="Less awkward calls."
+                delay={100}
+                animateBy="words"
+                className="text-white"
+              />{' '}
+              <BlurText
+                text="Stronger closes."
+                delay={150}
+                animateBy="words"
+                className="text-transparent bg-clip-text bg-gradient-to-r from-[#00d9ff] to-[#00ffea]"
+              />
             </motion.h1>
             <motion.p
               initial={{ opacity: 0, y: 30 }}
