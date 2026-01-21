@@ -9,6 +9,7 @@
     "baseColor": "zinc",
     "cssVariables": true
   },
+  "iconLibrary": "radix",
   "aliases": {
     "components": "@/components",
     "utils": "@/lib/utils",
@@ -16,15 +17,7 @@
     "lib": "@/lib",
     "hooks": "@/hooks"
   },
-  "registries": [
-    {
-      "name": "default",
-      "url": "https://ui.shadcn.com"
-    },
-    {
-      "name": "@react-bits",
-      "url": "https://shadcnregistry.com/react-bits/{name}.json"
-    }
-  ]
+  "registries": {
+    "@react-bits": "https://reactbits.dev/r/{name}.json"
+  }
 }
-

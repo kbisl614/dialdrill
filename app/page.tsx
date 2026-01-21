@@ -4,7 +4,8 @@ import { useState, useRef, useEffect } from 'react';
 import { useAuth, SignUpButton, SignInButton } from '@clerk/nextjs';
 import { motion, useInView, useScroll, useTransform } from 'framer-motion';
 import Link from 'next/link';
-import { BlurText, GalaxyBackground, ShimmerButton } from '@/components/ui/react-bits';
+import { BlurText, ShimmerButton } from '@/components/ui/react-bits';
+import Threads from '@/components/Threads';
 
 type Testimonial = {
   name: string;
@@ -262,11 +263,22 @@ function HeroSection({ isSignedIn }: { isSignedIn: boolean }) {
 
   return (
     <section ref={ref} className="relative overflow-hidden pt-24 pb-16 lg:pt-28 lg:pb-24">
-      {/* Galaxy Background - Brand Colors with Readability Protection */}
-      <GalaxyBackground
-        starCount={200}
-        nebulaIntensity={0.12}
-        className="z-0"
+      {/* Threads Background - Interactive animated threads matching DialDrill brand colors */}
+      <Threads
+        color={[0, 217, 255]} // DialDrill cyan #00d9ff in RGB
+        amplitude={1.2}
+        distance={0.3}
+        enableMouseInteraction={true}
+        className="fixed inset-0 opacity-30"
+        style={{ zIndex: 0 }}
+      />
+      {/* Readability protection overlay */}
+      <div
+        className="fixed inset-0 pointer-events-none"
+        style={{
+          zIndex: 1,
+          background: 'radial-gradient(ellipse 120% 60% at 50% 35%, rgba(8, 13, 26, 0.6) 0%, rgba(8, 13, 26, 0.3) 40%, transparent 70%)',
+        }}
       />
       <motion.div style={{ y }} className="radial-glow" />
       <div className="relative z-10 mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-12">
