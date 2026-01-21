@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import type { HTMLAttributes } from 'react';
 import { Renderer, Program, Mesh, Triangle, Color } from 'ogl';
 import './Threads.css';
 
@@ -121,12 +122,11 @@ void main() {
 }
 `;
 
-interface ThreadsProps {
-  color?: [number, number, number];
+interface ThreadsProps extends Omit<HTMLAttributes<HTMLDivElement>, 'color'> {
+  color?: [number, number, number]; // RGB color array for the threads
   amplitude?: number;
   distance?: number;
   enableMouseInteraction?: boolean;
-  className?: string;
 }
 
 export default function Threads({ 
@@ -135,10 +135,11 @@ export default function Threads({
   distance = 0.3, 
   enableMouseInteraction = true,
   className = '',
+  style,
   ...rest 
 }: ThreadsProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const animationFrameId = useRef<number>();
+  const animationFrameId = useRef<number | undefined>(undefined);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -238,7 +239,10 @@ export default function Threads({
     <div 
       ref={containerRef} 
       className={`threads-container ${className}`} 
-      style={{ pointerEvents: enableMouseInteraction ? 'auto' : 'none' }}
+      style={{ 
+        pointerEvents: enableMouseInteraction ? 'auto' : 'none',
+        ...style 
+      }}
       {...rest} 
     />
   );
