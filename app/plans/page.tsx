@@ -476,7 +476,7 @@ function PlansPageContent() {
             </div>
 
             <div className="mt-10 text-center">
-              <Link href="/dashboard" legacyBehavior>
+              <Link href="/dashboard" >
                 <Button variant="primary" size="md">
                   Back to Dashboard
                 </Button>

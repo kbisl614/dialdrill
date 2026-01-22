@@ -26,14 +26,14 @@ interface PersonalitySelectorProps {
 
 const personalityIcons: Record<string, string> = {
   Josh: '🛠️',
-  zenia: '🌸',
+  Zenia: '🌸',
   Marcus: '🏋️',
-  'The wolf': '🐺',
+  'The Wolf': '🐺',
   'The Shark': '🦈',
   'The Titan': '🏛️',
   Matrix: '🔴',
   Neo: '⚡',
-  'Sales Prospect - Objection Handler': '💼',
+  'Sales Prospect': '💼',
 };
 
 export default function PersonalitySelector({

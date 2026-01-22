@@ -1,12 +1,15 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { useAuth, SignUpButton, SignInButton } from '@clerk/nextjs';
 import { motion, useInView, useScroll, useTransform } from 'framer-motion';
 import Link from 'next/link';
 import { BlurText } from '@/components/ui/react-bits';
 import Threads from '@/components/Threads';
 import Button from '@/components/ui/Button';
+
+// Memoized color to prevent Threads WebGL context recreation on re-renders
+const THREADS_COLOR: [number, number, number] = [0, 217, 255];
 
 type Testimonial = {
   name: string;
@@ -143,11 +146,23 @@ export default function Home() {
               <a href="#how-it-works" className="text-sm font-medium text-[var(--color-text-muted)] transition-colors hover:text-white">
                 How it Works
               </a>
+              <a href="#pricing" className="text-sm font-medium text-[var(--color-text-muted)] transition-colors hover:text-white">
+                Pricing
+              </a>
               <a href="#testimonials" className="text-sm font-medium text-[var(--color-text-muted)] transition-colors hover:text-white">
                 Testimonials
               </a>
+              <a href="#security" className="text-sm font-medium text-[var(--color-text-muted)] transition-colors hover:text-white">
+                Security
+              </a>
+              <a href="#faq" className="text-sm font-medium text-[var(--color-text-muted)] transition-colors hover:text-white">
+                FAQ
+              </a>
+              <a href="#contact" className="text-sm font-medium text-[var(--color-text-muted)] transition-colors hover:text-white">
+                Contact
+              </a>
               {isSignedIn ? (
-                <Link href="/dashboard" legacyBehavior>
+                <Link href="/dashboard" >
                   <Button variant="primary" size="sm">
                     Go to Dashboard
                   </Button>
@@ -202,15 +217,43 @@ export default function Home() {
                 How it Works
               </a>
               <a
+                href="#pricing"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block px-4 py-2 text-sm font-medium text-[var(--color-text-muted)] transition-colors hover:text-white hover:bg-white/5 rounded-lg"
+              >
+                Pricing
+              </a>
+              <a
                 href="#testimonials"
                 onClick={() => setMobileMenuOpen(false)}
                 className="block px-4 py-2 text-sm font-medium text-[var(--color-text-muted)] transition-colors hover:text-white hover:bg-white/5 rounded-lg"
               >
                 Testimonials
               </a>
+              <a
+                href="#security"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block px-4 py-2 text-sm font-medium text-[var(--color-text-muted)] transition-colors hover:text-white hover:bg-white/5 rounded-lg"
+              >
+                Security
+              </a>
+              <a
+                href="#faq"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block px-4 py-2 text-sm font-medium text-[var(--color-text-muted)] transition-colors hover:text-white hover:bg-white/5 rounded-lg"
+              >
+                FAQ
+              </a>
+              <a
+                href="#contact"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block px-4 py-2 text-sm font-medium text-[var(--color-text-muted)] transition-colors hover:text-white hover:bg-white/5 rounded-lg"
+              >
+                Contact
+              </a>
               <div className="px-4 pt-2">
                 {isSignedIn ? (
-                  <Link href="/dashboard" legacyBehavior>
+                  <Link href="/dashboard" >
                     <Button variant="primary" size="sm" fullWidth>
                       Go to Dashboard
                     </Button>
@@ -229,10 +272,15 @@ export default function Home() {
       </motion.header>
 
       <HeroSection isSignedIn={!!isSignedIn} />
+      <TrustedByStrip />
       <MetricsStrip />
       <FeaturesSection features={features} activeTab={activeTab} setActiveTab={setActiveTab} />
       <HowItWorksSection />
+      <PricingSection isSignedIn={!!isSignedIn} />
       <TestimonialsSection testimonials={testimonials} />
+      <SecurityPrivacySection />
+      <FAQSection />
+      <ContactSection />
       <FinalCTA isSignedIn={!!isSignedIn} />
       <Footer />
 
@@ -270,7 +318,7 @@ function HeroSection({ isSignedIn }: { isSignedIn: boolean }) {
     <section ref={ref} className="relative overflow-hidden pt-24 pb-16 lg:pt-28 lg:pb-24">
       {/* Threads Background - Interactive animated threads matching DialDrill brand colors */}
       <Threads
-        color={[0, 217, 255]} // DialDrill cyan #00d9ff in RGB
+        color={THREADS_COLOR}
         amplitude={1.2}
         distance={0.3}
         enableMouseInteraction={true}
@@ -344,7 +392,7 @@ function HeroSection({ isSignedIn }: { isSignedIn: boolean }) {
               className="mt-8 flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start"
             >
               {isSignedIn ? (
-                <Link href="/dashboard" legacyBehavior>
+                <Link href="/dashboard" >
                   <Button variant="primary" size="md" className="btn-glow group">
                     Go to Dashboard
                     <svg
@@ -519,6 +567,40 @@ function DashboardCard() {
         </div>
       </div>
     </div>
+  );
+}
+
+function TrustedByStrip() {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: false, amount: 0.4 });
+  const logos = ['CloudScale', 'TechFlow', 'GrowthLabs', 'Northwind', 'SignalForge', 'BluePeak'];
+
+  return (
+    <section ref={ref} className="relative border-y border-[var(--color-border-subtle)]/50 bg-[var(--color-dark-bg)]/60 py-10">
+      <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-12">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+          transition={{ duration: 0.5 }}
+          className="text-center"
+        >
+          <p className="text-sm uppercase tracking-[0.3em] text-[var(--color-text-muted)]">Trusted by high-performing teams</p>
+        </motion.div>
+        <div className="mt-6 grid grid-cols-2 gap-4 text-center sm:grid-cols-3 lg:grid-cols-6">
+          {logos.map((logo, index) => (
+            <motion.div
+              key={logo}
+              initial={{ opacity: 0, y: 20 }}
+              animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+              transition={{ duration: 0.5, delay: index * 0.08 }}
+              className="rounded-xl border border-[var(--color-border-subtle)]/50 bg-[var(--color-card-bg)]/20 px-4 py-3 text-sm font-semibold text-[var(--color-text-secondary)]"
+            >
+              {logo}
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -820,6 +902,283 @@ function TestimonialsSection({ testimonials }: { testimonials: Testimonial[] }) 
   );
 }
 
+function PricingSection({ isSignedIn }: { isSignedIn: boolean }) {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: false, amount: 0.2 });
+  const plans = [
+    {
+      name: 'Starter Trial',
+      price: '$5',
+      cadence: 'one-time',
+      highlight: 'Great for first-time users',
+      features: ['5 AI practice calls', '3 base personalities', '90 second call limit', 'Up to 2 trial packs'],
+      cta: 'Start trial',
+      tone: 'from-[var(--color-cyan-bright)] to-[var(--color-cyan-bright-alt-2)]',
+    },
+    {
+      name: 'Pro',
+      price: '$11.99',
+      cadence: '/month',
+      highlight: 'Best for teams and reps',
+      features: ['20 minutes per month', 'All 8 personalities', '5 minute call limit', '$1/min overage', 'Priority support'],
+      cta: 'See full pricing',
+      tone: 'from-[#fbbf24] to-[#f97316]',
+    },
+  ];
+
+  return (
+    <section ref={ref} id="pricing" className="section-fade-top relative border-t border-[var(--color-border-subtle)]/50 py-20 lg:py-28">
+      <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-12">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+          transition={{ duration: 0.6 }}
+          className="mb-12 text-center"
+        >
+          <h2 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl lg:text-5xl">
+            Simple <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-cyan-bright)] to-[#00ffea]">pricing</span>
+          </h2>
+          <p className="mt-4 text-base text-[var(--color-text-secondary)]">
+            Start small, scale up as your reps get sharper.
+          </p>
+        </motion.div>
+
+        <div className="grid gap-8 lg:grid-cols-2">
+          {plans.map((plan, index) => (
+            <motion.div
+              key={plan.name}
+              initial={{ opacity: 0, y: 40 }}
+              animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
+              transition={{ duration: 0.6, delay: index * 0.1 }}
+              className="relative overflow-hidden rounded-3xl border border-[var(--color-border-subtle)]/50 bg-gradient-to-br from-card-bg to-[rgba(5,9,17,0.8)] p-6 shadow-[0_20px_50px_rgba(0,0,0,0.7)] backdrop-blur-xl"
+            >
+              <div className={`absolute right-0 top-0 h-40 w-40 -translate-y-1/2 translate-x-1/2 rounded-full bg-gradient-to-br ${plan.tone} opacity-20 blur-3xl`}></div>
+              <div className="relative">
+                <p className="text-sm uppercase tracking-[0.2em] text-[var(--color-text-muted)]">{plan.highlight}</p>
+                <h3 className="mt-2 text-2xl font-bold text-white">{plan.name}</h3>
+                <div className="mt-4 flex items-end gap-2">
+                  <span className="text-4xl font-extrabold text-white">{plan.price}</span>
+                  <span className="text-sm text-[var(--color-text-muted)]">{plan.cadence}</span>
+                </div>
+                <ul className="mt-6 space-y-3 text-sm text-[var(--color-text-secondary)]">
+                  {plan.features.map((feature) => (
+                    <li key={feature} className="flex items-center gap-2">
+                      <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-cyan-bright)]"></span>
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
+                <div className="mt-8">
+                  {isSignedIn ? (
+                    <Link href="/plans">
+                      <Button variant="primary" size="md" className="w-full">
+                        {plan.cta}
+                      </Button>
+                    </Link>
+                  ) : (
+                    <SignUpButton mode="modal">
+                      <Button variant="primary" size="md" className="w-full">
+                        {plan.cta}
+                      </Button>
+                    </SignUpButton>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+
+        <div className="mt-8 text-center text-sm text-[var(--color-text-muted)]">
+          Need enterprise pricing or a custom domain? <Link href="/plans" className="text-[var(--color-cyan-bright)] hover:text-white">Contact sales</Link>.
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function SecurityPrivacySection() {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: false, amount: 0.2 });
+  const items = [
+    {
+      title: 'Privacy controls',
+      description: 'Set your profile visibility, hide your stats from others, and opt out of public leaderboards.',
+    },
+    {
+      title: 'Data handling',
+      description: 'Your practice calls, scores, and transcripts stay inside your account and are never shared publicly without your consent.',
+    },
+    {
+      title: 'Secure access',
+      description: 'Protected by Clerk authentication, server-side rate limiting, and monitored error reporting.',
+    },
+  ];
+
+  return (
+    <section ref={ref} id="security" className="section-fade-top relative border-t border-[var(--color-border-subtle)]/50 py-20 lg:py-28">
+      <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-12">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+          transition={{ duration: 0.6 }}
+          className="mb-12 text-center"
+        >
+          <h2 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
+            Security & <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-cyan-bright)] to-[#00ffea]">privacy</span>
+          </h2>
+          <p className="mt-4 text-base text-[var(--color-text-secondary)]">
+            Built for teams that care about protecting data and reputation.
+          </p>
+        </motion.div>
+
+        <div className="grid gap-6 lg:grid-cols-3">
+          {items.map((item, index) => (
+            <motion.div
+              key={item.title}
+              initial={{ opacity: 0, y: 30 }}
+              animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+              transition={{ duration: 0.6, delay: index * 0.1 }}
+              className="rounded-3xl border border-[var(--color-border-subtle)]/50 bg-gradient-to-br from-card-bg to-[rgba(5,9,17,0.8)] p-6 shadow-[0_20px_40px_rgba(0,0,0,0.5)] backdrop-blur-xl"
+            >
+              <h3 className="text-xl font-semibold text-white">{item.title}</h3>
+              <p className="mt-3 text-sm text-[var(--color-text-secondary)]">{item.description}</p>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function FAQSection() {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: false, amount: 0.2 });
+  const faqs = [
+    {
+      question: 'How quickly can my team start?',
+      answer: 'Create an account, pick a plan, and start practicing in minutes. No setup required.',
+    },
+    {
+      question: 'What do reps get after each call?',
+      answer: 'Instant scoring across key areas, a transcript, and targeted feedback on objections.',
+    },
+    {
+      question: 'Can I cancel anytime?',
+      answer: 'Yes. You can manage or cancel your plan from the billing page at any time.',
+    },
+    {
+      question: 'Do you support teams and managers?',
+      answer: 'Yes. Managers can review performance trends and focus coaching sessions where it matters most.',
+    },
+    {
+      question: 'Do you offer custom pricing?',
+      answer: 'We do for teams that need multiple seats or custom usage. Reach out to sales for details.',
+    },
+    {
+      question: 'How do privacy controls work?',
+      answer: 'You can set your profile visibility, hide stats publicly, and opt out of the leaderboard.',
+    },
+  ];
+
+  return (
+    <section ref={ref} id="faq" className="section-fade-top relative border-t border-[var(--color-border-subtle)]/50 py-20 lg:py-28">
+      <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-12">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+          transition={{ duration: 0.6 }}
+          className="mb-12 text-center"
+        >
+          <h2 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
+            Frequently asked <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-cyan-bright)] to-[#00ffea]">questions</span>
+          </h2>
+          <p className="mt-4 text-base text-[var(--color-text-secondary)]">
+            Everything you need to know before your first call.
+          </p>
+        </motion.div>
+
+        <div className="grid gap-6 lg:grid-cols-2">
+          {faqs.map((faq, index) => (
+            <motion.div
+              key={faq.question}
+              initial={{ opacity: 0, y: 30 }}
+              animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+              transition={{ duration: 0.6, delay: index * 0.05 }}
+              className="rounded-3xl border border-[var(--color-border-subtle)]/50 bg-gradient-to-br from-card-bg to-[rgba(5,9,17,0.8)] p-6 shadow-[0_20px_40px_rgba(0,0,0,0.5)] backdrop-blur-xl"
+            >
+              <h3 className="text-lg font-semibold text-white">{faq.question}</h3>
+              <p className="mt-3 text-sm text-[var(--color-text-secondary)]">{faq.answer}</p>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function ContactSection() {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: false, amount: 0.2 });
+  const contacts = [
+    {
+      title: 'Sales',
+      description: 'Questions about pricing, seats, or custom domains?',
+      email: 'sales@dialdrill.ai',
+    },
+    {
+      title: 'Support',
+      description: 'Need help or found a bug? We respond fast.',
+      email: 'support@dialdrill.ai',
+    },
+    {
+      title: 'Security',
+      description: 'Request security docs or report a vulnerability.',
+      email: 'security@dialdrill.ai',
+    },
+  ];
+
+  return (
+    <section ref={ref} id="contact" className="section-fade-top relative border-t border-[var(--color-border-subtle)]/50 py-20 lg:py-28">
+      <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-12">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+          transition={{ duration: 0.6 }}
+          className="mb-12 text-center"
+        >
+          <h2 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
+            Contact <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-cyan-bright)] to-[#00ffea]">DialDrill</span>
+          </h2>
+          <p className="mt-4 text-base text-[var(--color-text-secondary)]">
+            We’re here to help with onboarding, billing, and security.
+          </p>
+        </motion.div>
+
+        <div className="grid gap-6 lg:grid-cols-3">
+          {contacts.map((contact, index) => (
+            <motion.div
+              key={contact.title}
+              initial={{ opacity: 0, y: 30 }}
+              animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+              transition={{ duration: 0.6, delay: index * 0.1 }}
+              className="rounded-3xl border border-[var(--color-border-subtle)]/50 bg-gradient-to-br from-card-bg to-[rgba(5,9,17,0.8)] p-6 shadow-[0_20px_40px_rgba(0,0,0,0.5)] backdrop-blur-xl"
+            >
+              <h3 className="text-lg font-semibold text-white">{contact.title}</h3>
+              <p className="mt-3 text-sm text-[var(--color-text-secondary)]">{contact.description}</p>
+              <a
+                href={`mailto:${contact.email}`}
+                className="mt-4 inline-flex items-center text-sm font-semibold text-[var(--color-cyan-bright)] transition-colors hover:text-white"
+              >
+                {contact.email}
+              </a>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function FinalCTA({ isSignedIn }: { isSignedIn: boolean }) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: false, amount: 0.5 });
@@ -851,7 +1210,7 @@ function FinalCTA({ isSignedIn }: { isSignedIn: boolean }) {
           className="mt-8 flex flex-col sm:flex-row items-center gap-4 justify-center"
         >
           {isSignedIn ? (
-            <Link href="/dashboard" legacyBehavior>
+            <Link href="/dashboard" >
               <Button variant="primary" size="lg" className="btn-glow group">
                 Go to Dashboard
                 <svg

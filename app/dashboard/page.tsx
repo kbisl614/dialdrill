@@ -562,7 +562,7 @@ function DashboardContent() {
 
               {entitlements && !entitlements.canCall && entitlements.plan === 'trial' && (
                 <div className="mt-6 text-center animate-fadeIn">
-                  <Link href="/plans" legacyBehavior>
+                  <Link href="/plans">
                     <Button variant="purple" size="lg" className="group/upgrade">
                       <span className="group-hover/upgrade:scale-110 transition-transform duration-300">✨</span>
                       Unlock More
@@ -660,7 +660,7 @@ function DashboardContent() {
                   </div>
                 )}
                 {entitlements?.plan === 'trial' && (
-                  <Link href="/plans" legacyBehavior>
+                  <Link href="/plans">
                     <Button variant="purple" size="sm" fullWidth className="group/upgrade-btn mt-3">
                       <span className="group-hover/upgrade-btn:scale-110 transition-transform duration-300">✨</span>
                       Upgrade
@@ -734,7 +734,7 @@ function DashboardContent() {
               Upgrade to the Pro plan to access The Wolf, The Shark, and three more advanced personalities.
             </p>
             <div className="mt-6 flex flex-col gap-3">
-              <Link href="/plans" legacyBehavior>
+              <Link href="/plans">
                 <Button
                   variant="purple"
                   size="sm"

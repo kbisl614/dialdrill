@@ -30,7 +30,7 @@ export default function NotFound() {
           <p className="text-lg text-[var(--color-text-secondary)] mb-10 max-w-md mx-auto">
             The page you&apos;re looking for doesn&apos;t exist or has been moved. Let&apos;s get you back on track.
           </p>
-          <Link href="/" legacyBehavior>
+          <Link href="/" >
             <Button variant="primary" size="md">
               Back to Home
             </Button>

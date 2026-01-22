@@ -161,7 +161,7 @@ export default async function PerformancePage() {
           <div className="rounded-3xl border border-[var(--color-border-subtle)]/50 bg-white/[0.02] p-12 text-center text-[var(--color-text-secondary)]">
             <p className="text-xl font-semibold text-white mb-2">No scored calls yet</p>
             <p>Complete a practice call to see your performance metrics here.</p>
-            <Link href="/dashboard" legacyBehavior>
+            <Link href="/dashboard" >
               <Button variant="primary" size="sm" className="mt-6">
                 Start Practicing
               </Button>
