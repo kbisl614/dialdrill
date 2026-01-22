@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import Toast from '@/components/Toast';
+import clientLogger from '@/lib/client-logger';
 
 // ⚠️ PASTE YOUR LOOM VIDEO EMBED URL HERE ⚠️
 // To get your Loom embed URL:
@@ -45,7 +46,7 @@ export default function HowItWorksPage() {
       const { url } = await response.json();
       window.location.href = url;
     } catch (error) {
-      console.error('[How It Works] Checkout failed:', error);
+      clientLogger.error('[How It Works] Checkout failed', error);
       setCheckoutLoading(false);
       setToast({
         show: true,
@@ -56,7 +57,7 @@ export default function HowItWorksPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#080d1a] grid-background">
+    <main className="min-h-screen bg-[var(--color-dark-bg)] grid-background">
       <Toast
         message={toast.message}
         type={toast.type}
@@ -64,15 +65,15 @@ export default function HowItWorksPage() {
         onClose={() => setToast({ ...toast, show: false })}
       />
       {/* Header */}
-      <header className="border-b border-[#1e293b]/50 bg-[#080d1a]/80 backdrop-blur-xl sticky top-0 z-50">
+      <header className="border-b border-[var(--color-border-subtle)]/50 bg-[var(--color-dark-bg)]/80 backdrop-blur-xl sticky top-0 z-50">
         <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-12">
           <div className="flex h-20 items-center justify-between">
             <Link href="/" className="text-2xl font-extrabold text-white hover:opacity-80 transition-opacity">
-              Dial<span className="text-[#00d9ff]">Drill</span>
+              Dial<span className="text-[var(--color-cyan-bright)]">Drill</span>
             </Link>
             <Link
               href="/"
-              className="text-sm font-semibold text-[#94a3b8] transition-colors hover:text-white"
+              className="text-sm font-semibold text-[var(--color-text-secondary)] transition-colors hover:text-white"
             >
               Back to Home
             </Link>
@@ -85,16 +86,16 @@ export default function HowItWorksPage() {
         <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-12">
           <div className="text-center mb-12">
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white mb-6">
-              See How <span className="text-[#00d9ff]">DialDrill</span> Works
+              See How <span className="text-[var(--color-cyan-bright)]">DialDrill</span> Works
             </h1>
-            <p className="text-lg sm:text-xl text-[#94a3b8] max-w-3xl mx-auto">
+            <p className="text-lg sm:text-xl text-[var(--color-text-secondary)] max-w-3xl mx-auto">
               Watch this quick demo to see how our AI-powered sales training platform helps you master objection handling and close more deals.
             </p>
           </div>
 
           {/* Video Container */}
           <div className="max-w-5xl mx-auto mb-16">
-            <div className="relative rounded-3xl overflow-hidden border border-[#1e293b]/50 bg-gradient-to-br from-[rgba(15,23,42,0.6)] to-[rgba(5,9,17,0.8)] p-2 sm:p-4 shadow-[0_20px_60px_rgba(0,0,0,0.5),0_0_40px_rgba(15,155,153,0.1)] backdrop-blur-xl transition-all duration-300 hover:border-[#334155] hover:shadow-[0_20px_80px_rgba(0,0,0,0.6),0_0_60px_rgba(15,155,153,0.2)] hover:-translate-y-1">
+            <div className="relative rounded-3xl overflow-hidden border border-[var(--color-border-subtle)]/50 bg-gradient-to-br from-card-bg to-[rgba(5,9,17,0.8)] p-2 sm:p-4 shadow-[0_20px_60px_rgba(0,0,0,0.5),0_0_40px_rgba(15,155,153,0.1)] backdrop-blur-xl transition-all duration-300 hover:border-[var(--color-border-medium)] hover:shadow-[0_20px_80px_rgba(0,0,0,0.6),0_0_60px_rgba(15,155,153,0.2)] hover:-translate-y-1">
               <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
                 {LOOM_VIDEO_URL !== "PASTE_LOOM_LINK_HERE" ? (
                   <iframe
@@ -104,16 +105,16 @@ export default function HowItWorksPage() {
                     className="absolute top-0 left-0 w-full h-full rounded-2xl"
                   ></iframe>
                 ) : (
-                  <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-gradient-to-br from-[#0f172a] to-[#1e293b] rounded-2xl">
+                  <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-gradient-to-br from-[#0f172a] to-[var(--color-border-subtle)] rounded-2xl">
                     <div className="text-center p-8">
-                      <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-[#0f9b99]/10 mb-6">
-                        <svg className="w-10 h-10 text-[#0f9b99]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-[var(--color-cyan-muted)]/10 mb-6">
+                        <svg className="w-10 h-10 text-[var(--color-cyan-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                       </div>
                       <p className="text-xl font-bold text-white mb-2">Video Coming Soon</p>
-                      <p className="text-[#94a3b8]">We&apos;re preparing an awesome demo for you!</p>
+                      <p className="text-[var(--color-text-secondary)]">We&apos;re preparing an awesome demo for you!</p>
                     </div>
                   </div>
                 )}
@@ -173,15 +174,15 @@ export default function HowItWorksPage() {
               ].map((benefit, idx) => (
                 <div
                   key={idx}
-                  className="rounded-2xl border border-[#1e293b]/50 bg-gradient-to-br from-white/[0.03] to-transparent p-6 transition-all duration-300 hover:border-[#334155] hover:bg-white/[0.05] hover:-translate-y-1 hover:shadow-[0_10px_30px_rgba(15,155,153,0.15)]"
+                  className="rounded-2xl border border-[var(--color-border-subtle)]/50 bg-gradient-to-br from-white/[0.03] to-transparent p-6 transition-all duration-300 hover:border-[var(--color-border-medium)] hover:bg-white/[0.05] hover:-translate-y-1 hover:shadow-[0_10px_30px_rgba(15,155,153,0.15)]"
                 >
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-[#0f9b99]/20 to-[#0f9b99]/5 ring-1 ring-[#0f9b99]/20 mb-4 transition-all duration-300 group-hover:scale-110">
-                    <svg className="h-6 w-6 text-[#0f9b99]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-[var(--color-cyan-muted)]/20 to-[var(--color-cyan-muted)]/5 ring-1 ring-[var(--color-cyan-muted)]/20 mb-4 transition-all duration-300 group-hover:scale-110">
+                    <svg className="h-6 w-6 text-[var(--color-cyan-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       {benefit.icon}
                     </svg>
                   </div>
                   <h3 className="text-lg font-bold text-white mb-2">{benefit.title}</h3>
-                  <p className="text-[#94a3b8] text-sm">{benefit.description}</p>
+                  <p className="text-[var(--color-text-secondary)] text-sm">{benefit.description}</p>
                 </div>
               ))}
             </div>
@@ -189,21 +190,23 @@ export default function HowItWorksPage() {
 
           {/* CTA Section */}
           <div className="max-w-3xl mx-auto text-center">
-            <div className="rounded-3xl border border-[#1e293b]/50 bg-gradient-to-br from-[rgba(15,155,153,0.05)] to-transparent p-8 sm:p-12 shadow-[0_0_40px_rgba(15,155,153,0.1)]">
+            <div className="rounded-3xl border border-[var(--color-border-subtle)]/50 bg-gradient-to-br from-[rgba(15,155,153,0.05)] to-transparent p-8 sm:p-12 shadow-[0_0_40px_rgba(15,155,153,0.1)]">
               <h2 className="text-3xl sm:text-4xl font-extrabold text-white mb-4">
                 Ready to Transform Your Sales Skills?
               </h2>
-              <p className="text-lg text-[#94a3b8] mb-8">
+              <p className="text-lg text-[var(--color-text-secondary)] mb-8">
                 Start your $5 trial today and get 5 AI-powered practice calls to master objection handling.
               </p>
-              <button
+              <Button
                 onClick={handleStartTrial}
                 disabled={checkoutLoading}
-                className="btn-glow group relative inline-flex items-center justify-center rounded-full bg-gradient-to-r from-[#06d9d7] to-[#05c4c2] px-10 py-5 text-lg font-semibold text-[#080d1a] transition-all hover:scale-105 hover:-translate-y-0.5 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:translate-y-0"
+                variant="primary"
+                size="lg"
+                className="btn-glow group"
               >
                 {checkoutLoading ? (
                   <>
-                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-[#080d1a]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-[var(--color-dark-bg)]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
@@ -234,8 +237,8 @@ export default function HowItWorksPage() {
                     </svg>
                   </>
                 )}
-              </button>
-              <p className="mt-6 text-sm text-[#64748b]">
+              </Button>
+              <p className="mt-6 text-sm text-[var(--color-text-muted)]">
                 No commitment. Cancel anytime. Start practicing in minutes.
               </p>
             </div>

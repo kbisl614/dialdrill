@@ -14,6 +14,9 @@ import SkeletonLoader from '@/components/SkeletonLoader';
 import Link from 'next/link';
 import { SidebarProvider, useSidebar } from '@/components/SidebarContext';
 import { BlurText } from '@/components/ui/react-bits';
+import Button from '@/components/ui/Button';
+import Card from '@/components/ui/Card';
+import Button from '@/components/ui/Button';
 
 // Force dynamic rendering for this page
 export const dynamic = 'force-dynamic';
@@ -129,10 +132,7 @@ function DashboardContent() {
         setEntitlements(data);
         setError(null); // Clear any previous errors on success
       } catch (err) {
-        // Only log in development to avoid console noise
-        if (process.env.NODE_ENV !== 'production') {
-          console.warn('[Dashboard] Error fetching entitlements:', err);
-        }
+        clientLogger.warn('[Dashboard] Error fetching entitlements', { error: err });
         // Set user-friendly error message
         const errorMessage = err instanceof Error ? err.message : 'Unknown error';
         if (errorMessage.includes('Unauthorized') || errorMessage.includes('401')) {
@@ -224,10 +224,10 @@ function DashboardContent() {
         setProfileData(data);
       } else {
         const errorData = await response.json();
-        console.error('Failed to fetch profile:', response.status, errorData);
+        clientLogger.error('Failed to fetch profile', undefined, { status: response.status, errorData });
       }
     } catch (error) {
-      console.error('Error fetching profile:', error);
+      clientLogger.error('Error fetching profile', error);
     } finally {
       setProfileLoading(false);
     }
@@ -241,18 +241,12 @@ function DashboardContent() {
         setUnreadNotificationsCount(data.unreadCount || 0);
       } else {
         // Silently handle errors - don't break UI if notifications fail
-        // Only log in development
-        if (process.env.NODE_ENV !== 'production') {
-          console.warn('[Dashboard] Failed to fetch notifications:', response.status, response.statusText);
-        }
+        clientLogger.warn('[Dashboard] Failed to fetch notifications', { status: response.status, statusText: response.statusText });
         setUnreadNotificationsCount(0);
       }
     } catch (error) {
       // Silently handle network errors - don't break UI
-      // Only log in development
-      if (process.env.NODE_ENV !== 'production') {
-        console.warn('[Dashboard] Error fetching unread notifications count:', error);
-      }
+      clientLogger.warn('[Dashboard] Error fetching unread notifications count', { error });
       setUnreadNotificationsCount(0);
     }
   }
@@ -276,16 +270,16 @@ function DashboardContent() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(userData),
         });
-        console.log('Onboarding data saved:', userData);
+        clientLogger.info('Onboarding data saved', { userData });
       } catch (error) {
-        console.error('Failed to save onboarding data:', error);
+        clientLogger.error('Failed to save onboarding data', error);
       }
     }
   }
 
   async function handleStartCall() {
     const perfStart = performance.now();
-    console.log('[PERF] Button click → Start call flow');
+    const perfTimer = clientLogger.startTimer('Button click → Start call flow');
 
     // UI-level check
     if (!entitlements || !entitlements.canCall) {
@@ -303,7 +297,7 @@ function DashboardContent() {
 
     try {
       const apiCallStart = performance.now();
-      console.log(`[PERF] ${(apiCallStart - perfStart).toFixed(0)}ms - Calling /api/calls/start`);
+      clientLogger.perf('Calling /api/calls/start', apiCallStart - perfStart);
 
       const payload: { personalityId?: string } = {};
       if (selectionMode === 'select' && selectedPersonalityId) {
@@ -317,13 +311,13 @@ function DashboardContent() {
       });
 
       const apiCallEnd = performance.now();
-      console.log(`[PERF] ${(apiCallEnd - perfStart).toFixed(0)}ms - API response received (took ${(apiCallEnd - apiCallStart).toFixed(0)}ms)`);
+      clientLogger.perf('API response received', apiCallEnd - apiCallStart, { totalTime: apiCallEnd - perfStart });
 
       const data = await response.json();
       if (!response.ok) {
         throw new Error(data.error || 'Failed to start call');
       }
-      console.log('Call started:', data);
+      clientLogger.info('Call started', { agentId: data.agentId, callLogId: data.callLogId });
 
       // Refresh entitlements after call starts
       const entitlementsResponse = await fetch('/api/user/entitlements');
@@ -333,7 +327,7 @@ function DashboardContent() {
       }
 
       const navStart = performance.now();
-      console.log(`[PERF] ${(navStart - perfStart).toFixed(0)}ms - Navigating to call page`);
+      clientLogger.perf('Navigating to call page', navStart - perfStart);
 
       // Navigate to call interface with max duration param
       const maxDuration = data.maxDurationSeconds || 300;
@@ -345,9 +339,10 @@ function DashboardContent() {
       }
       router.push(`/call/${data.agentId}?${query.toString()}`);
 
-      console.log(`[PERF] Total dashboard flow: ${(navStart - perfStart).toFixed(0)}ms`);
+      perfTimer();
+      clientLogger.perf('Total dashboard flow', navStart - perfStart);
     } catch (err) {
-      console.error('Error starting call:', err);
+      clientLogger.error('Error starting call', err);
       setError(err instanceof Error ? err.message : 'Something went wrong starting your call. Please try again.');
     } finally {
       setStartingCall(false);
@@ -390,7 +385,7 @@ function DashboardContent() {
     return (
       <>
         <Sidebar />
-        <main className="min-h-screen bg-[#080d1a] grid-background lg:pl-64">
+        <main className="min-h-screen bg-[var(--color-dark-bg)] grid-background lg:pl-64">
           <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-12 py-12 sm:py-16">
             {/* Header Skeleton */}
             <div className="mb-12">
@@ -425,7 +420,7 @@ function DashboardContent() {
   return (
     <>
       <Sidebar />
-      <main className={`min-h-screen bg-[#080d1a] grid-background transition-all duration-300 ${
+      <main className={`min-h-screen bg-[var(--color-dark-bg)] grid-background transition-all duration-300 ${
         isCollapsed ? 'lg:pl-20' : 'lg:pl-64'
       }`}>
       {/* Dashboard Content */}
@@ -441,16 +436,16 @@ function DashboardContent() {
               // Refresh notifications count when opening profile
               fetchUnreadNotificationsCount();
             }}
-            className="relative h-10 w-10 rounded-full bg-gradient-to-br from-[#00d9ff] to-[#9d4edd] p-0.5 transition hover:scale-105"
+            className="relative h-10 w-10 rounded-full bg-gradient-to-br from-[var(--color-cyan-bright)] to-[var(--color-purple-magenta)] p-0.5 transition hover:scale-105"
           >
-            <div className="h-full w-full rounded-full bg-[#1A1F2E] flex items-center justify-center">
+            <div className="h-full w-full rounded-full bg-[var(--color-card-bg-dark)] flex items-center justify-center">
               <span className="text-sm font-bold text-white">
                 {user?.firstName?.charAt(0) || user?.username?.charAt(0) || 'U'}
               </span>
             </div>
             {/* Notification badge - show when there are unread notifications */}
             {unreadNotificationsCount > 0 && (
-              <div className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white ring-2 ring-[#080d1a]">
+              <div className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white ring-2 ring-[var(--color-dark-bg)]">
                 {unreadNotificationsCount > 9 ? '9+' : unreadNotificationsCount}
               </div>
             )}
@@ -470,7 +465,7 @@ function DashboardContent() {
               text={`Hey ${user?.firstName || user?.username || 'there'} 👋`}
               delay={80}
               animateBy="words"
-              className="bg-gradient-to-r from-white via-[#00d9ff] to-[#00ffea] bg-clip-text text-transparent"
+              className="bg-gradient-to-r from-white via-[var(--color-cyan-bright)] to-[var(--color-cyan-bright-alt-2)] bg-clip-text text-transparent"
             />
           </h1>
         </div>
@@ -483,15 +478,15 @@ function DashboardContent() {
 
         {/* Main Content - Full Width */}
         <div className="space-y-6">
-          {/* Start Call Hero Section - Full Width */}
-          <div className="group rounded-3xl border border-[#1e293b]/50 bg-gradient-to-br from-[rgba(15,23,42,0.6)] to-[rgba(5,9,17,0.8)] p-8 md:p-12 shadow-[0_20px_60px_rgba(0,0,0,0.7),0_0_40px_rgba(0,217,255,0.08)] backdrop-blur-xl hover:shadow-[0_25px_70px_rgba(0,0,0,0.8),0_0_50px_rgba(0,217,255,0.12)] transition-all duration-500 hover:border-[#00d9ff]/30">
+          {/* Start Call Hero Section - Using standardized Card component */}
+          <Card variant="glow" padding="xl" className="group">
               <div className="text-center mb-8">
-                <div className="inline-flex items-center justify-center w-16 h-16 mb-4 rounded-2xl bg-gradient-to-br from-[#00d9ff]/20 to-[#00ffea]/20 ring-2 ring-[#00d9ff]/30 group-hover:scale-110 transition-transform duration-300">
-                  <svg className="w-8 h-8 text-[#00d9ff]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div className="inline-flex items-center justify-center w-16 h-16 mb-4 rounded-2xl bg-gradient-to-br from-[var(--color-cyan-bright)]/20 to-[var(--color-cyan-bright-alt-2)]/20 ring-2 ring-[var(--color-cyan-bright)]/30 group-hover:scale-110 transition-transform duration-300">
+                  <svg className="w-8 h-8 text-[var(--color-cyan-bright)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                   </svg>
                 </div>
-                <h2 className="text-5xl font-extrabold text-white mb-2 bg-gradient-to-r from-white to-[#00d9ff] bg-clip-text text-transparent">
+                <h2 className="text-5xl font-extrabold text-white mb-2 bg-gradient-to-r from-white to-[var(--color-cyan-bright)] bg-clip-text text-transparent">
                   Start Practice
                 </h2>
               </div>
@@ -523,10 +518,12 @@ function DashboardContent() {
                 </div>
               )}
 
-              {/* Start Call Button - Enhanced with Maximum Impact */}
-              <button
+              {/* Start Call Button - Using standardized Button component */}
+              <Button
                 onClick={handleStartCall}
-                className="w-full rounded-full bg-gradient-to-r from-[#00d9ff] to-[#00ffea] px-6 py-3 text-base font-semibold text-[#080d1a] transition-all hover:scale-[1.02] hover:shadow-[0_0_30px_rgba(0,217,255,0.5)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2"
+                variant="primary"
+                size="md"
+                fullWidth
                 disabled={
                   !entitlements ||
                   !entitlements.canCall ||
@@ -561,42 +558,41 @@ function DashboardContent() {
                     </svg>
                   </>
                 )}
-              </button>
+              </Button>
 
               {entitlements && !entitlements.canCall && entitlements.plan === 'trial' && (
                 <div className="mt-6 text-center animate-fadeIn">
-                  <Link
-                    href="/plans"
-                    className="group/upgrade inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#a855f7] to-[#9333ea] px-8 py-4 text-lg font-bold text-white transition-all hover:scale-105 shadow-[0_0_30px_rgba(168,85,247,0.5)] hover:shadow-[0_0_50px_rgba(168,85,247,0.8)] active:scale-[0.98]"
-                  >
-                    <span className="group-hover/upgrade:scale-110 transition-transform duration-300">✨</span>
-                    Unlock More
-                    <svg className="w-5 h-5 group-hover/upgrade:translate-x-1 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
+                  <Link href="/plans" legacyBehavior>
+                    <Button variant="purple" size="lg" className="group/upgrade">
+                      <span className="group-hover/upgrade:scale-110 transition-transform duration-300">✨</span>
+                      Unlock More
+                      <svg className="w-5 h-5 group-hover/upgrade:translate-x-1 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                      </svg>
+                    </Button>
                   </Link>
                 </div>
               )}
-            </div>
+          </Card>
 
           {/* Quick Actions */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <button
               onClick={() => setShowQuickPractice(true)}
-              className="group/quick relative overflow-hidden rounded-2xl border border-[#a855f7]/30 bg-gradient-to-br from-[#a855f7]/10 to-[#9333ea]/10 p-6 text-left transition-all duration-300 hover:scale-[1.03] hover:border-[#a855f7]/60 shadow-[0_0_20px_rgba(168,85,247,0.2)] hover:shadow-[0_0_40px_rgba(168,85,247,0.5)] active:scale-[0.99]"
+              className="group/quick relative overflow-hidden rounded-2xl border border-[var(--color-purple)]/30 bg-gradient-to-br from-[var(--color-purple)]/10 to-[var(--color-purple-dark)]/10 p-6 text-left transition-all duration-300 hover:scale-[1.03] hover:border-[var(--color-purple)]/60 shadow-[0_0_20px_rgba(168,85,247,0.2)] hover:shadow-[0_0_40px_rgba(168,85,247,0.5)] active:scale-[0.99]"
             >
-                <div className="absolute inset-0 bg-gradient-to-br from-[#a855f7]/0 to-[#a855f7]/20 opacity-0 group-hover/quick:opacity-100 transition-opacity duration-300"></div>
+                <div className="absolute inset-0 bg-gradient-to-br from-[var(--color-purple)]/0 to-[var(--color-purple)]/20 opacity-0 group-hover/quick:opacity-100 transition-opacity duration-300"></div>
                 <div className="relative z-10">
                   <div className="flex items-center gap-3 mb-3">
-                    <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-[#a855f7]/30 to-[#9333ea]/30 ring-2 ring-[#a855f7]/40 group-hover/quick:scale-110 group-hover/quick:rotate-3 transition-all duration-300">
-                      <svg className="h-5 w-5 text-[#d8b4fe]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--color-purple)]/30 to-[var(--color-purple-dark)]/30 ring-2 ring-[var(--color-purple)]/40 group-hover/quick:scale-110 group-hover/quick:rotate-3 transition-all duration-300">
+                      <svg className="h-5 w-5 text-[var(--color-purple-light)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                       </svg>
                     </div>
-                    <h3 className="text-xl font-bold text-white group-hover/quick:text-[#d8b4fe] transition-colors duration-300">Quick Practice</h3>
+                    <h3 className="text-xl font-bold text-white group-hover/quick:text-[var(--color-purple-light)] transition-colors duration-300">Quick Practice</h3>
                   </div>
-                  <div className="flex items-center gap-2 text-xs text-[#a855f7] font-semibold">
-                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#a855f7] animate-pulse"></span>
+                  <div className="flex items-center gap-2 text-xs text-[var(--color-purple)] font-semibold">
+                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-[var(--color-purple)] animate-pulse"></span>
                     30-sec drills
                   </div>
                 </div>
@@ -604,35 +600,35 @@ function DashboardContent() {
 
               <button
                 onClick={() => setShowObjectionLibrary(true)}
-                className="group/lib relative overflow-hidden rounded-2xl border border-[#00d9ff]/30 bg-gradient-to-br from-[#00d9ff]/10 to-[#00ffea]/10 p-6 text-left transition-all duration-300 hover:scale-[1.03] hover:border-[#00d9ff]/60 shadow-[0_0_20px_rgba(0,217,255,0.2)] hover:shadow-[0_0_40px_rgba(0,217,255,0.5)] active:scale-[0.99]"
+                className="group/lib relative overflow-hidden rounded-2xl border border-[var(--color-cyan-bright)]/30 bg-gradient-to-br from-[var(--color-cyan-bright)]/10 to-[var(--color-cyan-bright-alt-2)]/10 p-6 text-left transition-all duration-300 hover:scale-[1.03] hover:border-[var(--color-cyan-bright)]/60 shadow-[0_0_20px_rgba(0,217,255,0.2)] hover:shadow-[0_0_40px_rgba(0,217,255,0.5)] active:scale-[0.99]"
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-[#00d9ff]/0 to-[#00d9ff]/20 opacity-0 group-hover/lib:opacity-100 transition-opacity duration-300"></div>
+                <div className="absolute inset-0 bg-gradient-to-br from-[var(--color-cyan-bright)]/0 to-[var(--color-cyan-bright)]/20 opacity-0 group-hover/lib:opacity-100 transition-opacity duration-300"></div>
                 <div className="relative z-10">
                   <div className="flex items-center gap-3 mb-3">
-                    <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-[#00d9ff]/30 to-[#00ffea]/30 ring-2 ring-[#00d9ff]/40 group-hover/lib:scale-110 group-hover/lib:-rotate-3 transition-all duration-300">
-                      <svg className="h-5 w-5 text-[#00d9ff]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--color-cyan-bright)]/30 to-[var(--color-cyan-bright-alt-2)]/30 ring-2 ring-[var(--color-cyan-bright)]/40 group-hover/lib:scale-110 group-hover/lib:-rotate-3 transition-all duration-300">
+                      <svg className="h-5 w-5 text-[var(--color-cyan-bright)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                       </svg>
                     </div>
-                    <h3 className="text-xl font-bold text-white group-hover/lib:text-[#00d9ff] transition-colors duration-300">Objection Library</h3>
+                    <h3 className="text-xl font-bold text-white group-hover/lib:text-[var(--color-cyan-bright)] transition-colors duration-300">Objection Library</h3>
                   </div>
-                  <div className="flex items-center gap-2 text-xs text-[#00d9ff] font-semibold">
-                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#00d9ff] animate-pulse"></span>
+                  <div className="flex items-center gap-2 text-xs text-[var(--color-cyan-bright)] font-semibold">
+                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-[var(--color-cyan-bright)] animate-pulse"></span>
                     35+ responses
                   </div>
                 </div>
             </button>
 
-            {/* Credits Card - Now as third quick action */}
-            <div className="group/credits rounded-2xl border border-[#1e293b]/50 bg-gradient-to-br from-[rgba(15,23,42,0.6)] to-[rgba(5,9,17,0.8)] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.7),0_0_40px_rgba(0,217,255,0.08)] backdrop-blur-xl hover:shadow-[0_25px_70px_rgba(0,0,0,0.8),0_0_50px_rgba(0,217,255,0.15)] transition-all duration-300 hover:border-[#00d9ff]/30 text-left">
+            {/* Credits Card - Using standardized Card component */}
+            <Card variant="hover" padding="lg" className="group/credits text-left">
               <div className="relative z-10">
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#00d9ff]/30 to-[#00d9ff]/10 ring-2 ring-[#00d9ff]/40 group-hover/credits:scale-110 group-hover/credits:rotate-6 transition-all duration-300">
-                    <svg className="h-5 w-5 text-[#00d9ff]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[var(--color-cyan-bright)]/30 to-[var(--color-cyan-bright)]/10 ring-2 ring-[var(--color-cyan-bright)]/40 group-hover/credits:scale-110 group-hover/credits:rotate-6 transition-all duration-300">
+                    <svg className="h-5 w-5 text-[var(--color-cyan-bright)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                     </svg>
                   </div>
-                  <h3 className="text-xl font-bold text-white group-hover/credits:text-[#00d9ff] transition-colors duration-300">
+                  <h3 className="text-xl font-bold text-white group-hover/credits:text-[var(--color-cyan-bright)] transition-colors duration-300">
                     {creditsDisplay.label}
                   </h3>
                 </div>
@@ -641,15 +637,15 @@ function DashboardContent() {
                     {creditsDisplay.value}
                   </p>
                   {creditsDisplay.subValue && (
-                    <span className="text-sm text-[#64748b] font-medium">{creditsDisplay.subValue}</span>
+                    <span className="text-sm text-[var(--color-text-muted)] font-medium">{creditsDisplay.subValue}</span>
                   )}
-                  <span className="text-xs text-[#64748b] ml-auto">
+                  <span className="text-xs text-[var(--color-text-muted)] ml-auto">
                     {entitlements?.plan === 'trial' ? '🌱 Trial' : '⭐ Pro'}
                   </span>
                 </div>
-                <div className="relative h-2.5 overflow-hidden rounded-full bg-white/5 ring-1 ring-[#1e293b]/50">
+                <div className="relative h-2.5 overflow-hidden rounded-full bg-white/5 ring-1 ring-[var(--color-border-subtle)]/50">
                   <div
-                    className="h-full rounded-full bg-gradient-to-r from-[#00d9ff] via-[#00ffea] to-[#00d9ff] shadow-[0_0_20px_rgba(0,217,255,0.5)] transition-all duration-500 ease-out relative overflow-hidden"
+                    className="h-full rounded-full bg-gradient-to-r from-[var(--color-cyan-bright)] via-[var(--color-cyan-bright-alt-2)] to-[var(--color-cyan-bright)] shadow-[0_0_20px_rgba(0,217,255,0.5)] transition-all duration-500 ease-out relative overflow-hidden"
                     style={{ width: `${(creditsDisplay.current / creditsDisplay.max) * 100}%` }}
                   >
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-40 animate-shimmer"></div>
@@ -664,19 +660,18 @@ function DashboardContent() {
                   </div>
                 )}
                 {entitlements?.plan === 'trial' && (
-                  <Link
-                    href="/plans"
-                    className="group/upgrade-btn mt-3 w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#a855f7] to-[#9333ea] px-4 py-3 text-sm font-bold text-white transition-all hover:scale-[1.03] shadow-[0_0_20px_rgba(168,85,247,0.4)] hover:shadow-[0_0_35px_rgba(168,85,247,0.7)] active:scale-[0.98]"
-                  >
-                    <span className="group-hover/upgrade-btn:scale-110 transition-transform duration-300">✨</span>
-                    Upgrade
-                    <svg className="w-4 h-4 group-hover/upgrade-btn:translate-x-0.5 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
+                  <Link href="/plans" legacyBehavior>
+                    <Button variant="purple" size="sm" fullWidth className="group/upgrade-btn mt-3">
+                      <span className="group-hover/upgrade-btn:scale-110 transition-transform duration-300">✨</span>
+                      Upgrade
+                      <svg className="w-4 h-4 group-hover/upgrade-btn:translate-x-0.5 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </Button>
                   </Link>
                 )}
               </div>
-            </div>
+            </Card>
           </div>
         </div>
 
@@ -684,16 +679,16 @@ function DashboardContent() {
         {/* TODO: Unhide this section and populate with real data from call history */}
         {false && (
           <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="rounded-2xl border border-[#1e293b]/50 bg-white/[0.02] p-6 backdrop-blur-xl text-center">
-              <p className="text-sm font-medium text-[#94a3b8] mb-2">Total Calls</p>
+            <div className="rounded-2xl border border-[var(--color-border-subtle)]/50 bg-white/[0.02] p-6 backdrop-blur-xl text-center">
+              <p className="text-sm font-medium text-[var(--color-text-secondary)] mb-2">Total Calls</p>
               <p className="text-3xl font-extrabold text-white">0</p>
             </div>
-            <div className="rounded-2xl border border-[#1e293b]/50 bg-white/[0.02] p-6 backdrop-blur-xl text-center">
-              <p className="text-sm font-medium text-[#94a3b8] mb-2">Avg. Score</p>
+            <div className="rounded-2xl border border-[var(--color-border-subtle)]/50 bg-white/[0.02] p-6 backdrop-blur-xl text-center">
+              <p className="text-sm font-medium text-[var(--color-text-secondary)] mb-2">Avg. Score</p>
               <p className="text-3xl font-extrabold text-white">—</p>
             </div>
-            <div className="rounded-2xl border border-[#1e293b]/50 bg-white/[0.02] p-6 backdrop-blur-xl text-center">
-              <p className="text-sm font-medium text-[#94a3b8] mb-2">Success Rate</p>
+            <div className="rounded-2xl border border-[var(--color-border-subtle)]/50 bg-white/[0.02] p-6 backdrop-blur-xl text-center">
+              <p className="text-sm font-medium text-[var(--color-text-secondary)] mb-2">Success Rate</p>
               <p className="text-3xl font-extrabold text-white">—</p>
             </div>
           </div>
@@ -733,22 +728,25 @@ function DashboardContent() {
 
       {showUpgradePrompt && entitlements?.plan === 'trial' && (
         <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/70 px-4">
-          <div className="w-full max-w-md rounded-2xl border border-[#1e293b]/50 bg-[#050911] p-6 text-center shadow-2xl">
+          <div className="w-full max-w-md rounded-2xl border border-[var(--color-border-subtle)]/50 bg-[var(--color-darker-bg)] p-6 text-center shadow-2xl">
             <h3 className="text-2xl font-bold text-white">Unlock Boss Personalities</h3>
-            <p className="mt-3 text-sm text-[#94a3b8]">
+            <p className="mt-3 text-sm text-[var(--color-text-secondary)]">
               Upgrade to the Pro plan to access The Wolf, The Shark, and three more advanced personalities.
             </p>
             <div className="mt-6 flex flex-col gap-3">
-              <Link
-                href="/plans"
-                className="w-full rounded-full bg-gradient-to-r from-[#a855f7] to-[#9333ea] px-6 py-3 text-sm font-semibold text-white transition hover:opacity-90"
-                onClick={() => setShowUpgradePrompt(false)}
-              >
-                Upgrade to Pro
+              <Link href="/plans" legacyBehavior>
+                <Button
+                  variant="purple"
+                  size="sm"
+                  fullWidth
+                  onClick={() => setShowUpgradePrompt(false)}
+                >
+                  Upgrade to Pro
+                </Button>
               </Link>
               <button
                 onClick={() => setShowUpgradePrompt(false)}
-                className="w-full rounded-full border border-[#1e293b]/50 px-6 py-3 text-sm font-semibold text-white/70 transition hover:text-white hover:border-[#334155]"
+                className="w-full rounded-full border border-[var(--color-border-subtle)]/50 px-6 py-3 text-sm font-semibold text-white/70 transition hover:text-white hover:border-[var(--color-border-medium)]"
               >
                 Maybe later
               </button>

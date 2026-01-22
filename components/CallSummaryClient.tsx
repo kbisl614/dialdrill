@@ -112,7 +112,7 @@ export default function CallSummaryClient({ summary }: CallSummaryClientProps) {
   };
 
   return (
-    <div className="min-h-screen bg-[#080d1a] grid-background">
+    <div className="min-h-screen bg-[var(--color-dark-bg)] grid-background">
       {/* Confetti */}
       {showConfetti && (
         <Confetti
@@ -138,7 +138,7 @@ export default function CallSummaryClient({ summary }: CallSummaryClientProps) {
               animate={{ scale: 1, rotate: 0 }}
               exit={{ scale: 0, rotate: 180 }}
               transition={{ type: 'spring', duration: 0.8 }}
-              className="rounded-3xl border-4 border-[#00d9ff] bg-gradient-to-br from-[#1A1F2E] to-[#0f1419] p-12 text-center shadow-2xl"
+              className="rounded-3xl border-4 border-[var(--color-cyan-bright)] bg-gradient-to-br from-[var(--color-card-bg-dark)] to-[#0f1419] p-12 text-center shadow-2xl"
             >
               <motion.div
                 initial={{ y: -50, opacity: 0 }}
@@ -148,20 +148,20 @@ export default function CallSummaryClient({ summary }: CallSummaryClientProps) {
                 <h2 className="text-5xl font-extrabold text-white mb-6">🎉 Belt Upgraded! 🎉</h2>
                 <div className="flex items-center justify-center gap-8 mb-6">
                   <div className="text-center">
-                    <div className="text-sm text-[#9ca3af] mb-2">Previous</div>
+                    <div className="text-sm text-[var(--color-text-secondary)] mb-2">Previous</div>
                     <div className="text-2xl font-bold" style={{ color: gamification.beltUpgrade.previousBelt?.color }}>
                       {gamification.beltUpgrade.previousBelt?.tier} {gamification.beltUpgrade.previousBelt?.belt}
                     </div>
                   </div>
                   <div className="text-4xl">→</div>
                   <div className="text-center">
-                    <div className="text-sm text-[#9ca3af] mb-2">New Belt</div>
+                    <div className="text-sm text-[var(--color-text-secondary)] mb-2">New Belt</div>
                     <div className="text-3xl font-extrabold" style={{ color: gamification.beltUpgrade.newBelt?.color }}>
                       {gamification.beltUpgrade.newBelt?.tier} {gamification.beltUpgrade.newBelt?.belt}
                     </div>
                   </div>
                 </div>
-                <p className="text-[#9ca3af] text-sm">Click anywhere to continue</p>
+                <p className="text-[var(--color-text-secondary)] text-sm">Click anywhere to continue</p>
               </motion.div>
             </motion.div>
           </motion.div>
@@ -176,7 +176,7 @@ export default function CallSummaryClient({ summary }: CallSummaryClientProps) {
           className="mb-12 text-center"
         >
           <h1 className="text-5xl font-extrabold text-white mb-4">Call Complete!</h1>
-          <p className="text-lg text-[#9ca3af]">
+          <p className="text-lg text-[var(--color-text-secondary)]">
             {callLog.personality_name} • {Math.floor(callLog.duration_seconds / 60)}:{(callLog.duration_seconds % 60).toString().padStart(2, '0')}
           </p>
         </motion.div>
@@ -186,12 +186,12 @@ export default function CallSummaryClient({ summary }: CallSummaryClientProps) {
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ delay: 0.2 }}
-          className="mb-12 rounded-3xl border border-white/10 bg-gradient-to-br from-[rgba(15,23,42,0.6)] to-[rgba(5,9,17,0.8)] p-12 text-center shadow-2xl backdrop-blur-xl"
+          className="mb-12 rounded-3xl border border-white/10 bg-gradient-to-br from-card-bg to-[rgba(5,9,17,0.8)] p-12 text-center shadow-2xl backdrop-blur-xl"
         >
           <h2 className="text-2xl font-bold text-white mb-6">Overall Score</h2>
           <div className={`text-8xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r ${getScoreColor(score.overall_score)} mb-4`}>
             {animatedScore.toFixed(1)}
-            <span className="text-4xl text-[#9ca3af]">/10</span>
+            <span className="text-4xl text-[var(--color-text-secondary)]">/10</span>
           </div>
 
           {/* Power Gained */}
@@ -203,7 +203,7 @@ export default function CallSummaryClient({ summary }: CallSummaryClientProps) {
                 exit={{ y: -50, opacity: 0 }}
                 className="inline-block"
               >
-                <div className="rounded-full bg-gradient-to-r from-[#00d9ff] to-[#9d4edd] px-6 py-3 text-xl font-bold text-white shadow-lg">
+                <div className="rounded-full bg-gradient-to-r from-[var(--color-cyan-bright)] to-[var(--color-purple-magenta)] px-6 py-3 text-xl font-bold text-white shadow-lg">
                   +{gamification.powerGained} Power
                 </div>
               </motion.div>
@@ -217,7 +217,7 @@ export default function CallSummaryClient({ summary }: CallSummaryClientProps) {
             initial={{ y: 30, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.4 }}
-            className="mb-12 rounded-3xl border border-[#00d9ff]/30 bg-gradient-to-r from-[#00d9ff]/10 to-[#9d4edd]/10 p-8"
+            className="mb-12 rounded-3xl border border-[var(--color-cyan-bright)]/30 bg-gradient-to-r from-[var(--color-cyan-bright)]/10 to-[var(--color-purple-magenta)]/10 p-8"
           >
             <h3 className="text-2xl font-bold text-white mb-6 text-center">🏆 Badges Unlocked!</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -231,7 +231,7 @@ export default function CallSummaryClient({ summary }: CallSummaryClientProps) {
                 >
                   <div className="text-4xl mb-3">🏅</div>
                   <h4 className="text-lg font-bold text-white mb-2">{badge.name}</h4>
-                  <p className="text-sm text-[#9ca3af]">{badge.description}</p>
+                  <p className="text-sm text-[var(--color-text-secondary)]">{badge.description}</p>
                 </motion.div>
               ))}
             </div>
@@ -274,7 +274,7 @@ export default function CallSummaryClient({ summary }: CallSummaryClientProps) {
                       initial={{ width: 0 }}
                       animate={{ width: `${percentage}%` }}
                       transition={{ delay: 1 + index * 0.1, duration: 1 }}
-                      className="h-full rounded-full bg-gradient-to-r from-[#00d9ff] to-[#9d4edd]"
+                      className="h-full rounded-full bg-gradient-to-r from-[var(--color-cyan-bright)] to-[var(--color-purple-magenta)]"
                     />
                   </div>
 
@@ -324,14 +324,13 @@ export default function CallSummaryClient({ summary }: CallSummaryClientProps) {
           transition={{ delay: 1.2 }}
           className="flex flex-col sm:flex-row gap-4 justify-center"
         >
-          <Link
-            href="/dashboard"
-            className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#00d9ff] to-[#00ffea] px-8 py-4 text-lg font-semibold text-[#080d1a] transition hover:scale-105 hover:shadow-[0_0_30px_rgba(0,217,255,0.5)] shadow-lg"
-          >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
-            Back to Dashboard
+          <Link href="/dashboard" legacyBehavior>
+            <Button variant="primary" size="lg">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              Back to Dashboard
+            </Button>
           </Link>
           <button
             onClick={() => router.push('/dashboard')}

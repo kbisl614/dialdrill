@@ -4,6 +4,7 @@ import { pool } from '@/lib/db';
 import DashboardLayout from '@/components/DashboardLayout';
 import Breadcrumb from '@/components/Breadcrumb';
 import Link from 'next/link';
+import Button from '@/components/ui/Button';
 
 interface CategoryScore {
   category: string;
@@ -151,41 +152,40 @@ export default async function PerformancePage() {
 
         <div className="mb-12 text-center">
           <h1 className="text-4xl font-extrabold text-white sm:text-5xl">Performance Dashboard</h1>
-          <p className="mt-4 text-lg text-[#94a3b8]">
+          <p className="mt-4 text-lg text-[var(--color-text-secondary)]">
             Track your progress and identify areas for improvement.
           </p>
         </div>
 
         {stats.totalCalls === 0 ? (
-          <div className="rounded-3xl border border-[#1e293b]/50 bg-white/[0.02] p-12 text-center text-[#94a3b8]">
+          <div className="rounded-3xl border border-[var(--color-border-subtle)]/50 bg-white/[0.02] p-12 text-center text-[var(--color-text-secondary)]">
             <p className="text-xl font-semibold text-white mb-2">No scored calls yet</p>
             <p>Complete a practice call to see your performance metrics here.</p>
-            <Link
-              href="/dashboard"
-              className="mt-6 inline-flex items-center justify-center rounded-full bg-gradient-to-r from-[#00d9ff] to-[#00ffea] px-8 py-3 text-sm font-semibold text-[#080d1a] transition hover:scale-105 shadow-[0_0_40px_rgba(0,217,255,0.6)] hover:shadow-[0_0_60px_rgba(0,255,234,0.8)]"
-            >
-              Start Practicing
+            <Link href="/dashboard" legacyBehavior>
+              <Button variant="primary" size="sm" className="mt-6">
+                Start Practicing
+              </Button>
             </Link>
           </div>
         ) : (
           <div className="space-y-8">
             {/* Overall Stats */}
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              <div className="rounded-3xl border border-[#1e293b]/50 bg-gradient-to-br from-[rgba(15,23,42,0.6)] to-[rgba(5,9,17,0.8)] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.7),0_0_40px_rgba(6,217,215,0.08)]">
-                <p className="text-sm font-semibold text-[#94a3b8]">Total Calls Scored</p>
+              <div className="rounded-3xl border border-[var(--color-border-subtle)]/50 bg-gradient-to-br from-card-bg to-[rgba(5,9,17,0.8)] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.7),0_0_40px_rgba(6,217,215,0.08)]">
+                <p className="text-sm font-semibold text-[var(--color-text-secondary)]">Total Calls Scored</p>
                 <p className="mt-2 text-4xl font-bold text-white">{stats.totalCalls}</p>
               </div>
 
-              <div className="rounded-3xl border border-[#1e293b]/50 bg-gradient-to-br from-[rgba(15,23,42,0.6)] to-[rgba(5,9,17,0.8)] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.7),0_0_40px_rgba(6,217,215,0.08)]">
-                <p className="text-sm font-semibold text-[#94a3b8]">Average Score</p>
+              <div className="rounded-3xl border border-[var(--color-border-subtle)]/50 bg-gradient-to-br from-card-bg to-[rgba(5,9,17,0.8)] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.7),0_0_40px_rgba(6,217,215,0.08)]">
+                <p className="text-sm font-semibold text-[var(--color-text-secondary)]">Average Score</p>
                 <p className="mt-2 text-4xl font-bold text-white">
                   {stats.avgOverallScore}
-                  <span className="text-2xl text-[#94a3b8]">/10</span>
+                  <span className="text-2xl text-[var(--color-text-secondary)]">/10</span>
                 </p>
               </div>
 
-              <div className="rounded-3xl border border-[#1e293b]/50 bg-gradient-to-br from-[rgba(15,23,42,0.6)] to-[rgba(5,9,17,0.8)] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.7),0_0_40px_rgba(6,217,215,0.08)]">
-                <p className="text-sm font-semibold text-[#94a3b8]">Trend</p>
+              <div className="rounded-3xl border border-[var(--color-border-subtle)]/50 bg-gradient-to-br from-card-bg to-[rgba(5,9,17,0.8)] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.7),0_0_40px_rgba(6,217,215,0.08)]">
+                <p className="text-sm font-semibold text-[var(--color-text-secondary)]">Trend</p>
                 <div className="mt-2 flex items-center gap-2">
                   {stats.improvementTrend === 'up' && (
                     <>
@@ -210,7 +210,7 @@ export default async function PerformancePage() {
             </div>
 
             {/* Category Breakdown */}
-            <div className="rounded-3xl border border-[#1e293b]/50 bg-gradient-to-br from-[rgba(15,23,42,0.6)] to-[rgba(5,9,17,0.8)] p-6 sm:p-8 shadow-[0_20px_60px_rgba(0,0,0,0.7),0_0_40px_rgba(6,217,215,0.08)]">
+            <div className="rounded-3xl border border-[var(--color-border-subtle)]/50 bg-gradient-to-br from-card-bg to-[rgba(5,9,17,0.8)] p-6 sm:p-8 shadow-[0_20px_60px_rgba(0,0,0,0.7),0_0_40px_rgba(6,217,215,0.08)]">
               <h2 className="text-2xl font-bold text-white mb-6">Average Scores by Category</h2>
               <div className="space-y-4">
                 {Object.entries(stats.avgCategoryScores)
@@ -253,7 +253,7 @@ export default async function PerformancePage() {
             </div>
 
             {/* Recent Calls */}
-            <div className="rounded-3xl border border-[#1e293b]/50 bg-gradient-to-br from-[rgba(15,23,42,0.6)] to-[rgba(5,9,17,0.8)] p-6 sm:p-8 shadow-[0_20px_60px_rgba(0,0,0,0.7),0_0_40px_rgba(6,217,215,0.08)]">
+            <div className="rounded-3xl border border-[var(--color-border-subtle)]/50 bg-gradient-to-br from-card-bg to-[rgba(5,9,17,0.8)] p-6 sm:p-8 shadow-[0_20px_60px_rgba(0,0,0,0.7),0_0_40px_rgba(6,217,215,0.08)]">
               <h2 className="text-2xl font-bold text-white mb-6">Recent Calls</h2>
               <div className="space-y-3">
                 {stats.recentCalls.map((call) => {
@@ -268,19 +268,19 @@ export default async function PerformancePage() {
                     <Link
                       key={call.callLogId}
                       href={`/call-summary/${call.callLogId}`}
-                      className="block rounded-xl border border-[#1e293b]/50 bg-white/[0.03] p-4 transition hover:bg-white/[0.06] hover:border-[#334155]"
+                      className="block rounded-xl border border-[var(--color-border-subtle)]/50 bg-white/[0.03] p-4 transition hover:bg-white/[0.06] hover:border-[var(--color-border-medium)]"
                     >
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="text-sm font-semibold text-white">
                             {call.personalityName || 'Unknown'}
                             {call.personalityIsBoss && (
-                              <span className="ml-2 rounded-full border border-[#a855f7]/30 bg-[#a855f7]/10 px-2 py-0.5 text-xs text-[#d8b4fe]">
+                              <span className="ml-2 rounded-full border border-[var(--color-purple)]/30 bg-[var(--color-purple)]/10 px-2 py-0.5 text-xs text-[#d8b4fe]">
                                 Boss
                               </span>
                             )}
                           </p>
-                          <p className="text-xs text-[#94a3b8]">{formatTimestamp(call.createdAt)}</p>
+                          <p className="text-xs text-[var(--color-text-secondary)]">{formatTimestamp(call.createdAt)}</p>
                         </div>
                         <div className={`text-2xl font-bold ${scoreColor}`}>
                           {call.overallScore}

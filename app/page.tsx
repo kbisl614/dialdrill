@@ -4,8 +4,9 @@ import { useState, useRef, useEffect } from 'react';
 import { useAuth, SignUpButton, SignInButton } from '@clerk/nextjs';
 import { motion, useInView, useScroll, useTransform } from 'framer-motion';
 import Link from 'next/link';
-import { BlurText, ShimmerButton } from '@/components/ui/react-bits';
+import { BlurText } from '@/components/ui/react-bits';
 import Threads from '@/components/Threads';
+import Button from '@/components/ui/Button';
 
 type Testimonial = {
   name: string;
@@ -121,42 +122,41 @@ export default function Home() {
   ];
 
   return (
-    <main className="min-h-screen bg-[#080d1a] grid-background">
+    <main className="min-h-screen bg-[var(--color-dark-bg)] grid-background">
       {/* Header with Logo */}
       <motion.header
         initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-        className="fixed top-0 left-0 right-0 z-50 border-b border-[#1e293b]/50 bg-[#080d1a]/90 backdrop-blur-xl"
+        className="fixed top-0 left-0 right-0 z-50 border-b border-[var(--color-border-subtle)]/50 bg-[var(--color-dark-bg)]/90 backdrop-blur-xl"
       >
         <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-12">
           <div className="flex h-20 items-center justify-between">
             <div className="text-2xl font-extrabold text-white">
-              Dial<span className="text-[#00d9ff]">Drill</span>
+              Dial<span className="text-[var(--color-cyan-bright)]">Drill</span>
             </div>
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center gap-8">
-              <a href="#features" className="text-sm font-medium text-[#64748b] transition-colors hover:text-white">
+              <a href="#features" className="text-sm font-medium text-[var(--color-text-muted)] transition-colors hover:text-white">
                 Features
               </a>
-              <a href="#how-it-works" className="text-sm font-medium text-[#64748b] transition-colors hover:text-white">
+              <a href="#how-it-works" className="text-sm font-medium text-[var(--color-text-muted)] transition-colors hover:text-white">
                 How it Works
               </a>
-              <a href="#testimonials" className="text-sm font-medium text-[#64748b] transition-colors hover:text-white">
+              <a href="#testimonials" className="text-sm font-medium text-[var(--color-text-muted)] transition-colors hover:text-white">
                 Testimonials
               </a>
               {isSignedIn ? (
-                <Link
-                  href="/dashboard"
-                  className="rounded-full bg-gradient-to-r from-[#00d9ff] to-[#00ffea] px-6 py-2.5 text-sm font-semibold text-[#080d1a] transition-all hover:scale-105 shadow-[0_0_30px_rgba(0,217,255,0.6)] hover:shadow-[0_0_50px_rgba(0,217,255,0.8)]"
-                >
-                  Go to Dashboard
+                <Link href="/dashboard" legacyBehavior>
+                  <Button variant="primary" size="sm">
+                    Go to Dashboard
+                  </Button>
                 </Link>
               ) : (
                 <SignUpButton mode="modal">
-                  <button className="rounded-full bg-gradient-to-r from-[#00d9ff] to-[#00ffea] px-6 py-2.5 text-sm font-semibold text-[#080d1a] transition-all hover:scale-105 shadow-[0_0_30px_rgba(0,217,255,0.6)] hover:shadow-[0_0_50px_rgba(0,217,255,0.8)]">
+                  <Button variant="primary" size="sm">
                     Get Started
-                  </button>
+                  </Button>
                 </SignUpButton>
               )}
             </nav>
@@ -185,42 +185,41 @@ export default function Home() {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="md:hidden border-t border-[#1e293b]/50 py-4 space-y-4"
+              className="md:hidden border-t border-[var(--color-border-subtle)]/50 py-4 space-y-4"
             >
               <a
                 href="#features"
                 onClick={() => setMobileMenuOpen(false)}
-                className="block px-4 py-2 text-sm font-medium text-[#64748b] transition-colors hover:text-white hover:bg-white/5 rounded-lg"
+                className="block px-4 py-2 text-sm font-medium text-[var(--color-text-muted)] transition-colors hover:text-white hover:bg-white/5 rounded-lg"
               >
                 Features
               </a>
               <a
                 href="#how-it-works"
                 onClick={() => setMobileMenuOpen(false)}
-                className="block px-4 py-2 text-sm font-medium text-[#64748b] transition-colors hover:text-white hover:bg-white/5 rounded-lg"
+                className="block px-4 py-2 text-sm font-medium text-[var(--color-text-muted)] transition-colors hover:text-white hover:bg-white/5 rounded-lg"
               >
                 How it Works
               </a>
               <a
                 href="#testimonials"
                 onClick={() => setMobileMenuOpen(false)}
-                className="block px-4 py-2 text-sm font-medium text-[#64748b] transition-colors hover:text-white hover:bg-white/5 rounded-lg"
+                className="block px-4 py-2 text-sm font-medium text-[var(--color-text-muted)] transition-colors hover:text-white hover:bg-white/5 rounded-lg"
               >
                 Testimonials
               </a>
               <div className="px-4 pt-2">
                 {isSignedIn ? (
-                  <Link
-                    href="/dashboard"
-                    className="block w-full text-center rounded-full bg-gradient-to-r from-[#00d9ff] to-[#00ffea] px-6 py-2.5 text-sm font-semibold text-[#080d1a] transition-all hover:scale-105 shadow-[0_0_30px_rgba(0,217,255,0.6)]"
-                  >
-                    Go to Dashboard
+                  <Link href="/dashboard" legacyBehavior>
+                    <Button variant="primary" size="sm" fullWidth>
+                      Go to Dashboard
+                    </Button>
                   </Link>
                 ) : (
                   <SignUpButton mode="modal">
-                    <button className="w-full rounded-full bg-gradient-to-r from-[#00d9ff] to-[#00ffea] px-6 py-2.5 text-sm font-semibold text-[#080d1a] transition-all hover:scale-105 shadow-[0_0_30px_rgba(0,217,255,0.6)]">
+                    <Button variant="primary" size="sm" fullWidth>
                       Get Started
-                    </button>
+                    </Button>
                   </SignUpButton>
                 )}
               </div>
@@ -238,18 +237,24 @@ export default function Home() {
       <Footer />
 
       {/* Back to Top Button */}
-      <motion.button
+      <motion.div
         initial={{ opacity: 0, scale: 0 }}
         animate={{ opacity: showBackToTop ? 1 : 0, scale: showBackToTop ? 1 : 0 }}
         transition={{ duration: 0.3 }}
-        onClick={scrollToTop}
-        className="fixed bottom-8 right-8 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-r from-[#00d9ff] to-[#00ffea] text-[#080d1a] shadow-[0_0_40px_rgba(0,217,255,0.6)] transition-all hover:scale-110 hover:shadow-[0_0_60px_rgba(0,255,234,0.8)]"
-        aria-label="Back to top"
+        className="fixed bottom-8 right-8 z-50"
       >
-        <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
-        </svg>
-      </motion.button>
+        <Button
+          onClick={scrollToTop}
+          variant="primary"
+          size="md"
+          className="h-14 w-14 p-0"
+          aria-label="Back to top"
+        >
+          <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+          </svg>
+        </Button>
+      </motion.div>
     </main>
   );
 }
@@ -289,14 +294,14 @@ function HeroSection({ isSignedIn }: { isSignedIn: boolean }) {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="flex justify-center mb-6"
         >
-          <div className="inline-flex items-center gap-2 rounded-full border border-[#00d9ff]/30 bg-[#00d9ff]/10 px-4 py-1.5 text-sm text-[#94a3b8] backdrop-blur-sm">
+          <div className="inline-flex items-center gap-2 rounded-full border border-[var(--color-cyan-bright)]/30 bg-[var(--color-cyan-bright)]/10 px-4 py-1.5 text-sm text-[var(--color-text-secondary)] backdrop-blur-sm">
             <span className="flex h-2 w-2">
-              <span className="absolute inline-flex h-2 w-2 animate-ping rounded-full bg-[#00d9ff] opacity-75"></span>
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-[#00d9ff]"></span>
+              <span className="absolute inline-flex h-2 w-2 animate-ping rounded-full bg-[var(--color-cyan-bright)] opacity-75"></span>
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-[var(--color-cyan-bright)]"></span>
             </span>
             <span className="font-medium text-white">New</span>
-            <span className="text-[#64748b]">•</span>
-            <span className="text-[#94a3b8]">AI Sales Call Simulator</span>
+            <span className="text-[var(--color-text-muted)]">•</span>
+            <span className="text-[var(--color-text-secondary)]">AI Sales Call Simulator</span>
           </div>
         </motion.div>
 
@@ -320,14 +325,14 @@ function HeroSection({ isSignedIn }: { isSignedIn: boolean }) {
                 text="Stronger closes."
                 delay={150}
                 animateBy="words"
-                className="text-transparent bg-clip-text bg-gradient-to-r from-[#00d9ff] to-[#00ffea]"
+                className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-cyan-bright)] to-[var(--color-cyan-bright-alt-2)]"
               />
             </motion.h1>
             <motion.p
               initial={{ opacity: 0, y: 30 }}
               animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
               transition={{ duration: 0.8, delay: 0.4 }}
-              className="mt-4 text-lg leading-8 text-[#94a3b8] max-w-2xl mx-auto lg:mx-0"
+              className="mt-4 text-lg leading-8 text-[var(--color-text-secondary)] max-w-2xl mx-auto lg:mx-0"
             >
               DialDrill lets founders and sales reps practice real objection handling by calling AI bots.
               Build confidence, refine your pitch, and turn tough conversations into closed deals.
@@ -339,23 +344,22 @@ function HeroSection({ isSignedIn }: { isSignedIn: boolean }) {
               className="mt-8 flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start"
             >
               {isSignedIn ? (
-                <Link
-                  href="/dashboard"
-                  className="btn-glow group relative inline-flex items-center justify-center rounded-full bg-gradient-to-r from-[#00d9ff] to-[#00ffea] px-8 py-4 text-base font-semibold text-[#080d1a] transition-all hover:scale-105 hover:-translate-y-0.5 shadow-[0_0_40px_rgba(0,217,255,0.6)] hover:shadow-[0_0_60px_rgba(0,255,234,0.8)]"
-                >
-                  Go to Dashboard
-                  <svg
-                    className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                  </svg>
+                <Link href="/dashboard" legacyBehavior>
+                  <Button variant="primary" size="md" className="btn-glow group">
+                    Go to Dashboard
+                    <svg
+                      className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                  </Button>
                 </Link>
               ) : (
                 <SignUpButton mode="modal">
-                  <button className="btn-glow group relative inline-flex items-center justify-center rounded-full bg-gradient-to-r from-[#00d9ff] to-[#00ffea] px-8 py-4 text-base font-semibold text-[#080d1a] transition-all hover:scale-105 hover:-translate-y-0.5 shadow-[0_0_40px_rgba(0,217,255,0.6)] hover:shadow-[0_0_60px_rgba(0,255,234,0.8)]">
+                  <Button variant="primary" size="md" className="btn-glow group">
                     Start My Trial Today!
                     <svg
                       className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1"
@@ -365,12 +369,12 @@ function HeroSection({ isSignedIn }: { isSignedIn: boolean }) {
                     >
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
-                  </button>
+                  </Button>
                 </SignUpButton>
               )}
               <Link
                 href="/how-it-works"
-                className="inline-flex items-center gap-2 text-base font-medium text-[#94a3b8] transition-all hover:text-[#00d9ff] hover:gap-3"
+                className="inline-flex items-center gap-2 text-base font-medium text-[var(--color-text-secondary)] transition-all hover:text-[var(--color-cyan-bright)] hover:gap-3"
               >
                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
@@ -398,11 +402,11 @@ function HeroSection({ isSignedIn }: { isSignedIn: boolean }) {
 
 function DashboardCard() {
   return (
-    <div className="overflow-hidden rounded-3xl border border-[#1e293b]/50 bg-gradient-to-br from-[rgba(15,23,42,0.6)] to-[rgba(5,9,17,0.8)] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.7)] backdrop-blur-xl transition-all hover:shadow-[0_20px_80px_rgba(0,0,0,0.8)] hover:-translate-y-1">
+    <div className="overflow-hidden rounded-3xl border border-[var(--color-border-subtle)]/50 bg-gradient-to-br from-card-bg to-[rgba(5,9,17,0.8)] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.7)] backdrop-blur-xl transition-all hover:shadow-[0_20px_80px_rgba(0,0,0,0.8)] hover:-translate-y-1">
       {/* Status Pills */}
       <div className="mb-6 flex flex-wrap gap-2">
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-[#22c55e]/10 px-3 py-1.5 text-xs font-medium text-[#22c55e] ring-1 ring-[#22c55e]/20">
-          <span className="h-1.5 w-1.5 rounded-full bg-[#22c55e]"></span>
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--color-green)]/10 px-3 py-1.5 text-xs font-medium text-[var(--color-green)] ring-1 ring-[var(--color-green)]/20">
+          <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-green)]"></span>
           AI Caller Active
         </span>
         <span className="inline-flex items-center gap-1.5 rounded-full bg-[#c026d3]/10 px-3 py-1.5 text-xs font-medium text-[#e879f9] ring-1 ring-[#c026d3]/20">
@@ -417,8 +421,8 @@ function DashboardCard() {
           <h3 className="mb-4 text-sm font-semibold text-[#e5e7eb]">Call Outcomes</h3>
           <div className="flex h-40 items-end gap-3">
             {[
-              { height: 75, color: 'from-[#00d9ff] to-[#00d9ff]/70', label: 'Won' },
-              { height: 50, color: 'from-[#94a3b8] to-[#94a3b8]/70', label: 'Lost' },
+              { height: 75, color: 'from-[var(--color-cyan-bright)] to-[var(--color-cyan-bright)]/70', label: 'Won' },
+              { height: 50, color: 'from-[var(--color-text-secondary)] to-[var(--color-text-secondary)]/70', label: 'Lost' },
               { height: 90, color: 'from-[#10b981] to-[#10b981]/70', label: 'Follow-up' },
               { height: 60, color: 'from-[#e879f9] to-[#e879f9]/70', label: 'Demo' },
             ].map((bar, i) => (
@@ -430,8 +434,8 @@ function DashboardCard() {
                 viewport={{ once: true }}
                 className="group relative flex flex-1 flex-col items-center gap-2"
               >
-                <div className={`w-full rounded-t-lg bg-gradient-to-t ${bar.color} transition-all group-hover:from-[#00d9ff] group-hover:to-[#00d9ff]`} style={{ height: '100%' }}></div>
-                <span className="text-xs text-[#64748b]">{bar.label}</span>
+                <div className={`w-full rounded-t-lg bg-gradient-to-t ${bar.color} transition-all group-hover:from-[var(--color-cyan-bright)] group-hover:to-[var(--color-cyan-bright)]`} style={{ height: '100%' }}></div>
+                <span className="text-xs text-[var(--color-text-muted)]">{bar.label}</span>
               </motion.div>
             ))}
           </div>
@@ -493,23 +497,23 @@ function DashboardCard() {
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="text-center">
                   <div className="text-2xl font-bold text-white">87</div>
-                  <div className="text-xs text-[#64748b]">Total</div>
+                  <div className="text-xs text-[var(--color-text-muted)]">Total</div>
                 </div>
               </div>
             </motion.div>
           </div>
           <div className="mt-4 grid grid-cols-3 gap-2 text-xs">
             <div className="flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-[#00d9ff]"></span>
-              <span className="text-[#64748b]">Price</span>
+              <span className="h-2 w-2 rounded-full bg-[var(--color-cyan-bright)]"></span>
+              <span className="text-[var(--color-text-muted)]">Price</span>
             </div>
             <div className="flex items-center gap-1.5">
               <span className="h-2 w-2 rounded-full bg-[#fbbf24]"></span>
-              <span className="text-[#64748b]">Timing</span>
+              <span className="text-[var(--color-text-muted)]">Timing</span>
             </div>
             <div className="flex items-center gap-1.5">
               <span className="h-2 w-2 rounded-full bg-[#10b981]"></span>
-              <span className="text-[#64748b]">Authority</span>
+              <span className="text-[var(--color-text-muted)]">Authority</span>
             </div>
           </div>
         </div>
@@ -531,7 +535,7 @@ function MetricsStrip() {
   ];
 
   return (
-    <section ref={ref} className="section-fade-top section-fade-bottom relative border-y border-[#1e293b]/50 bg-white/[0.02] py-10">
+    <section ref={ref} className="section-fade-top section-fade-bottom relative border-y border-[var(--color-border-subtle)]/50 bg-white/[0.02] py-10">
       <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-12">
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {metrics.map((metric, index) => (
@@ -541,7 +545,7 @@ function MetricsStrip() {
               animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
               transition={{ duration: 0.6, delay: index * 0.1 }}
               whileHover={{ y: -10, scale: 1.02 }}
-              className="group rounded-2xl border border-[#1e293b]/50 bg-gradient-to-br from-white/[0.02] to-transparent p-6 transition-all duration-300 hover:border-[#fbbf24]/40 hover:bg-white/[0.04] hover:shadow-[0_0_35px_rgba(251,191,36,0.25)] cursor-pointer"
+              className="group rounded-2xl border border-[var(--color-border-subtle)]/50 bg-gradient-to-br from-white/[0.02] to-transparent p-6 transition-all duration-300 hover:border-[#fbbf24]/40 hover:bg-white/[0.04] hover:shadow-[0_0_35px_rgba(251,191,36,0.25)] cursor-pointer"
             >
               <div
                 className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br transition-all duration-300 group-hover:scale-110 group-hover:rotate-3"
@@ -560,7 +564,7 @@ function MetricsStrip() {
               >
                 {metric.value}
               </h3>
-              <p className="mt-1 text-sm text-[#94a3b8]">{metric.label}</p>
+              <p className="mt-1 text-sm text-[var(--color-text-secondary)]">{metric.label}</p>
             </motion.div>
           ))}
         </div>
@@ -592,9 +596,9 @@ function FeaturesSection({
           className="mb-10 text-center"
         >
           <h2 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
-            Everything you need to <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00d9ff] to-[#00ffea]">level up</span>
+            Everything you need to <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-cyan-bright)] to-[#00ffea]">level up</span>
           </h2>
-          <p className="mt-3 text-base text-[#94a3b8]">
+          <p className="mt-3 text-base text-[var(--color-text-secondary)]">
             Practice. Analyze. Improve. Repeat.
           </p>
         </motion.div>
@@ -616,16 +620,16 @@ function FeaturesSection({
                 onClick={() => setActiveTab(idx)}
                 className={`group relative rounded-xl border p-5 text-left transition-all ${
                   activeTab === idx
-                    ? 'border-[#00d9ff]/50 bg-gradient-to-r from-[#00d9ff]/10 to-transparent shadow-lg shadow-[#00d9ff]/20'
-                    : 'border-[#1e293b]/50 bg-white/[0.02] hover:border-[#334155] hover:bg-white/[0.04]'
+                    ? 'border-[var(--color-cyan-bright)]/50 bg-gradient-to-r from-[var(--color-cyan-bright)]/10 to-transparent shadow-lg shadow-[var(--color-cyan-bright)]/20'
+                    : 'border-[var(--color-border-subtle)]/50 bg-white/[0.02] hover:border-[var(--color-border-medium)] hover:bg-white/[0.04]'
                 }`}
               >
                 {activeTab === idx && (
-                  <div className="absolute left-0 top-1/2 h-8 w-1 -translate-y-1/2 rounded-r-full bg-gradient-to-b from-[#00d9ff] to-[#00ffea]"></div>
+                  <div className="absolute left-0 top-1/2 h-8 w-1 -translate-y-1/2 rounded-r-full bg-gradient-to-b from-[var(--color-cyan-bright)] to-[var(--color-cyan-bright-alt-2)]"></div>
                 )}
                 <h3
                   className={`text-lg font-semibold transition-colors ${
-                    activeTab === idx ? 'text-white' : 'text-[#94a3b8] group-hover:text-white'
+                    activeTab === idx ? 'text-white' : 'text-[var(--color-text-secondary)] group-hover:text-white'
                   }`}
                 >
                   {feature.title}
@@ -638,10 +642,10 @@ function FeaturesSection({
             initial={{ opacity: 0, scale: 0.95 }}
             animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.6, delay: 0.4 }}
-            className="overflow-hidden rounded-3xl border border-[#1e293b]/50 bg-gradient-to-br from-[rgba(15,23,42,0.6)] to-[rgba(5,9,17,0.8)] p-6 shadow-[0_20px_50px_rgba(0,0,0,0.7)] backdrop-blur-xl lg:p-10"
+            className="overflow-hidden rounded-3xl border border-[var(--color-border-subtle)]/50 bg-gradient-to-br from-card-bg to-[rgba(5,9,17,0.8)] p-6 shadow-[0_20px_50px_rgba(0,0,0,0.7)] backdrop-blur-xl lg:p-10"
           >
             <h3 className="text-2xl font-bold text-white">{features[activeTab].title}</h3>
-            <p className="mt-3 text-base leading-relaxed text-[#94a3b8]">
+            <p className="mt-3 text-base leading-relaxed text-[var(--color-text-secondary)]">
               {features[activeTab].description}
             </p>
             <div className="mt-6 grid gap-5 sm:grid-cols-2">
@@ -651,16 +655,16 @@ function FeaturesSection({
                   initial={{ opacity: 0, y: 20 }}
                   animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
                   transition={{ duration: 0.5, delay: 0.5 + idx * 0.1 }}
-                  className="rounded-xl border border-[#1e293b]/50 bg-gradient-to-br from-white/[0.03] to-transparent p-6"
+                  className="rounded-xl border border-[var(--color-border-subtle)]/50 bg-gradient-to-br from-white/[0.03] to-transparent p-6"
                 >
                   <div className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#fbbf24] to-[#fcd34d]">{stat.value}</div>
-                  <div className="mt-2 text-sm text-[#94a3b8]">{stat.label}</div>
+                  <div className="mt-2 text-sm text-[var(--color-text-secondary)]">{stat.label}</div>
                 </motion.div>
               ))}
             </div>
 
             {/* Mock Chart Area */}
-            <div className="mt-6 rounded-2xl border border-[#1e293b]/50 bg-gradient-to-br from-white/[0.03] to-transparent p-6">
+            <div className="mt-6 rounded-2xl border border-[var(--color-border-subtle)]/50 bg-gradient-to-br from-white/[0.03] to-transparent p-6">
               <div className="flex h-28 items-end gap-2">
                 {[40, 65, 45, 80, 55, 75, 60, 85, 70, 90].map((height, idx) => (
                   <motion.div
@@ -668,7 +672,7 @@ function FeaturesSection({
                     initial={{ height: 0 }}
                     animate={isInView ? { height: `${height}%` } : { height: 0 }}
                     transition={{ duration: 0.6, delay: 0.6 + idx * 0.05 }}
-                    className="flex-1 rounded-t-lg bg-gradient-to-t from-[#00d9ff] to-[#00d9ff]/50 transition-all hover:from-[#00ffea] hover:to-[#00ffea]"
+                    className="flex-1 rounded-t-lg bg-gradient-to-t from-[var(--color-cyan-bright)] to-[var(--color-cyan-bright)]/50 transition-all hover:from-[var(--color-cyan-bright-alt-2)] hover:to-[var(--color-cyan-bright-alt-2)]"
                   ></motion.div>
                 ))}
               </div>
@@ -695,9 +699,9 @@ function HowItWorksSection() {
           className="mb-16 lg:mb-20 text-center"
         >
           <h2 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl">
-            How it <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00d9ff] to-[#00ffea]">works</span>
+            How it <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-cyan-bright)] to-[#00ffea]">works</span>
           </h2>
-          <p className="mt-5 text-xl text-[#94a3b8] max-w-3xl mx-auto">
+          <p className="mt-5 text-xl text-[var(--color-text-secondary)] max-w-3xl mx-auto">
             Three simple steps to transform your sales team
           </p>
         </motion.div>
@@ -711,12 +715,12 @@ function HowItWorksSection() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="relative mb-12 flex items-start gap-6"
           >
-            <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#00d9ff] to-[#00b8d4] text-2xl font-bold text-white ring-4 ring-[#00d9ff]/30 shadow-[0_0_40px_rgba(0,217,255,0.5)]">
+            <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[var(--color-cyan-bright)] to-[#00b8d4] text-2xl font-bold text-white ring-4 ring-[var(--color-cyan-bright)]/30 shadow-[0_0_40px_rgba(0,217,255,0.5)]">
               1
             </div>
             <div className="flex-1 pt-2">
               <h3 className="text-2xl font-bold text-white mb-3">Sign Up & Choose Your Plan</h3>
-              <p className="text-lg text-[#94a3b8] leading-relaxed">
+              <p className="text-lg text-[var(--color-text-secondary)] leading-relaxed">
                 Start with our <span className="text-[#fbbf24] font-semibold">$5 trial</span> for 5 practice calls, or go Pro for <span className="text-[#fbbf24] font-semibold">20 minutes per month</span> with all 8 personalities unlocked.
               </p>
             </div>
@@ -729,12 +733,12 @@ function HowItWorksSection() {
             transition={{ duration: 0.6, delay: 0.4 }}
             className="relative mb-12 flex items-start gap-6"
           >
-            <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#fbbf24] to-[#f59e0b] text-2xl font-bold text-white ring-4 ring-[#fbbf24]/30 shadow-[0_0_40px_rgba(251,191,36,0.5)]">
+            <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#fbbf24] to-[var(--color-warning)] text-2xl font-bold text-white ring-4 ring-[#fbbf24]/30 shadow-[0_0_40px_rgba(251,191,36,0.5)]">
               2
             </div>
             <div className="flex-1 pt-2">
               <h3 className="text-2xl font-bold text-white mb-3">Practice Real Sales Scenarios</h3>
-              <p className="text-lg text-[#94a3b8] leading-relaxed">
+              <p className="text-lg text-[var(--color-text-secondary)] leading-relaxed">
                 Choose from approachable business owners or challenging boss personalities. Each call presents realistic objections that test your handling skills in real-time.
               </p>
             </div>
@@ -752,7 +756,7 @@ function HowItWorksSection() {
             </div>
             <div className="flex-1 pt-2">
               <h3 className="text-2xl font-bold text-white mb-3">Review & Improve</h3>
-              <p className="text-lg text-[#94a3b8] leading-relaxed">
+              <p className="text-lg text-[var(--color-text-secondary)] leading-relaxed">
                 Get instant scores on your opening, discovery, objection handling, clarity, and closing. Review full transcripts, see which objections you faced, and track your progress over time.
               </p>
             </div>
@@ -777,9 +781,9 @@ function TestimonialsSection({ testimonials }: { testimonials: Testimonial[] }) 
           className="mb-10 text-center"
         >
           <h2 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
-            Trusted by <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00d9ff] to-[#00ffea]">sales teams</span>
+            Trusted by <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-cyan-bright)] to-[#00ffea]">sales teams</span>
           </h2>
-          <p className="mt-3 text-base text-[#94a3b8]">
+          <p className="mt-3 text-base text-[var(--color-text-secondary)]">
             See what our customers have to say
           </p>
         </motion.div>
@@ -791,18 +795,18 @@ function TestimonialsSection({ testimonials }: { testimonials: Testimonial[] }) 
               animate={isInView ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 50, scale: 0.9 }}
               transition={{ duration: 0.6, delay: idx * 0.15 }}
               whileHover={{ y: -10, scale: 1.02 }}
-              className="overflow-hidden rounded-3xl border border-[#1e293b]/50 bg-gradient-to-br from-[rgba(15,23,42,0.6)] to-[rgba(5,9,17,0.8)] p-5 lg:p-6 shadow-[0_20px_40px_rgba(0,0,0,0.5)] backdrop-blur-xl transition-all hover:shadow-[0_20px_60px_rgba(0,0,0,0.7)] hover:border-[#334155]"
+              className="overflow-hidden rounded-3xl border border-[var(--color-border-subtle)]/50 bg-gradient-to-br from-card-bg to-[rgba(5,9,17,0.8)] p-5 lg:p-6 shadow-[0_20px_40px_rgba(0,0,0,0.5)] backdrop-blur-xl transition-all hover:shadow-[0_20px_60px_rgba(0,0,0,0.7)] hover:border-[var(--color-border-medium)]"
             >
               <div className="flex items-start gap-4 mb-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-[#00d9ff] to-[#00b8d4] text-lg font-bold text-white ring-4 ring-[#00d9ff]/30 flex-shrink-0 shadow-[0_0_20px_rgba(0,217,255,0.4)]">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-[var(--color-cyan-bright)] to-[#00b8d4] text-lg font-bold text-white ring-4 ring-[var(--color-cyan-bright)]/30 flex-shrink-0 shadow-[0_0_20px_rgba(0,217,255,0.4)]">
                   {testimonial.initials}
                 </div>
                 <div className="min-w-0">
                   <div className="font-semibold text-white">{testimonial.name}</div>
-                  <div className="text-sm text-[#94a3b8]">
+                  <div className="text-sm text-[var(--color-text-secondary)]">
                     {testimonial.role} at {testimonial.company}
                   </div>
-                  <div className="mt-1 text-xs text-[#64748b]">{testimonial.description}</div>
+                  <div className="mt-1 text-xs text-[var(--color-text-muted)]">{testimonial.description}</div>
                 </div>
               </div>
               <blockquote className="text-base font-medium leading-relaxed text-white">
@@ -821,7 +825,7 @@ function FinalCTA({ isSignedIn }: { isSignedIn: boolean }) {
   const isInView = useInView(ref, { once: false, amount: 0.5 });
 
   return (
-    <section ref={ref} className="section-fade-top relative border-t border-[#1e293b]/50 py-16 lg:py-24">
+    <section ref={ref} className="section-fade-top relative border-t border-[var(--color-border-subtle)]/50 py-16 lg:py-24">
       <div className="mx-auto max-w-5xl px-4 sm:px-6 text-center lg:px-12">
         <motion.h2
           initial={{ opacity: 0, y: 30 }}
@@ -830,13 +834,13 @@ function FinalCTA({ isSignedIn }: { isSignedIn: boolean }) {
           className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl lg:text-5xl"
         >
           Make your next real call{' '}
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00d9ff] to-[#00ffea]">feel easy.</span>
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-cyan-bright)] to-[#00ffea]">feel easy.</span>
         </motion.h2>
         <motion.p
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="mt-4 text-base text-[#94a3b8]"
+          className="mt-4 text-base text-[var(--color-text-secondary)]"
         >
           Join hundreds of sales teams practicing smarter, closing faster, and growing fearlessly.
         </motion.p>
@@ -847,24 +851,23 @@ function FinalCTA({ isSignedIn }: { isSignedIn: boolean }) {
           className="mt-8 flex flex-col sm:flex-row items-center gap-4 justify-center"
         >
           {isSignedIn ? (
-            <Link
-              href="/dashboard"
-              className="btn-glow group inline-flex items-center justify-center rounded-full bg-gradient-to-r from-[#00d9ff] to-[#00ffea] px-10 py-5 text-lg font-semibold text-[#080d1a] transition-all hover:scale-105 hover:-translate-y-0.5 shadow-[0_0_40px_rgba(0,217,255,0.6)] hover:shadow-[0_0_60px_rgba(0,255,234,0.8)]"
-            >
-              Go to Dashboard
-              <svg
-                className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-              </svg>
+            <Link href="/dashboard" legacyBehavior>
+              <Button variant="primary" size="lg" className="btn-glow group">
+                Go to Dashboard
+                <svg
+                  className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+              </Button>
             </Link>
           ) : (
             <>
               <SignUpButton mode="modal">
-                <button className="btn-glow group inline-flex items-center justify-center rounded-full bg-gradient-to-r from-[#00d9ff] to-[#00ffea] px-10 py-5 text-lg font-semibold text-[#080d1a] transition-all hover:scale-105 hover:-translate-y-0.5 shadow-[0_0_40px_rgba(0,217,255,0.6)] hover:shadow-[0_0_60px_rgba(0,255,234,0.8)]">
+                <Button variant="primary" size="lg" className="btn-glow group">
                   Start My Trial Today!
                   <svg
                     className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1"
@@ -874,10 +877,10 @@ function FinalCTA({ isSignedIn }: { isSignedIn: boolean }) {
                   >
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                   </svg>
-                </button>
+                </Button>
               </SignUpButton>
               <SignInButton mode="modal">
-                <button className="inline-flex items-center text-lg font-medium text-[#94a3b8] transition-colors hover:text-[#00d9ff]">
+                <button className="inline-flex items-center text-lg font-medium text-[var(--color-text-secondary)] transition-colors hover:text-[var(--color-cyan-bright)]">
                   Already have an account? Sign in
                 </button>
               </SignInButton>
@@ -891,13 +894,13 @@ function FinalCTA({ isSignedIn }: { isSignedIn: boolean }) {
 
 function Footer() {
   return (
-    <footer className="border-t border-[#1e293b]/50 py-8">
+    <footer className="border-t border-[var(--color-border-subtle)]/50 py-8">
       <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-12">
         <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
           <div className="text-2xl font-extrabold text-white">
-            Dial<span className="text-[#00d9ff]">Drill</span>
+            Dial<span className="text-[var(--color-cyan-bright)]">Drill</span>
           </div>
-          <div className="text-sm text-[#64748b]">
+          <div className="text-sm text-[var(--color-text-muted)]">
             © 2025 DialDrill. All rights reserved.
           </div>
         </div>
