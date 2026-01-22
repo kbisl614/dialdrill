@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { TiltCard, LetterGlitch } from '@/components/ui/react-bits';
+import Card from '@/components/ui/Card';
 
 export type Personality = {
   id: string;
@@ -97,7 +98,7 @@ export default function PersonalitySelector({
       </div>
 
       {selectionMode === 'random' ? (
-        <div className="rounded-xl border border-[var(--color-cyan-bright)]/20 bg-gradient-to-br from-[var(--color-cyan-bright)]/5 to-transparent p-5">
+        <Card variant="default" padding="md" className="border-[var(--color-cyan-bright)]/20">
           <div className="flex items-start gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--color-cyan-bright)]/20 text-xl flex-shrink-0">
               🎲
@@ -109,7 +110,7 @@ export default function PersonalitySelector({
               </p>
             </div>
           </div>
-        </div>
+        </Card>
       ) : (
         <div className="relative">
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
@@ -182,10 +183,10 @@ export default function PersonalitySelector({
                     </div>
                   </TiltCard>
 
-                  {/* Enhanced Info Card on Hover */}
+                  {/* Enhanced Info Card on Hover - Using standardized Card component */}
                   {isHovered && (
                     <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 z-30 pointer-events-none">
-                      <div className="rounded-2xl border-2 border-[var(--color-cyan-bright)]/40 bg-gradient-to-br from-[#0a0f1a] to-[#1a1f2e] p-5 shadow-[0_0_40px_rgba(0,217,255,0.4)] backdrop-blur-xl max-w-[280px] min-w-[260px] animate-fadeIn">
+                      <Card variant="glow" padding="md" className="border-2 border-[var(--color-cyan-bright)]/40 max-w-[280px] min-w-[260px] animate-fadeIn">
                         {/* Header with Icon and Name */}
                         <div className="flex items-start gap-3 mb-3 pb-3 border-b border-[var(--color-cyan-bright)]/20">
                           <div className="text-3xl flex-shrink-0">{icon}</div>
@@ -199,15 +200,15 @@ export default function PersonalitySelector({
                           </div>
                         </div>
                         {/* Description */}
-                        <p className="text-sm text-[#cbd5e1] leading-relaxed whitespace-normal">
+                        <p className="text-sm text-[var(--color-text-secondary)] leading-relaxed whitespace-normal">
                           {personality.description}
                         </p>
                         {/* Arrow */}
                         <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-[2px]">
-                          <div className="w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-t-[8px] border-t-[#0a0f1a]"></div>
+                          <div className="w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-t-[8px] border-t-[var(--color-darkest-bg)]"></div>
                           <div className="absolute top-[-1px] left-1/2 -translate-x-1/2 w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-t-[8px] border-t-[var(--color-cyan-bright)]/40"></div>
                         </div>
-                      </div>
+                      </Card>
                     </div>
                   )}
                 </div>
