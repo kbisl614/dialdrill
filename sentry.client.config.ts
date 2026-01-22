@@ -1,20 +1,21 @@
-import * as Sentry from '@sentry/nextjs';
+// This file configures the initialization of Sentry on the client.
+// The config you add here will be used whenever a user loads a page in their browser.
+// https://docs.sentry.io/platforms/javascript/guides/nextjs/
+
+import * as Sentry from "@sentry/nextjs";
 
 Sentry.init({
-  dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
+  dsn: "https://12d7526f4894eacea21d586296197375@o4510752351518720.ingest.us.sentry.io/4510752360235008",
 
-  // Only enable in production
-  enabled: process.env.NODE_ENV === 'production',
-
-  // Performance monitoring
-  tracesSampleRate: 0.1, // 10% of transactions for performance monitoring
+  // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.
+  tracesSampleRate: 1,
 
   // Session replay for debugging user issues
   replaysSessionSampleRate: 0.1, // 10% of sessions
   replaysOnErrorSampleRate: 1.0, // 100% of sessions with errors
 
-  // Don't send PII
-  sendDefaultPii: false,
+  // Enable logs to be sent to Sentry
+  enableLogs: true,
 
   // Filter out noisy errors
   ignoreErrors: [
@@ -28,22 +29,4 @@ Sentry.init({
     // User navigation
     'AbortError',
   ],
-
-  // Add context
-  beforeSend(event) {
-    // Remove sensitive data from breadcrumbs
-    if (event.breadcrumbs) {
-      event.breadcrumbs = event.breadcrumbs.map((breadcrumb) => {
-        if (breadcrumb.category === 'fetch' && breadcrumb.data?.url) {
-          // Redact API keys from URLs
-          breadcrumb.data.url = breadcrumb.data.url.replace(
-            /key=[^&]+/g,
-            'key=[REDACTED]'
-          );
-        }
-        return breadcrumb;
-      });
-    }
-    return event;
-  },
 });
