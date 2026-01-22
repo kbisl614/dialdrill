@@ -8,6 +8,7 @@ import { NextResponse } from 'next/server';
 import { pool } from '@/lib/db';
 import { getCoachingAnalysis } from '@/lib/ai-coach';
 import { logger } from '@/lib/logger';
+import { rateLimit, RATE_LIMITS, rateLimitHeaders } from '@/lib/rate-limit';
 
 export async function GET(request: Request, { params }: { params: Promise<{ callLogId: string }> }) {
   try {
@@ -15,6 +16,15 @@ export async function GET(request: Request, { params }: { params: Promise<{ call
 
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Rate limit: 10 coaching requests per minute per user
+    const rateLimitResult = rateLimit(`coaching:${userId}`, RATE_LIMITS.expensive);
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { error: 'Too many requests. Please wait before requesting more coaching insights.' },
+        { status: 429, headers: rateLimitHeaders(rateLimitResult) }
+      );
     }
 
     const { callLogId } = await params;

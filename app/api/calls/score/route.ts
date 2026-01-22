@@ -4,6 +4,7 @@ import { pool } from '@/lib/db';
 import { scoreCall, isCallTooShort, generateShortCallScore } from '@/lib/scoring-engine';
 import type { TranscriptEntry } from '@/lib/transcript-parser';
 import { logger } from '@/lib/logger';
+import { rateLimit, RATE_LIMITS, rateLimitHeaders } from '@/lib/rate-limit';
 
 /**
  * POST /api/calls/score
@@ -20,6 +21,15 @@ export async function POST(request: Request) {
 
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Rate limit: 10 scoring requests per minute per user
+    const rateLimitResult = rateLimit(`calls/score:${userId}`, RATE_LIMITS.expensive);
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { error: 'Too many requests. Please wait before scoring another call.' },
+        { status: 429, headers: rateLimitHeaders(rateLimitResult) }
+      );
     }
 
     const body = await request.json();

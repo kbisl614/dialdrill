@@ -4,6 +4,8 @@ import type Stripe from 'stripe';
 import { pool } from '@/lib/db';
 import { getStripeClient } from '@/lib/stripe';
 import { logger } from '@/lib/logger';
+import { rateLimit, RATE_LIMITS, rateLimitHeaders } from '@/lib/rate-limit';
+import { validateBody, checkoutSchema, isValidationError } from '@/lib/validation';
 
 export async function POST(request: Request) {
   logger.apiInfo('/stripe/checkout', 'Request received');
@@ -15,8 +17,18 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const body = await request.json();
-    const { priceId, planType } = body; // planType: 'trial' or 'paid'
+    // Rate limit: 5 payment attempts per minute per user
+    const rateLimitResult = rateLimit(`stripe/checkout:${userId}`, RATE_LIMITS.payment);
+    if (!rateLimitResult.success) {
+      logger.apiInfo('/stripe/checkout', 'Rate limited', { userId });
+      return NextResponse.json(
+        { error: 'Too many requests. Please wait before trying again.' },
+        { status: 429, headers: rateLimitHeaders(rateLimitResult) }
+      );
+    }
+
+    // Validate request body
+    const { priceId, planType } = await validateBody(request, checkoutSchema);
 
     logger.apiInfo('/stripe/checkout', 'Creating session', { userId, priceId, planType });
 
@@ -96,6 +108,14 @@ export async function POST(request: Request) {
       url: session.url,
     });
   } catch (error) {
+    // Handle validation errors
+    if (isValidationError(error)) {
+      return NextResponse.json(
+        { error: 'Invalid request', details: error.errors },
+        { status: 400 }
+      );
+    }
+
     logger.apiError('/stripe/checkout', error, { route: '/stripe/checkout' });
     return NextResponse.json(
       {

@@ -535,7 +535,7 @@ function MetricsStrip() {
   ];
 
   return (
-    <section ref={ref} className="section-fade-top section-fade-bottom relative border-y border-[var(--color-border-subtle)]/50 bg-white/[0.02] py-10">
+    <section ref={ref} className="section-fade-top section-fade-bottom relative border-y border-[var(--color-border-subtle)]/50 bg-[var(--color-dark-bg)]/50 py-10">
       <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-12">
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {metrics.map((metric, index) => (
@@ -545,7 +545,7 @@ function MetricsStrip() {
               animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
               transition={{ duration: 0.6, delay: index * 0.1 }}
               whileHover={{ y: -10, scale: 1.02 }}
-              className="group rounded-2xl border border-[var(--color-border-subtle)]/50 bg-gradient-to-br from-white/[0.02] to-transparent p-6 transition-all duration-300 hover:border-[#fbbf24]/40 hover:bg-white/[0.04] hover:shadow-[0_0_35px_rgba(251,191,36,0.25)] cursor-pointer"
+              className="group rounded-2xl border border-[var(--color-border-subtle)]/50 bg-gradient-to-br from-[var(--color-card-bg)]/30 to-transparent p-6 transition-all duration-300 hover:border-[#fbbf24]/40 hover:bg-[var(--color-card-bg)]/50 hover:shadow-[0_0_35px_rgba(251,191,36,0.25)] cursor-pointer"
             >
               <div
                 className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br transition-all duration-300 group-hover:scale-110 group-hover:rotate-3"
@@ -621,7 +621,7 @@ function FeaturesSection({
                 className={`group relative rounded-xl border p-5 text-left transition-all ${
                   activeTab === idx
                     ? 'border-[var(--color-cyan-bright)]/50 bg-gradient-to-r from-[var(--color-cyan-bright)]/10 to-transparent shadow-lg shadow-[var(--color-cyan-bright)]/20'
-                    : 'border-[var(--color-border-subtle)]/50 bg-white/[0.02] hover:border-[var(--color-border-medium)] hover:bg-white/[0.04]'
+                    : 'border-[var(--color-border-subtle)]/50 bg-[var(--color-card-bg)]/30 hover:border-[var(--color-border-medium)] hover:bg-[var(--color-card-bg)]/50'
                 }`}
               >
                 {activeTab === idx && (
@@ -655,7 +655,7 @@ function FeaturesSection({
                   initial={{ opacity: 0, y: 20 }}
                   animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
                   transition={{ duration: 0.5, delay: 0.5 + idx * 0.1 }}
-                  className="rounded-xl border border-[var(--color-border-subtle)]/50 bg-gradient-to-br from-white/[0.03] to-transparent p-6"
+                  className="rounded-xl border border-[var(--color-border-subtle)]/50 bg-gradient-to-br from-[var(--color-card-bg)]/30 to-transparent p-6"
                 >
                   <div className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#fbbf24] to-[#fcd34d]">{stat.value}</div>
                   <div className="mt-2 text-sm text-[var(--color-text-secondary)]">{stat.label}</div>
@@ -664,7 +664,7 @@ function FeaturesSection({
             </div>
 
             {/* Mock Chart Area */}
-            <div className="mt-6 rounded-2xl border border-[var(--color-border-subtle)]/50 bg-gradient-to-br from-white/[0.03] to-transparent p-6">
+            <div className="mt-6 rounded-2xl border border-[var(--color-border-subtle)]/50 bg-gradient-to-br from-[var(--color-card-bg)]/30 to-transparent p-6">
               <div className="flex h-28 items-end gap-2">
                 {[40, 65, 45, 80, 55, 75, 60, 85, 70, 90].map((height, idx) => (
                   <motion.div

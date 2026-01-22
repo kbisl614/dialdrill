@@ -152,12 +152,12 @@ body {
   font-family: var(--font-sans);
 }
 
-/* Animated grid background - Darker */
+/* Animated grid background - Darker with cyan accent */
 .grid-background {
   background-color: #080d1a;
   background-image:
-    linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+    linear-gradient(to right, rgba(0, 217, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 217, 255, 0.03) 1px, transparent 1px);
   background-size: 60px 60px;
 }
 

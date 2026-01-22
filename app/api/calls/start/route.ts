@@ -4,6 +4,8 @@ import { NextResponse } from 'next/server';
 import { getRandomAgentId } from '@/lib/agent-selector';
 import { getEntitlements, deductCallCredit } from '@/lib/entitlements';
 import { logger } from '@/lib/logger';
+import { rateLimit, RATE_LIMITS, rateLimitHeaders } from '@/lib/rate-limit';
+import { validateBody, startCallSchema, isValidationError } from '@/lib/validation';
 
 export async function POST(request: Request) {
   const perfStart = Date.now();
@@ -20,9 +22,18 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Parse request body to get optional personality selection
-    const body = await request.json().catch(() => ({}));
-    const selectedPersonalityId = body.personalityId;
+    // Rate limit: 10 calls per minute per user
+    const rateLimitResult = rateLimit(`calls/start:${userId}`, RATE_LIMITS.expensive);
+    if (!rateLimitResult.success) {
+      logger.api('/calls/start', 'Rate limited', { userId });
+      return NextResponse.json(
+        { error: 'Too many requests. Please wait before starting another call.' },
+        { status: 429, headers: rateLimitHeaders(rateLimitResult) }
+      );
+    }
+
+    // Parse and validate request body
+    const { personalityId: selectedPersonalityId } = await validateBody(request, startCallSchema);
 
     // Get user entitlements (single source of truth)
     const entitlementsStart = Date.now();
@@ -119,6 +130,14 @@ export async function POST(request: Request) {
       callLogId,
     });
   } catch (error) {
+    // Handle validation errors
+    if (isValidationError(error)) {
+      return NextResponse.json(
+        { error: 'Invalid request', details: error.errors },
+        { status: 400 }
+      );
+    }
+
     logger.apiError('/calls/start', error, { route: '/calls/start' });
 
     return NextResponse.json(
