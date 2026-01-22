@@ -7,6 +7,7 @@ import Confetti from 'react-confetti';
 import Link from 'next/link';
 import CoachingInsightsPanel from './CoachingInsightsPanel';
 import VoiceAnalyticsPanel from './VoiceAnalyticsPanel';
+import Button from '@/components/ui/Button';
 
 interface CallSummaryClientProps {
   summary: {

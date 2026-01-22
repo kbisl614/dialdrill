@@ -516,12 +516,12 @@ export const spin: Variants = {
  * Create a delayed version of any variant
  */
 export function withDelay<T extends Variants>(variants: T, delay: number): T {
-  const delayed = { ...variants };
-  if (delayed.animate && typeof delayed.animate === 'object') {
-    delayed.animate = {
+  const delayed = { ...variants } as T;
+  if ('animate' in delayed && delayed.animate && typeof delayed.animate === 'object' && delayed.animate !== null) {
+    (delayed as any).animate = {
       ...delayed.animate,
       transition: {
-        ...(delayed.animate as any).transition,
+        ...((delayed.animate as any).transition || {}),
         delay,
       },
     };

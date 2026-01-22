@@ -16,7 +16,7 @@ import { SidebarProvider, useSidebar } from '@/components/SidebarContext';
 import { BlurText } from '@/components/ui/react-bits';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
-import Button from '@/components/ui/Button';
+import { clientLogger } from '@/lib/client-logger';
 
 // Force dynamic rendering for this page
 export const dynamic = 'force-dynamic';

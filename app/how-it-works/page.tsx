@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import Toast from '@/components/Toast';
 import clientLogger from '@/lib/client-logger';
+import Button from '@/components/ui/Button';
 
 // ⚠️ PASTE YOUR LOOM VIDEO EMBED URL HERE ⚠️
 // To get your Loom embed URL:

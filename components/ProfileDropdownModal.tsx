@@ -291,7 +291,6 @@ export default function ProfileDropdownModal({ isOpen, onClose, userData, loadin
             <p className="text-sm text-[var(--color-text-secondary)] mb-1">Power Level</p>
             <AnimatedNumber
               value={userData.currentPower}
-              duration={2000}
               className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-cyan-bright)] to-[#9d4edd]"
               formatOptions={{ useGrouping: true }}
               springConfig={{ stiffness: 80, damping: 25 }}
@@ -367,8 +366,6 @@ export default function ProfileDropdownModal({ isOpen, onClose, userData, loadin
               activeTab={activeTab}
               onTabChange={(tabId) => setActiveTab(tabId as TabType)}
               pillColor="#00d9ff"
-              textColor="rgba(156, 163, 175, 1)"
-              activeTextColor="#080d1a"
               className="w-full"
             />
           </div>

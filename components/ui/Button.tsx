@@ -1,12 +1,12 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import { type ReactNode, type ButtonHTMLAttributes } from 'react';
+import { motion, type HTMLMotionProps } from 'framer-motion';
+import { type ReactNode } from 'react';
 import { cn } from '@/lib/design-system';
 import { buttonInteraction } from '@/lib/design-system/animations';
 import { colors } from '@/lib/design-system/tokens';
 
-interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+interface ButtonProps extends Omit<HTMLMotionProps<'button'>, 'children'> {
   children: ReactNode;
   variant?: 'primary' | 'secondary' | 'purple' | 'ghost';
   size?: 'sm' | 'md' | 'lg';
@@ -43,7 +43,8 @@ export default function Button({
 
   return (
     <motion.button
-      {...buttonInteraction}
+      whileHover={buttonInteraction.whileHover}
+      whileTap={buttonInteraction.whileTap}
       disabled={disabled}
       className={cn(
         'transition-all font-semibold flex items-center justify-center gap-2',

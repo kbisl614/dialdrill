@@ -86,11 +86,18 @@ class Logger {
   }
 
   /**
-   * API route logging helper
+   * API route logging helper (debug only)
    */
   api(route: string, message: string, context?: LogContext): void {
     if (!this.isDebug) return;
     this.debug(`[API ${route}] ${message}`, context);
+  }
+
+  /**
+   * API info logging (always logged, with route context)
+   */
+  apiInfo(route: string, message: string, context?: LogContext): void {
+    this.info(`[API ${route}] ${message}`, context);
   }
 
   /**
