@@ -17,7 +17,7 @@ export default function Breadcrumb({ items }: BreadcrumbProps) {
           {item.href ? (
             <Link
               href={item.href}
-              className="text-[#64748b] transition-colors hover:text-[#00d9ff]"
+              className="text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-cyan-bright)]"
             >
               {item.label}
             </Link>

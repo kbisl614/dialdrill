@@ -13,8 +13,6 @@ interface PillNavigationProps {
   activeTab: string;
   onTabChange: (tabId: string) => void;
   pillColor?: string;
-  textColor?: string;
-  activeTextColor?: string;
   className?: string;
 }
 
@@ -23,14 +21,12 @@ export default function PillNavigation({
   activeTab,
   onTabChange,
   pillColor = '#00d9ff',
-  textColor = 'rgba(156, 163, 175, 1)',
-  activeTextColor = '#080d1a',
   className = '',
 }: PillNavigationProps) {
   const activeIndex = tabs.findIndex((tab) => tab.id === activeTab);
 
   return (
-    <div className={`relative inline-flex gap-2 p-1 rounded-full bg-[#1e293b] ${className}`}>
+    <div className={`relative inline-flex gap-2 p-1 rounded-full bg-[var(--color-border-subtle)] ${className}`}>
       {/* Animated pill background */}
       <div
         className="absolute top-1 bottom-1 rounded-full transition-all duration-300 ease-out"
@@ -46,7 +42,7 @@ export default function PillNavigation({
           key={tab.id}
           onClick={() => onTabChange(tab.id)}
           className={`relative z-10 flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-            activeTab === tab.id ? 'text-[#080d1a]' : 'text-[#9ca3af] hover:text-white'
+            activeTab === tab.id ? 'text-[var(--color-dark-bg)]' : 'text-[var(--color-text-secondary)] hover:text-white'
           }`}
         >
           {tab.icon && <span>{tab.icon}</span>}

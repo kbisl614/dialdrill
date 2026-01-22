@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Sparkles, TrendingUp, Target, MessageSquare, AlertCircle, Lightbulb, CheckCircle2, XCircle } from 'lucide-react';
+import { Sparkles, TrendingUp, Target, MessageSquare, AlertCircle, Lightbulb, CheckCircle2 } from 'lucide-react';
+import clientLogger from '@/lib/client-logger';
 
 interface CoachingInsight {
   category: string;
@@ -70,7 +71,7 @@ export default function CoachingInsightsPanel({ callLogId }: CoachingInsightsPan
         const data = await response.json();
         setCoaching(data.coaching);
       } catch (err) {
-        console.error('Error fetching coaching:', err);
+        clientLogger.error('Error fetching coaching', err);
         setError('Unable to load coaching insights');
       } finally {
         setLoading(false);
@@ -190,7 +191,7 @@ export default function CoachingInsightsPanel({ callLogId }: CoachingInsightsPan
                       {strength.example && (
                         <div className="bg-white dark:bg-gray-800 rounded p-3 border-l-4 border-green-500">
                           <p className="text-sm italic text-gray-600 dark:text-gray-400 mb-2">
-                            "{strength.example.quote}"
+                            &ldquo;{strength.example.quote}&rdquo;
                           </p>
                           <p className="text-sm text-gray-700 dark:text-gray-300 mb-2">
                             <strong>Why this worked:</strong> {strength.example.context}
@@ -234,7 +235,7 @@ export default function CoachingInsightsPanel({ callLogId }: CoachingInsightsPan
                         <div className="bg-white dark:bg-gray-800 rounded p-3 border-l-4 border-blue-500">
                           {improvement.example.quote && (
                             <p className="text-sm italic text-gray-600 dark:text-gray-400 mb-2">
-                              "{improvement.example.quote}"
+                              &ldquo;{improvement.example.quote}&rdquo;
                             </p>
                           )}
                           <p className="text-sm text-gray-700 dark:text-gray-300 mb-2">
@@ -271,7 +272,7 @@ export default function CoachingInsightsPanel({ callLogId }: CoachingInsightsPan
                   >
                     <div className="font-medium text-purple-900 dark:text-purple-100 mb-2">{phrase.situation}</div>
                     <div className="bg-white dark:bg-gray-800 rounded p-3 mb-2 border-l-4 border-purple-500">
-                      <p className="text-gray-900 dark:text-gray-100 font-medium">"{phrase.phrase}"</p>
+                      <p className="text-gray-900 dark:text-gray-100 font-medium">&ldquo;{phrase.phrase}&rdquo;</p>
                     </div>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
                       <strong>When to use:</strong> {phrase.whenToUse}

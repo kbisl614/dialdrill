@@ -7,6 +7,7 @@ import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import { pool } from '@/lib/db';
 import { getCoachingAnalysis } from '@/lib/ai-coach';
+import { logger } from '@/lib/logger';
 
 export async function GET(request: Request, { params }: { params: Promise<{ callLogId: string }> }) {
   try {
@@ -53,11 +54,13 @@ export async function GET(request: Request, { params }: { params: Promise<{ call
       coaching,
     });
   } catch (error) {
-    console.error('[API /coaching/[callLogId]] ERROR:', error);
+    logger.apiError('/coaching/[callLogId]', error, { route: '/coaching/[callLogId]' });
     return NextResponse.json(
       {
         error: 'Internal server error',
-        details: error instanceof Error ? error.message : String(error),
+        ...(process.env.NODE_ENV !== 'production' && {
+          details: error instanceof Error ? error.message : String(error)
+        })
       },
       { status: 500 }
     );

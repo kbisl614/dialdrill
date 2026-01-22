@@ -5,7 +5,6 @@ import { motion, useSpring, useTransform } from 'framer-motion';
 
 interface AnimatedNumberProps {
   value: number;
-  duration?: number;
   className?: string;
   formatOptions?: Intl.NumberFormatOptions;
   springConfig?: { stiffness: number; damping: number };
@@ -13,7 +12,6 @@ interface AnimatedNumberProps {
 
 export default function AnimatedNumber({
   value,
-  duration = 2000,
   className = '',
   formatOptions = { useGrouping: true },
   springConfig = { stiffness: 80, damping: 25 },

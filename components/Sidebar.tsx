@@ -53,10 +53,10 @@ export default function Sidebar() {
   return (
     <>
       {/* Mobile Header */}
-      <header className="lg:hidden border-b border-[#1e293b]/50 bg-[#080d1a]/80 backdrop-blur-xl sticky top-0 z-50">
+      <header className="lg:hidden border-b border-[var(--color-border-subtle)]/50 bg-[var(--color-dark-bg)]/80 backdrop-blur-xl sticky top-0 z-50">
         <div className="flex h-16 items-center justify-between px-4">
           <Link href="/dashboard" className="text-xl font-extrabold text-white">
-            Dial<span className="text-[#00d9ff]">Drill</span>
+            Dial<span className="text-[var(--color-cyan-bright)]">Drill</span>
           </Link>
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -77,7 +77,7 @@ export default function Sidebar() {
 
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
-          <div className="border-t border-[#1e293b]/50 bg-[#080d1a]/95 backdrop-blur-xl">
+          <div className="border-t border-[var(--color-border-subtle)]/50 bg-[var(--color-dark-bg)]/95 backdrop-blur-xl">
             <nav className="px-4 py-4 space-y-1">
               {navItems.map((item) => {
                 const isActive = pathname === item.href;
@@ -89,8 +89,8 @@ export default function Sidebar() {
                     title={item.name}
                     className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold transition-all ${
                       isActive
-                        ? 'bg-gradient-to-r from-[#00d9ff]/20 to-transparent text-white border-l-2 border-[#00d9ff]'
-                        : 'text-[#94a3b8] hover:bg-white/5 hover:text-white'
+                        ? 'bg-gradient-to-r from-[var(--color-cyan-bright)]/20 to-transparent text-white border-l-2 border-[var(--color-cyan-bright)]'
+                        : 'text-[var(--color-text-secondary)] hover:bg-white/5 hover:text-white'
                     }`}
                   >
                     {item.icon}
@@ -98,9 +98,9 @@ export default function Sidebar() {
                   </Link>
                 );
               })}
-              <div className="pt-4 border-t border-[#1e293b]/50">
+              <div className="pt-4 border-t border-[var(--color-border-subtle)]/50">
                 <SignOutButton>
-                  <button className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold text-[#94a3b8] transition-all hover:bg-white/5 hover:text-white">
+                  <button className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold text-[var(--color-text-secondary)] transition-all hover:bg-white/5 hover:text-white">
                     <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                     </svg>
@@ -114,14 +114,14 @@ export default function Sidebar() {
       </header>
 
       {/* Desktop Sidebar */}
-      <aside className={`hidden lg:flex lg:flex-col lg:fixed lg:inset-y-0 lg:border-r lg:border-[#1e293b]/50 lg:bg-[#0a1120]/95 lg:backdrop-blur-xl transition-all duration-300 ${
+      <aside className={`hidden lg:flex lg:flex-col lg:fixed lg:inset-y-0 lg:border-r lg:border-[var(--color-border-subtle)]/50 lg:bg-[#0a1120]/95 lg:backdrop-blur-xl transition-all duration-300 ${
         isCollapsed ? 'lg:w-20' : 'lg:w-64'
       }`}>
         {/* Logo */}
-        <div className="flex h-20 items-center justify-between px-6 border-b border-[#1e293b]/50">
+        <div className="flex h-20 items-center justify-between px-6 border-b border-[var(--color-border-subtle)]/50">
           {!isCollapsed && (
             <Link href="/dashboard" className="text-2xl font-extrabold text-white">
-              Dial<span className="text-[#00d9ff]">Drill</span>
+              Dial<span className="text-[var(--color-cyan-bright)]">Drill</span>
             </Link>
           )}
           <button
@@ -149,8 +149,8 @@ export default function Sidebar() {
                 title={item.name}
                 className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition-all ${
                   isActive
-                    ? 'bg-gradient-to-r from-[#00d9ff]/20 to-transparent text-white shadow-lg border-l-4 border-[#00d9ff]'
-                    : 'text-[#94a3b8] hover:bg-white/5 hover:text-white'
+                    ? 'bg-gradient-to-r from-[var(--color-cyan-bright)]/20 to-transparent text-white shadow-lg border-l-4 border-[var(--color-cyan-bright)]'
+                    : 'text-[var(--color-text-secondary)] hover:bg-white/5 hover:text-white'
                 } ${isCollapsed ? 'justify-center' : ''}`}
               >
                 {item.icon}
@@ -161,11 +161,11 @@ export default function Sidebar() {
         </nav>
 
         {/* Sign Out Button */}
-        <div className="px-4 py-6 border-t border-[#1e293b]/50">
+        <div className="px-4 py-6 border-t border-[var(--color-border-subtle)]/50">
           <SignOutButton>
             <button
               title="Sign out of your account"
-              className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#1e293b]/50 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition-all hover:bg-white/10 hover:border-[#334155]">
+              className="flex w-full items-center justify-center gap-2 rounded-xl border border-[var(--color-border-subtle)]/50 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition-all hover:bg-white/10 hover:border-[var(--color-border-medium)]">
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
               </svg>

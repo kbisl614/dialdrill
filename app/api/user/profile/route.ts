@@ -1,6 +1,7 @@
 import { auth } from '@clerk/nextjs/server';
 import { pool } from '@/lib/db';
 import { NextResponse } from 'next/server';
+import { logger } from '@/lib/logger';
 
 // Belt progression configuration (49 total levels)
 const BELT_PROGRESSION = [
@@ -166,13 +167,13 @@ const ALL_BADGES = [
 ];
 
 export async function GET() {
-  console.log('[API /user/profile] Request received');
+  logger.apiInfo('/user/profile', 'Request received');
 
   try {
     const { userId } = await auth();
 
     if (!userId) {
-      console.log('[API /user/profile] No userId found');
+      logger.apiInfo('/user/profile', 'Unauthorized - no userId');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -355,7 +356,7 @@ export async function GET() {
 
     return NextResponse.json(profileData);
   } catch (error) {
-    console.error('[API /user/profile] ERROR:', error);
+    logger.apiError('/user/profile', error, { route: '/user/profile' });
     return NextResponse.json(
       { error: 'Internal server error', details: error instanceof Error ? error.message : String(error) },
       { status: 500 }

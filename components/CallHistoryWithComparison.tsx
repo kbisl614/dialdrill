@@ -100,12 +100,12 @@ export default function CallHistoryWithComparison({ calls }: Props) {
 
   if (calls.length === 0) {
     return (
-      <div className="rounded-3xl border border-[#1e293b]/50 bg-white/[0.02] p-12 text-center text-[#94a3b8]">
+      <div className="rounded-3xl border border-[var(--color-border-subtle)]/50 bg-white/[0.02] p-12 text-center text-[var(--color-text-secondary)]">
         <p className="text-xl font-semibold text-white mb-2">No calls yet</p>
         <p>Once you complete a call, the transcript and summary will appear here.</p>
         <Link
           href="/dashboard"
-          className="mt-6 inline-flex items-center justify-center rounded-full bg-gradient-to-r from-[#00d9ff] to-[#00ffea] px-8 py-3 text-sm font-semibold text-[#080d1a] transition hover:scale-105 shadow-[0_0_40px_rgba(0,217,255,0.6)] hover:shadow-[0_0_60px_rgba(0,255,234,0.8)]"
+          className="mt-6 inline-flex items-center justify-center rounded-full bg-gradient-to-r from-[var(--color-cyan-bright)] to-[#00ffea] px-8 py-3 text-sm font-semibold text-[var(--color-dark-bg)] transition hover:scale-105 shadow-[0_0_40px_rgba(0,217,255,0.6)] hover:shadow-[0_0_60px_rgba(0,255,234,0.8)]"
         >
           Start Practicing
         </Link>
@@ -117,13 +117,13 @@ export default function CallHistoryWithComparison({ calls }: Props) {
     <>
       {/* Comparison Toolbar */}
       {calls.length >= 2 && (
-        <div className="mb-6 rounded-2xl border border-[#1e293b]/50 bg-gradient-to-br from-[rgba(15,23,42,0.6)] to-[rgba(5,9,17,0.8)] p-4 shadow-[0_20px_60px_rgba(0,0,0,0.7)]">
+        <div className="mb-6 rounded-2xl border border-[var(--color-border-subtle)]/50 bg-gradient-to-br from-card-bg to-[rgba(5,9,17,0.8)] p-4 shadow-[0_20px_60px_rgba(0,0,0,0.7)]">
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div className="flex items-center gap-3">
-              <GitCompare className="w-5 h-5 text-[#00d9ff]" />
+              <GitCompare className="w-5 h-5 text-[var(--color-cyan-bright)]" />
               <div>
                 <p className="text-sm font-semibold text-white">Compare Calls</p>
-                <p className="text-xs text-[#94a3b8]">
+                <p className="text-xs text-[var(--color-text-secondary)]">
                   Select 2 calls to compare side-by-side ({selectedCallIds.length}/2 selected)
                 </p>
               </div>
@@ -131,7 +131,7 @@ export default function CallHistoryWithComparison({ calls }: Props) {
             <button
               onClick={handleCompare}
               disabled={selectedCallIds.length !== 2}
-              className="rounded-full bg-gradient-to-r from-[#00d9ff] to-[#00ffea] px-6 py-2 text-sm font-semibold text-[#080d1a] transition hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-[0_0_20px_rgba(0,217,255,0.4)]"
+              className="rounded-full bg-gradient-to-r from-[var(--color-cyan-bright)] to-[#00ffea] px-6 py-2 text-sm font-semibold text-[var(--color-dark-bg)] transition hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-[0_0_20px_rgba(0,217,255,0.4)]"
             >
               Compare Selected
             </button>
@@ -163,14 +163,14 @@ export default function CallHistoryWithComparison({ calls }: Props) {
               key={call.id}
               className={`rounded-3xl border ${
                 isSelected
-                  ? 'border-[#00d9ff]/50 bg-gradient-to-br from-[rgba(0,217,255,0.1)] to-[rgba(5,9,17,0.8)]'
-                  : 'border-[#1e293b]/50 bg-gradient-to-br from-[rgba(15,23,42,0.6)] to-[rgba(5,9,17,0.8)]'
-              } p-6 sm:p-8 shadow-[0_20px_60px_rgba(0,0,0,0.7),0_0_40px_rgba(6,217,215,0.08)] backdrop-blur-xl transition-all duration-300 hover:shadow-[0_20px_80px_rgba(0,0,0,0.8),0_0_60px_rgba(6,217,215,0.12)] hover:border-[#334155]`}
+                  ? 'border-[var(--color-cyan-bright)]/50 bg-gradient-to-br from-[rgba(0,217,255,0.1)] to-[rgba(5,9,17,0.8)]'
+                  : 'border-[var(--color-border-subtle)]/50 bg-gradient-to-br from-card-bg to-[rgba(5,9,17,0.8)]'
+              } p-6 sm:p-8 shadow-[0_20px_60px_rgba(0,0,0,0.7),0_0_40px_rgba(6,217,215,0.08)] backdrop-blur-xl transition-all duration-300 hover:shadow-[0_20px_80px_rgba(0,0,0,0.8),0_0_60px_rgba(6,217,215,0.12)] hover:border-[var(--color-border-medium)]`}
             >
               <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                 <div className="flex-1">
                   <div className="flex items-center justify-between mb-2">
-                    <p className="text-sm font-semibold text-[#94a3b8]">{formatTimestamp(call.createdAt)}</p>
+                    <p className="text-sm font-semibold text-[var(--color-text-secondary)]">{formatTimestamp(call.createdAt)}</p>
                     {/* Selection Checkbox */}
                     {calls.length >= 2 && (
                       <label className="flex items-center gap-2 cursor-pointer">
@@ -178,30 +178,30 @@ export default function CallHistoryWithComparison({ calls }: Props) {
                           type="checkbox"
                           checked={isSelected}
                           onChange={() => handleSelectCall(call.id)}
-                          className="w-5 h-5 rounded border-2 border-[#00d9ff] bg-transparent checked:bg-[#00d9ff] checked:border-[#00d9ff] focus:ring-2 focus:ring-[#00d9ff] focus:ring-offset-0 cursor-pointer transition-all"
+                          className="w-5 h-5 rounded border-2 border-[var(--color-cyan-bright)] bg-transparent checked:bg-[var(--color-cyan-bright)] checked:border-[var(--color-cyan-bright)] focus:ring-2 focus:ring-[var(--color-cyan-bright)] focus:ring-offset-0 cursor-pointer transition-all"
                           disabled={!isSelected && selectedCallIds.length >= 2}
                         />
-                        <span className="text-sm font-semibold text-[#00d9ff]">Compare</span>
+                        <span className="text-sm font-semibold text-[var(--color-cyan-bright)]">Compare</span>
                       </label>
                     )}
                   </div>
                   <h2 className="text-xl sm:text-2xl font-bold text-white">
                     {call.personalityName || 'Unknown personality'}
                     {call.personalityIsBoss && (
-                      <span className="ml-2 sm:ml-3 rounded-full border border-[#a855f7]/30 bg-[#a855f7]/10 px-2 sm:px-3 py-1 text-xs font-semibold text-[#d8b4fe]">
+                      <span className="ml-2 sm:ml-3 rounded-full border border-[var(--color-purple)]/30 bg-[var(--color-purple)]/10 px-2 sm:px-3 py-1 text-xs font-semibold text-[#d8b4fe]">
                         Boss
                       </span>
                     )}
                   </h2>
                   {call.personalityDescription && (
-                    <p className="mt-1 text-sm text-[#94a3b8]">{call.personalityDescription}</p>
+                    <p className="mt-1 text-sm text-[var(--color-text-secondary)]">{call.personalityDescription}</p>
                   )}
                 </div>
                 <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                  <span className="rounded-full border border-[#1e293b]/50 px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold text-white/80">
+                  <span className="rounded-full border border-[var(--color-border-subtle)]/50 px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold text-white/80">
                     Duration: {formatDuration(call.durationSeconds)}
                   </span>
-                  <span className="rounded-full border border-[#1e293b]/50 px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold text-white/80">
+                  <span className="rounded-full border border-[var(--color-border-subtle)]/50 px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold text-white/80">
                     {minutesLabel}
                   </span>
                   {overageLabel && (
@@ -218,7 +218,7 @@ export default function CallHistoryWithComparison({ calls }: Props) {
                     <h3 className="text-lg font-semibold text-white">Call Score</h3>
                     <div className="text-3xl font-bold text-white">
                       {call.score.overallScore}
-                      <span className="text-lg text-[#94a3b8]">/10</span>
+                      <span className="text-lg text-[var(--color-text-secondary)]">/10</span>
                     </div>
                   </div>
 
@@ -316,7 +316,7 @@ export default function CallHistoryWithComparison({ calls }: Props) {
                               <h4 className="text-sm font-semibold text-white mb-1">
                                 {objection.name}
                               </h4>
-                              <p className="text-xs text-[#94a3b8] mb-2">
+                              <p className="text-xs text-[var(--color-text-secondary)] mb-2">
                                 {objection.description}
                               </p>
                             </div>
@@ -329,7 +329,7 @@ export default function CallHistoryWithComparison({ calls }: Props) {
                               </span>
                             </div>
                           </div>
-                          <div className="space-y-2 mt-3 pt-3 border-t border-[#1e293b]/50">
+                          <div className="space-y-2 mt-3 pt-3 border-t border-[var(--color-border-subtle)]/50">
                             <div>
                               <p className="text-xs font-semibold text-white/60 mb-1">Prospect said:</p>
                               <p className="text-xs text-white/80 italic">
@@ -352,10 +352,10 @@ export default function CallHistoryWithComparison({ calls }: Props) {
                 </div>
               )}
 
-              <div className="mt-6 rounded-2xl border border-[#1e293b]/50 bg-black/30 p-6">
+              <div className="mt-6 rounded-2xl border border-[var(--color-border-subtle)]/50 bg-black/30 p-6">
                 <h3 className="text-lg font-semibold text-white mb-4">Transcript</h3>
                 {call.transcript.length === 0 ? (
-                  <p className="text-sm text-[#94a3b8]">
+                  <p className="text-sm text-[var(--color-text-secondary)]">
                     No transcript was captured for this call. Stay connected until the session ends to save future transcripts automatically.
                   </p>
                 ) : (
@@ -365,11 +365,11 @@ export default function CallHistoryWithComparison({ calls }: Props) {
                         key={`${call.id}-${index}`}
                         className={`rounded-xl p-4 text-sm ${
                           entry.role === 'user'
-                            ? 'bg-[#0f172a] border border-[#00d9ff]/20'
-                            : 'bg-white/[0.03] border border-[#1e293b]/50'
+                            ? 'bg-[#0f172a] border border-[var(--color-cyan-bright)]/20'
+                            : 'bg-white/[0.03] border border-[var(--color-border-subtle)]/50'
                         }`}
                       >
-                        <div className="flex items-center justify-between text-xs text-[#94a3b8] mb-2">
+                        <div className="flex items-center justify-between text-xs text-[var(--color-text-secondary)] mb-2">
                           <span className="font-semibold">
                             {entry.role === 'user' ? 'You' : 'Prospect'}
                           </span>

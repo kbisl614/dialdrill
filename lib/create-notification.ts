@@ -1,4 +1,5 @@
 import { pool } from './db';
+import { logger } from './logger';
 
 export interface CreateNotificationParams {
   userId: string; // Internal user ID (UUID)
@@ -22,7 +23,7 @@ export async function createNotification(params: CreateNotificationParams) {
       ]
     );
   } catch (error) {
-    console.error('[createNotification] Failed to create notification:', error);
+    logger.error('[createNotification] Failed to create notification', error);
     // Don't throw - notifications are non-critical
   }
 }

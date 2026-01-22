@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { pool } from '@/lib/db';
+import { logger } from '@/lib/logger';
 
 export interface ObjectionProfile {
   id: string;
@@ -52,7 +53,7 @@ export async function GET() {
       byIndustry
     });
   } catch (error) {
-    console.error('[API /objections/library] ERROR:', error);
+    logger.apiError('/objections/library', error, { route: '/objections/library' });
     return NextResponse.json(
       {
         error: 'Failed to fetch objection library',

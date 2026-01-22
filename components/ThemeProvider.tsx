@@ -13,16 +13,15 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>('system');
-  const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>('dark');
-
-  // Initialize theme from localStorage on mount
-  useEffect(() => {
-    const stored = localStorage.getItem('dialdrill-theme') as Theme | null;
-    if (stored) {
-      setThemeState(stored);
+  // Initialize theme from localStorage synchronously to avoid setState in effect
+  const [theme, setThemeState] = useState<Theme>(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('dialdrill-theme') as Theme | null;
+      return stored || 'system';
     }
-  }, []);
+    return 'system';
+  });
+  const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>('dark');
 
   // Apply theme to document
   useEffect(() => {

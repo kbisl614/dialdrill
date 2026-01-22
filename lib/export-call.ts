@@ -52,7 +52,7 @@ export function exportAsText(call: CallData): string {
   lines.push('');
 
   // Transcript
-  call.transcript.forEach((entry, index) => {
+  call.transcript.forEach((entry) => {
     const speaker = entry.role === 'user' ? 'Sales Rep' : 'Prospect';
     lines.push(`[${speaker}]`);
     lines.push(entry.text);

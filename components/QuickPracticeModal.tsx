@@ -123,11 +123,11 @@ export default function QuickPracticeModal({ isOpen, onClose }: QuickPracticeMod
         className="w-full max-w-2xl rounded-2xl border border-white/10 bg-[#030712] shadow-2xl overflow-hidden"
       >
         {/* Header */}
-        <div className="border-b border-white/10 bg-gradient-to-r from-[#00d9ff]/10 to-[#9333ea]/10 p-6">
+        <div className="border-b border-white/10 bg-gradient-to-r from-[var(--color-cyan-bright)]/10 to-[var(--color-purple-dark)]/10 p-6">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-2xl font-bold text-white">⚡ Quick Practice</h2>
-              <p className="mt-1 text-sm text-[#9ca3af]">
+              <p className="mt-1 text-sm text-[var(--color-text-secondary)]">
                 30-second lightning drills • {completedRounds} completed
               </p>
             </div>
@@ -178,13 +178,13 @@ export default function QuickPracticeModal({ isOpen, onClose }: QuickPracticeMod
                 animate={{ scale: 1, opacity: 1 }}
                 className="text-center py-12"
               >
-                <div className="text-9xl font-extrabold text-[#00d9ff] mb-6">
+                <div className="text-9xl font-extrabold text-[var(--color-cyan-bright)] mb-6">
                   {countdown}
                 </div>
                 <p className="text-xl text-white mb-4">Get ready...</p>
                 <div className="max-w-md mx-auto p-4 rounded-xl bg-white/5 border border-white/10">
                   <p className="text-lg font-semibold text-white mb-2">&ldquo;{currentObjection?.name}&rdquo;</p>
-                  <p className="text-sm text-[#9ca3af]">{currentObjection?.description}</p>
+                  <p className="text-sm text-[var(--color-text-secondary)]">{currentObjection?.description}</p>
                 </div>
               </motion.div>
             )}
@@ -237,7 +237,7 @@ export default function QuickPracticeModal({ isOpen, onClose }: QuickPracticeMod
 
                 <div className="max-w-md mx-auto p-4 rounded-xl bg-white/5 border border-white/10">
                   <p className="text-lg font-semibold text-white mb-2">&ldquo;{currentObjection?.name}&rdquo;</p>
-                  <p className="text-sm text-[#9ca3af]">Respond now!</p>
+                  <p className="text-sm text-[var(--color-text-secondary)]">Respond now!</p>
                 </div>
               </motion.div>
             )}
@@ -252,94 +252,94 @@ export default function QuickPracticeModal({ isOpen, onClose }: QuickPracticeMod
               >
                 <div className="text-6xl mb-4">🎯</div>
                 <h3 className="text-3xl font-bold text-white mb-2">Nice Work!</h3>
-                <p className="text-[#9ca3af] mb-6">Practice makes perfect. Keep it up!</p>
+                <p className="text-[var(--color-text-secondary)] mb-6">Practice makes perfect. Keep it up!</p>
 
                 {/* Instant Feedback Card */}
-                <div className="max-w-2xl mx-auto mb-8 rounded-xl border border-[#00d9ff]/30 bg-gradient-to-br from-[#00d9ff]/10 to-transparent p-6 text-left">
+                <div className="max-w-2xl mx-auto mb-8 rounded-xl border border-[var(--color-cyan-bright)]/30 bg-gradient-to-br from-[var(--color-cyan-bright)]/10 to-transparent p-6 text-left">
                   <div className="flex items-start gap-3 mb-4">
-                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-[#00d9ff]/20 flex items-center justify-center">
-                      <svg className="w-5 h-5 text-[#00d9ff]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-[var(--color-cyan-bright)]/20 flex items-center justify-center">
+                      <svg className="w-5 h-5 text-[var(--color-cyan-bright)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                       </svg>
                     </div>
                     <div className="flex-1">
                       <h4 className="text-lg font-bold text-white mb-2">💡 Quick Tips for &ldquo;{currentObjection?.name}&rdquo;</h4>
                       {selectedCategory === 'price' && (
-                        <ul className="space-y-2 text-sm text-[#94a3b8]">
+                        <ul className="space-y-2 text-sm text-[var(--color-text-secondary)]">
                           <li className="flex items-start gap-2">
-                            <span className="text-[#00d9ff] mt-1">•</span>
+                            <span className="text-[var(--color-cyan-bright)] mt-1">•</span>
                             <span>Focus on <span className="text-white font-semibold">value, not cost</span> - emphasize ROI and long-term benefits</span>
                           </li>
                           <li className="flex items-start gap-2">
-                            <span className="text-[#00d9ff] mt-1">•</span>
+                            <span className="text-[var(--color-cyan-bright)] mt-1">•</span>
                             <span>Use comparison: &ldquo;Compared to the cost of not solving this problem...&rdquo;</span>
                           </li>
                           <li className="flex items-start gap-2">
-                            <span className="text-[#00d9ff] mt-1">•</span>
+                            <span className="text-[var(--color-cyan-bright)] mt-1">•</span>
                             <span>Break it down: Show daily/monthly cost instead of total</span>
                           </li>
                         </ul>
                       )}
                       {selectedCategory === 'time' && (
-                        <ul className="space-y-2 text-sm text-[#94a3b8]">
+                        <ul className="space-y-2 text-sm text-[var(--color-text-secondary)]">
                           <li className="flex items-start gap-2">
-                            <span className="text-[#00d9ff] mt-1">•</span>
+                            <span className="text-[var(--color-cyan-bright)] mt-1">•</span>
                             <span>Create <span className="text-white font-semibold">urgency</span> - What&apos;s the cost of waiting?</span>
                           </li>
                           <li className="flex items-start gap-2">
-                            <span className="text-[#00d9ff] mt-1">•</span>
+                            <span className="text-[var(--color-cyan-bright)] mt-1">•</span>
                             <span>Acknowledge their concern, then pivot: &ldquo;I understand timing is important. That&apos;s exactly why...&rdquo;</span>
                           </li>
                           <li className="flex items-start gap-2">
-                            <span className="text-[#00d9ff] mt-1">•</span>
+                            <span className="text-[var(--color-cyan-bright)] mt-1">•</span>
                             <span>Ask: &ldquo;What would need to happen for this to be the right time?&rdquo;</span>
                           </li>
                         </ul>
                       )}
                       {selectedCategory === 'authority' && (
-                        <ul className="space-y-2 text-sm text-[#94a3b8]">
+                        <ul className="space-y-2 text-sm text-[var(--color-text-secondary)]">
                           <li className="flex items-start gap-2">
-                            <span className="text-[#00d9ff] mt-1">•</span>
+                            <span className="text-[var(--color-cyan-bright)] mt-1">•</span>
                             <span><span className="text-white font-semibold">Involve the decision maker</span> - &ldquo;Let&apos;s get them on a call together&rdquo;</span>
                           </li>
                           <li className="flex items-start gap-2">
-                            <span className="text-[#00d9ff] mt-1">•</span>
+                            <span className="text-[var(--color-cyan-bright)] mt-1">•</span>
                             <span>Ask: &ldquo;What information would you need to make a strong recommendation?&rdquo;</span>
                           </li>
                           <li className="flex items-start gap-2">
-                            <span className="text-[#00d9ff] mt-1">•</span>
+                            <span className="text-[var(--color-cyan-bright)] mt-1">•</span>
                             <span>Position them as a champion, not a gatekeeper</span>
                           </li>
                         </ul>
                       )}
                       {selectedCategory === 'need' && (
-                        <ul className="space-y-2 text-sm text-[#94a3b8]">
+                        <ul className="space-y-2 text-sm text-[var(--color-text-secondary)]">
                           <li className="flex items-start gap-2">
-                            <span className="text-[#00d9ff] mt-1">•</span>
+                            <span className="text-[var(--color-cyan-bright)] mt-1">•</span>
                             <span><span className="text-white font-semibold">Ask questions</span> - Uncover the hidden pain points</span>
                           </li>
                           <li className="flex items-start gap-2">
-                            <span className="text-[#00d9ff] mt-1">•</span>
+                            <span className="text-[var(--color-cyan-bright)] mt-1">•</span>
                             <span>&ldquo;What would it mean for your business if you could solve X problem?&rdquo;</span>
                           </li>
                           <li className="flex items-start gap-2">
-                            <span className="text-[#00d9ff] mt-1">•</span>
+                            <span className="text-[var(--color-cyan-bright)] mt-1">•</span>
                             <span>Share a relevant case study or success story</span>
                           </li>
                         </ul>
                       )}
                       {selectedCategory === 'trust' && (
-                        <ul className="space-y-2 text-sm text-[#94a3b8]">
+                        <ul className="space-y-2 text-sm text-[var(--color-text-secondary)]">
                           <li className="flex items-start gap-2">
-                            <span className="text-[#00d9ff] mt-1">•</span>
+                            <span className="text-[var(--color-cyan-bright)] mt-1">•</span>
                             <span><span className="text-white font-semibold">Build credibility</span> - Share social proof, testimonials, or case studies</span>
                           </li>
                           <li className="flex items-start gap-2">
-                            <span className="text-[#00d9ff] mt-1">•</span>
+                            <span className="text-[var(--color-cyan-bright)] mt-1">•</span>
                             <span>Offer a low-risk next step: &ldquo;Let&apos;s start with a pilot/trial&rdquo;</span>
                           </li>
                           <li className="flex items-start gap-2">
-                            <span className="text-[#00d9ff] mt-1">•</span>
+                            <span className="text-[var(--color-cyan-bright)] mt-1">•</span>
                             <span>Share specific metrics and results from similar clients</span>
                           </li>
                         </ul>
@@ -348,7 +348,7 @@ export default function QuickPracticeModal({ isOpen, onClose }: QuickPracticeMod
                   </div>
 
                   <div className="mt-4 pt-4 border-t border-white/10">
-                    <p className="text-xs text-[#64748b] italic">
+                    <p className="text-xs text-[var(--color-text-muted)] italic">
                       💪 Pro tip: The best responses are confident, address the concern directly, and focus on the customer&apos;s success.
                     </p>
                   </div>
@@ -357,7 +357,7 @@ export default function QuickPracticeModal({ isOpen, onClose }: QuickPracticeMod
                 <div className="flex flex-col sm:flex-row gap-3 justify-center">
                   <button
                     onClick={doAnother}
-                    className="px-8 py-3 rounded-xl bg-gradient-to-r from-[#00d9ff] to-[#00ffea] text-[#080d1a] font-semibold hover:scale-105 transition-all"
+                    className="px-8 py-3 rounded-xl bg-gradient-to-r from-[var(--color-cyan-bright)] to-[#00ffea] text-[var(--color-dark-bg)] font-semibold hover:scale-105 transition-all"
                   >
                     Do Another ({selectedCategory})
                   </button>

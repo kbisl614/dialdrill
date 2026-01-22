@@ -4,7 +4,7 @@ import { Moon, Sun, Monitor } from 'lucide-react';
 import { useTheme } from './ThemeProvider';
 
 export default function ThemeToggle() {
-  const { theme, setTheme, resolvedTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
 
   const themes = [
     { value: 'light' as const, icon: Sun, label: 'Light' },

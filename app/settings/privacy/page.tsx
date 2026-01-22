@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import Sidebar from '@/components/Sidebar';
 import Breadcrumb from '@/components/Breadcrumb';
 import { SidebarProvider, useSidebar } from '@/components/SidebarContext';
+import clientLogger from '@/lib/client-logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -41,7 +42,7 @@ function PrivacySettingsContent() {
         const data = await response.json();
         setSettings(data);
       } catch (err) {
-        console.error('Error fetching privacy settings:', err);
+        clientLogger.error('Error fetching privacy settings', err);
         setError('Failed to load your privacy settings. Please refresh the page.');
       } finally {
         setLoading(false);
@@ -88,7 +89,7 @@ function PrivacySettingsContent() {
         setSavedKey(null);
       }, 2000);
     } catch (err) {
-      console.error('Error updating privacy setting:', err);
+      clientLogger.error('Error updating privacy setting', err);
       setError(err instanceof Error ? err.message : 'Failed to update setting');
       // Revert optimistic update on error
       setSettings(previousSettings);
@@ -101,7 +102,7 @@ function PrivacySettingsContent() {
     return (
       <>
         <Sidebar />
-        <main className="min-h-screen bg-[#080d1a] grid-background lg:pl-64">
+        <main className="min-h-screen bg-[var(--color-dark-bg)] grid-background lg:pl-64">
           <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-12 py-12 sm:py-16">
             <div className="h-10 w-64 mb-8 bg-white/5 rounded animate-pulse"></div>
             <div className="space-y-6">
@@ -123,7 +124,7 @@ function PrivacySettingsContent() {
     <>
       <Sidebar />
       <main
-        className={`min-h-screen bg-[#080d1a] grid-background transition-all duration-300 ${
+        className={`min-h-screen bg-[var(--color-dark-bg)] grid-background transition-all duration-300 ${
           isCollapsed ? 'lg:pl-20' : 'lg:pl-64'
         }`}
       >
@@ -136,7 +137,7 @@ function PrivacySettingsContent() {
             <h1 className="text-4xl font-extrabold text-white mt-4">
               Privacy Settings
             </h1>
-            <p className="text-[#94a3b8] mt-2">
+            <p className="text-[var(--color-text-secondary)] mt-2">
               Control how your profile and stats appear to other users
             </p>
           </div>
@@ -150,13 +151,13 @@ function PrivacySettingsContent() {
           {/* Settings List */}
           <div className="space-y-4">
             {/* Profile Visibility */}
-            <div className="group rounded-2xl border border-[#1e293b]/50 bg-gradient-to-br from-[rgba(15,23,42,0.6)] to-[rgba(5,9,17,0.8)] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.7)] backdrop-blur-xl hover:border-[#00d9ff]/30 transition-all duration-300">
+            <div className="group rounded-2xl border border-[var(--color-border-subtle)]/50 bg-gradient-to-br from-card-bg to-[rgba(5,9,17,0.8)] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.7)] backdrop-blur-xl hover:border-[var(--color-cyan-bright)]/30 transition-all duration-300">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
-                    <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-[#00d9ff]/30 to-[#00ffea]/30 ring-2 ring-[#00d9ff]/40">
+                    <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--color-cyan-bright)]/30 to-[#00ffea]/30 ring-2 ring-[var(--color-cyan-bright)]/40">
                       <svg
-                        className="h-5 w-5 text-[#00d9ff]"
+                        className="h-5 w-5 text-[var(--color-cyan-bright)]"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -180,7 +181,7 @@ function PrivacySettingsContent() {
                       )}
                     </div>
                   </div>
-                  <p className="text-sm text-[#94a3b8] mt-2">
+                  <p className="text-sm text-[var(--color-text-secondary)] mt-2">
                     When set to private, other users cannot view your profile page.
                     Your profile will return a 404 error to anyone except you.
                   </p>
@@ -201,10 +202,10 @@ function PrivacySettingsContent() {
                     )
                   }
                   disabled={saving === 'profile_visibility'}
-                  className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#00d9ff] focus:ring-offset-2 focus:ring-offset-[#080d1a] ${
+                  className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-cyan-bright)] focus:ring-offset-2 focus:ring-offset-[var(--color-dark-bg)] ${
                     settings.profile_visibility === 'public'
-                      ? 'bg-[#00d9ff]'
-                      : 'bg-[#1e293b]'
+                      ? 'bg-[var(--color-cyan-bright)]'
+                      : 'bg-[var(--color-border-subtle)]'
                   } ${
                     saving === 'profile_visibility' ? 'opacity-50 cursor-not-allowed' : ''
                   }`}
@@ -221,11 +222,11 @@ function PrivacySettingsContent() {
             </div>
 
             {/* Show Stats Publicly */}
-            <div className="group rounded-2xl border border-[#1e293b]/50 bg-gradient-to-br from-[rgba(15,23,42,0.6)] to-[rgba(5,9,17,0.8)] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.7)] backdrop-blur-xl hover:border-[#00d9ff]/30 transition-all duration-300">
+            <div className="group rounded-2xl border border-[var(--color-border-subtle)]/50 bg-gradient-to-br from-card-bg to-[rgba(5,9,17,0.8)] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.7)] backdrop-blur-xl hover:border-[var(--color-cyan-bright)]/30 transition-all duration-300">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
-                    <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-[#a855f7]/30 to-[#9333ea]/30 ring-2 ring-[#a855f7]/40">
+                    <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--color-purple)]/30 to-[var(--color-purple-dark)]/30 ring-2 ring-[var(--color-purple)]/40">
                       <svg
                         className="h-5 w-5 text-[#d8b4fe]"
                         fill="none"
@@ -249,7 +250,7 @@ function PrivacySettingsContent() {
                       )}
                     </div>
                   </div>
-                  <p className="text-sm text-[#94a3b8] mt-2">
+                  <p className="text-sm text-[var(--color-text-secondary)] mt-2">
                     Hide your call statistics (total calls, total minutes, scores) from
                     other users. Your belt, tier, badges, and power level will still be
                     visible.
@@ -260,8 +261,8 @@ function PrivacySettingsContent() {
                     updateSetting('show_stats_publicly', !settings.show_stats_publicly)
                   }
                   disabled={saving === 'show_stats_publicly'}
-                  className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#a855f7] focus:ring-offset-2 focus:ring-offset-[#080d1a] ${
-                    settings.show_stats_publicly ? 'bg-[#a855f7]' : 'bg-[#1e293b]'
+                  className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-purple)] focus:ring-offset-2 focus:ring-offset-[var(--color-dark-bg)] ${
+                    settings.show_stats_publicly ? 'bg-[var(--color-purple)]' : 'bg-[var(--color-border-subtle)]'
                   } ${
                     saving === 'show_stats_publicly' ? 'opacity-50 cursor-not-allowed' : ''
                   }`}
@@ -276,11 +277,11 @@ function PrivacySettingsContent() {
             </div>
 
             {/* Show on Leaderboard */}
-            <div className="group rounded-2xl border border-[#1e293b]/50 bg-gradient-to-br from-[rgba(15,23,42,0.6)] to-[rgba(5,9,17,0.8)] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.7)] backdrop-blur-xl hover:border-[#00d9ff]/30 transition-all duration-300">
+            <div className="group rounded-2xl border border-[var(--color-border-subtle)]/50 bg-gradient-to-br from-card-bg to-[rgba(5,9,17,0.8)] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.7)] backdrop-blur-xl hover:border-[var(--color-cyan-bright)]/30 transition-all duration-300">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
-                    <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-[#fbbf24]/30 to-[#f59e0b]/30 ring-2 ring-[#fbbf24]/40">
+                    <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-[#fbbf24]/30 to-[var(--color-warning)]/30 ring-2 ring-[#fbbf24]/40">
                       <svg
                         className="h-5 w-5 text-[#fbbf24]"
                         fill="none"
@@ -306,7 +307,7 @@ function PrivacySettingsContent() {
                       )}
                     </div>
                   </div>
-                  <p className="text-sm text-[#94a3b8] mt-2">
+                  <p className="text-sm text-[var(--color-text-secondary)] mt-2">
                     Opt out of appearing on the global leaderboard. Your ranking will not
                     be visible to others and will not count in rank calculations.
                   </p>
@@ -316,8 +317,8 @@ function PrivacySettingsContent() {
                     updateSetting('show_on_leaderboard', !settings.show_on_leaderboard)
                   }
                   disabled={saving === 'show_on_leaderboard'}
-                  className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#fbbf24] focus:ring-offset-2 focus:ring-offset-[#080d1a] ${
-                    settings.show_on_leaderboard ? 'bg-[#fbbf24]' : 'bg-[#1e293b]'
+                  className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#fbbf24] focus:ring-offset-2 focus:ring-offset-[var(--color-dark-bg)] ${
+                    settings.show_on_leaderboard ? 'bg-[#fbbf24]' : 'bg-[var(--color-border-subtle)]'
                   } ${
                     saving === 'show_on_leaderboard' ? 'opacity-50 cursor-not-allowed' : ''
                   }`}

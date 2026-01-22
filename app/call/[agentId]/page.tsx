@@ -4,6 +4,7 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { Conversation } from '@elevenlabs/client';
+import clientLogger from '@/lib/client-logger';
 
 type CallStatus = 'connecting' | 'connected' | 'disconnected' | 'error';
 
@@ -43,7 +44,7 @@ export default function CallPage() {
   const timeRemaining = Math.max(maxDuration - elapsedSeconds, 0);
 
   const endCall = useCallback(() => {
-    console.log('[Call] Ending call...');
+    clientLogger.info('[Call] Ending call');
 
     // Clear timer
     if (timerIntervalRef.current) {
@@ -54,9 +55,9 @@ export default function CallPage() {
     if (conversation) {
       try {
         conversation.endSession();
-        console.log('[Call] Session ended');
+        clientLogger.info('[Call] Session ended');
       } catch (e) {
-        console.error('[Call] Error ending session:', e);
+        clientLogger.error('[Call] Error ending session', e);
       }
       setConversation(null);
     }
@@ -72,7 +73,7 @@ export default function CallPage() {
         stream.getTracks().forEach(track => track.stop());
         setMicPermissionGranted(true);
       } catch (err) {
-        console.error('[Call] Microphone permission denied:', err);
+        clientLogger.error('[Call] Microphone permission denied', err);
         setMicPermissionGranted(false);
         setError('Microphone access is required for calls. Please enable it in your browser settings.');
         setStatus('error');
@@ -98,16 +99,16 @@ export default function CallPage() {
 
     async function initializeCall() {
       const perfStart = performance.now();
-      console.log('[PERF] Call page mounted → Initialize call');
+      const perfTimer = clientLogger.startTimer('Call page mounted → Initialize call');
 
       try {
-        console.log('[Call] Starting initialization...');
+        clientLogger.debug('[Call] Starting initialization');
         setStatus('connecting');
         isInitializedRef.current = true;
 
         // Step 1: Get signed URL from our API
         const apiCallStart = performance.now();
-        console.log(`[PERF] ${(apiCallStart - perfStart).toFixed(0)}ms - Fetching signed URL`);
+        clientLogger.perf('Fetching signed URL', apiCallStart - perfStart);
 
         const response = await fetch('/api/calls/signed-url', {
           method: 'POST',
@@ -116,7 +117,7 @@ export default function CallPage() {
         });
 
         const apiCallEnd = performance.now();
-        console.log(`[PERF] ${(apiCallEnd - perfStart).toFixed(0)}ms - Signed URL received (took ${(apiCallEnd - apiCallStart).toFixed(0)}ms)`);
+        clientLogger.perf('Signed URL received', apiCallEnd - apiCallStart, { totalTime: apiCallEnd - perfStart });
 
         if (!response.ok) {
           const errorData = await response.json();
@@ -124,24 +125,24 @@ export default function CallPage() {
         }
 
         const { signedUrl, simulated } = await response.json();
-        console.log('[Call] Got signed URL, initializing conversation...');
+        clientLogger.debug('[Call] Got signed URL, initializing conversation');
 
         if (isCancelled) {
-          console.log('[Call] Cancelled before starting session');
+          clientLogger.debug('[Call] Cancelled before starting session');
           return;
         }
 
         // Simulated mode - run mock call without ElevenLabs
         if (simulated || signedUrl.startsWith('simulated://')) {
-          console.log('[PERF] Simulated mode detected - no WebSocket connection');
-          console.log('[Call] Running in simulated mode');
+          clientLogger.debug('[Call] Simulated mode detected - no WebSocket connection');
+          clientLogger.info('[Call] Running in simulated mode');
 
           // Simulate connection after short delay
           const connectTimeout = setTimeout(() => {
             if (!isCancelled) {
               const connectedTime = performance.now();
-              console.log(`[PERF] ${(connectedTime - perfStart).toFixed(0)}ms - ✅ SIMULATED CALL CONNECTED`);
-              console.log('[Call] Simulated: Connected');
+              clientLogger.perf('SIMULATED CALL CONNECTED', connectedTime - perfStart);
+              clientLogger.info('[Call] Simulated: Connected');
               setStatus('connected');
 
               // Add simulated transcript entries over time
@@ -173,16 +174,15 @@ export default function CallPage() {
 
         // Real mode - Initialize ElevenLabs conversation
         const wsStartTime = performance.now();
-        console.log(`[PERF] ${(wsStartTime - perfStart).toFixed(0)}ms - Starting WebSocket connection`);
-        console.log('[Call] About to call Conversation.startSession...');
-        console.log('[Call] Signed URL:', signedUrl);
+        clientLogger.perf('Starting WebSocket connection', wsStartTime - perfStart);
+        clientLogger.debug('[Call] About to call Conversation.startSession', { signedUrl: signedUrl.substring(0, 50) + '...' });
 
         // Set connection timeout
         const connectionTimeout = setTimeout(() => {
           if (!isCancelled) {
             const timeoutTime = performance.now();
-            console.error(`[PERF] ${(timeoutTime - perfStart).toFixed(0)}ms - ❌ CONNECTION TIMEOUT (10s limit)`);
-            console.error('[Call] Connection timeout after 10s');
+            clientLogger.perf('CONNECTION TIMEOUT (10s limit)', timeoutTime - perfStart);
+            clientLogger.error('[Call] Connection timeout after 10s');
             setStatus('error');
             setError('Connection timed out. Please check your internet and try again.');
           }
@@ -194,8 +194,8 @@ export default function CallPage() {
             signedUrl: signedUrl,
             onConnect: () => {
               const connectedTime = performance.now();
-              console.log(`[PERF] ${(connectedTime - perfStart).toFixed(0)}ms - ✅ WEBSOCKET CONNECTED (WebSocket handshake took ${(connectedTime - wsStartTime).toFixed(0)}ms)`);
-              console.log('[Call] ✅ WebSocket Connected!');
+              clientLogger.perf('WEBSOCKET CONNECTED', connectedTime - perfStart, { handshakeTime: connectedTime - wsStartTime });
+              clientLogger.info('[Call] WebSocket Connected');
               clearTimeout(connectionTimeout);
               setStatus('connected');
               setConnectionQuality('excellent');
@@ -205,17 +205,17 @@ export default function CallPage() {
               lastMessageTimeRef.current = Date.now();
             },
             onDisconnect: () => {
-              console.log('[Call] WebSocket Disconnected');
+              clientLogger.info('[Call] WebSocket Disconnected');
               setStatus('disconnected');
             },
             onError: (error) => {
-              console.error('[Call] ❌ WebSocket Error:', error);
+              clientLogger.error('[Call] WebSocket Error', error);
               clearTimeout(connectionTimeout);
               setError(typeof error === 'string' ? error : 'Connection lost. Please check your internet and try again.');
               setStatus('error');
             },
             onMessage: (message: { type?: string; text?: string; message?: string }) => {
-              console.log('[Call] Message received:', message);
+              clientLogger.debug('[Call] Message received', { type: message.type });
 
               // Update connection quality based on message timing
               const now = Date.now();
@@ -236,7 +236,7 @@ export default function CallPage() {
                 const text = message.text || message.message || '';
 
                 if (text) {
-                  console.log(`[Call] Transcript [${role}]:`, text);
+                  clientLogger.debug(`[Call] Transcript [${role}]`, { text: text.substring(0, 50) });
                   setTranscript(prev => [...prev, {
                     role,
                     text,
@@ -247,22 +247,23 @@ export default function CallPage() {
             },
           });
 
-          console.log('[Call] ✅ Conversation object created:', conv);
+          clientLogger.info('[Call] Conversation object created');
         } catch (sessionError) {
-          console.error('[Call] ❌ Error calling startSession:', sessionError);
+          clientLogger.error('[Call] Error calling startSession', sessionError);
           throw sessionError;
         }
 
         if (!isCancelled) {
           setConversation(conv);
-          console.log('[Call] Conversation set');
+          clientLogger.debug('[Call] Conversation set');
         } else {
-          console.log('[Call] Cancelled after starting session, ending immediately');
+          clientLogger.debug('[Call] Cancelled after starting session, ending immediately');
           conv.endSession();
         }
 
       } catch (err) {
-        console.error('[Call] Initialization error:', err);
+        perfTimer();
+        clientLogger.error('[Call] Initialization error', err);
         setStatus('error');
         setError(err instanceof Error ? err.message : 'Unable to connect. Please try again.');
       }
@@ -271,18 +272,18 @@ export default function CallPage() {
     initializeCall();
 
     return () => {
-      console.log('[Call] Cleanup running...');
+      clientLogger.debug('[Call] Cleanup running');
       isCancelled = true;
 
       // Clear mock timeouts
       mockTimeouts.forEach(timeout => clearTimeout(timeout));
 
       if (conv) {
-        console.log('[Call] Cleaning up conversation');
+        clientLogger.debug('[Call] Cleaning up conversation');
         try {
           conv.endSession();
         } catch (e) {
-          console.error('[Call] Error during cleanup:', e);
+          clientLogger.error('[Call] Error during cleanup', e);
         }
       }
     };
@@ -310,7 +311,7 @@ export default function CallPage() {
 
       // Auto-disconnect when time limit reached
       if (elapsed >= maxDuration) {
-        console.log('[Call] Maximum duration reached, ending call');
+        clientLogger.info('[Call] Maximum duration reached, ending call');
         setError(`Call ended: ${maxDuration === 90 ? '1.5 minute' : '5 minute'} time limit reached`);
         endCall();
       }
@@ -349,10 +350,10 @@ export default function CallPage() {
 
       if (!response.ok) {
         const details = await response.json().catch(() => null);
-        console.error('[Call] Failed to save transcript:', details);
+        clientLogger.error('[Call] Failed to save transcript', undefined, { details });
       }
     } catch (err) {
-      console.error('[Call] Error saving transcript:', err);
+      clientLogger.error('[Call] Error saving transcript', err);
     }
   }, [callLogId, transcript]);
 
@@ -570,13 +571,13 @@ export default function CallPage() {
                   key={index}
                   className={`p-3 rounded-lg ${
                     item.role === 'user'
-                      ? 'bg-[#00d9ff]/10 border border-[#00d9ff]/30'
+                      ? 'bg-[var(--color-cyan-bright)]/10 border border-[var(--color-cyan-bright)]/30'
                       : 'bg-[#9d4edd]/10 border border-[#9d4edd]/30'
                   }`}
                 >
                   <div className="flex items-center gap-2 mb-1">
                     <span className={`text-xs font-semibold ${
-                      item.role === 'user' ? 'text-[#00d9ff]' : 'text-[#9d4edd]'
+                      item.role === 'user' ? 'text-[var(--color-cyan-bright)]' : 'text-[#9d4edd]'
                     }`}>
                       {item.role === 'user' ? 'You' : 'Prospect'}
                     </span>

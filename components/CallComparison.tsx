@@ -1,6 +1,6 @@
 'use client';
 
-import { X, ArrowLeft, ArrowRight } from 'lucide-react';
+import { X } from 'lucide-react';
 
 interface TranscriptEntry {
   role: 'user' | 'agent';
@@ -73,9 +73,9 @@ export default function CallComparison({ call1, call2, onClose }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="relative w-full max-w-[1400px] max-h-[90vh] bg-gradient-to-br from-[rgba(15,23,42,0.98)] to-[rgba(5,9,17,0.98)] border border-[#1e293b]/50 rounded-3xl shadow-2xl overflow-hidden">
+      <div className="relative w-full max-w-[1400px] max-h-[90vh] bg-gradient-to-br from-card-bg to-[rgba(5,9,17,0.98)] border border-[var(--color-border-subtle)]/50 rounded-3xl shadow-2xl overflow-hidden">
         {/* Header */}
-        <div className="sticky top-0 z-10 bg-[#0f172a]/95 backdrop-blur-xl border-b border-[#1e293b]/50 p-6">
+        <div className="sticky top-0 z-10 bg-[#0f172a]/95 backdrop-blur-xl border-b border-[var(--color-border-subtle)]/50 p-6">
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-bold text-white">Call Comparison</h2>
             <button
@@ -92,23 +92,23 @@ export default function CallComparison({ call1, call2, onClose }: Props) {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Call 1 */}
             <div className="space-y-6">
-              <div className="rounded-2xl border border-[#1e293b]/50 bg-gradient-to-br from-[rgba(15,23,42,0.6)] to-[rgba(5,9,17,0.8)] p-6">
+              <div className="rounded-2xl border border-[var(--color-border-subtle)]/50 bg-gradient-to-br from-card-bg to-[rgba(5,9,17,0.8)] p-6">
                 <div className="flex items-center justify-between mb-4">
                   <div>
                     <h3 className="text-xl font-bold text-white">
                       {call1.personalityName || 'Call 1'}
                       {call1.personalityIsBoss && (
-                        <span className="ml-2 text-xs rounded-full border border-[#a855f7]/30 bg-[#a855f7]/10 px-2 py-0.5 text-[#d8b4fe]">
+                        <span className="ml-2 text-xs rounded-full border border-[var(--color-purple)]/30 bg-[var(--color-purple)]/10 px-2 py-0.5 text-[#d8b4fe]">
                           Boss
                         </span>
                       )}
                     </h3>
-                    <p className="text-sm text-[#94a3b8] mt-1">{formatTimestamp(call1.createdAt)}</p>
+                    <p className="text-sm text-[var(--color-text-secondary)] mt-1">{formatTimestamp(call1.createdAt)}</p>
                   </div>
                   <div className="text-right">
                     <div className="text-3xl font-bold text-white">
                       {call1.score?.overallScore || '—'}
-                      <span className="text-lg text-[#94a3b8]">/10</span>
+                      <span className="text-lg text-[var(--color-text-secondary)]">/10</span>
                     </div>
                     {scoreDiff !== 0 && (
                       <div className={`text-sm font-semibold ${scoreDiff > 0 ? 'text-green-400' : 'text-red-400'}`}>
@@ -117,14 +117,14 @@ export default function CallComparison({ call1, call2, onClose }: Props) {
                     )}
                   </div>
                 </div>
-                <div className="text-sm text-[#94a3b8]">
+                <div className="text-sm text-[var(--color-text-secondary)]">
                   Duration: {formatDuration(call1.durationSeconds)}
                 </div>
               </div>
 
               {/* Category Scores */}
               {call1.score && (
-                <div className="rounded-2xl border border-[#1e293b]/50 bg-gradient-to-br from-[rgba(15,23,42,0.6)] to-[rgba(5,9,17,0.8)] p-6">
+                <div className="rounded-2xl border border-[var(--color-border-subtle)]/50 bg-gradient-to-br from-card-bg to-[rgba(5,9,17,0.8)] p-6">
                   <h4 className="text-lg font-bold text-white mb-4">Category Scores</h4>
                   <div className="space-y-3">
                     {call1.score.categoryScores.map((cat) => {
@@ -146,7 +146,7 @@ export default function CallComparison({ call1, call2, onClose }: Props) {
                           <div className="h-2 rounded-full bg-white/10">
                             <div
                               className={`h-full rounded-full transition-all ${
-                                isBetter ? 'bg-green-500' : 'bg-[#00d9ff]'
+                                isBetter ? 'bg-green-500' : 'bg-[var(--color-cyan-bright)]'
                               }`}
                               style={{ width: `${scorePercent}%` }}
                             />
@@ -159,22 +159,22 @@ export default function CallComparison({ call1, call2, onClose }: Props) {
               )}
 
               {/* Transcript */}
-              <div className="rounded-2xl border border-[#1e293b]/50 bg-gradient-to-br from-[rgba(15,23,42,0.6)] to-[rgba(5,9,17,0.8)] p-6">
+              <div className="rounded-2xl border border-[var(--color-border-subtle)]/50 bg-gradient-to-br from-card-bg to-[rgba(5,9,17,0.8)] p-6">
                 <h4 className="text-lg font-bold text-white mb-4">Transcript</h4>
                 <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
                   {call1.transcript.length === 0 ? (
-                    <p className="text-sm text-[#94a3b8]">No transcript available</p>
+                    <p className="text-sm text-[var(--color-text-secondary)]">No transcript available</p>
                   ) : (
                     call1.transcript.map((entry, index) => (
                       <div
                         key={`${call1.id}-${index}`}
                         className={`rounded-xl p-3 text-sm ${
                           entry.role === 'user'
-                            ? 'bg-[#0f172a] border border-[#00d9ff]/20'
-                            : 'bg-white/[0.03] border border-[#1e293b]/50'
+                            ? 'bg-[#0f172a] border border-[var(--color-cyan-bright)]/20'
+                            : 'bg-white/[0.03] border border-[var(--color-border-subtle)]/50'
                         }`}
                       >
-                        <div className="text-xs font-semibold text-[#94a3b8] mb-1">
+                        <div className="text-xs font-semibold text-[var(--color-text-secondary)] mb-1">
                           {entry.role === 'user' ? 'You' : 'Prospect'}
                         </div>
                         <p className="text-white leading-relaxed">{entry.text}</p>
@@ -187,23 +187,23 @@ export default function CallComparison({ call1, call2, onClose }: Props) {
 
             {/* Call 2 */}
             <div className="space-y-6">
-              <div className="rounded-2xl border border-[#1e293b]/50 bg-gradient-to-br from-[rgba(15,23,42,0.6)] to-[rgba(5,9,17,0.8)] p-6">
+              <div className="rounded-2xl border border-[var(--color-border-subtle)]/50 bg-gradient-to-br from-card-bg to-[rgba(5,9,17,0.8)] p-6">
                 <div className="flex items-center justify-between mb-4">
                   <div>
                     <h3 className="text-xl font-bold text-white">
                       {call2.personalityName || 'Call 2'}
                       {call2.personalityIsBoss && (
-                        <span className="ml-2 text-xs rounded-full border border-[#a855f7]/30 bg-[#a855f7]/10 px-2 py-0.5 text-[#d8b4fe]">
+                        <span className="ml-2 text-xs rounded-full border border-[var(--color-purple)]/30 bg-[var(--color-purple)]/10 px-2 py-0.5 text-[#d8b4fe]">
                           Boss
                         </span>
                       )}
                     </h3>
-                    <p className="text-sm text-[#94a3b8] mt-1">{formatTimestamp(call2.createdAt)}</p>
+                    <p className="text-sm text-[var(--color-text-secondary)] mt-1">{formatTimestamp(call2.createdAt)}</p>
                   </div>
                   <div className="text-right">
                     <div className="text-3xl font-bold text-white">
                       {call2.score?.overallScore || '—'}
-                      <span className="text-lg text-[#94a3b8]">/10</span>
+                      <span className="text-lg text-[var(--color-text-secondary)]">/10</span>
                     </div>
                     {scoreDiff !== 0 && (
                       <div className={`text-sm font-semibold ${scoreDiff < 0 ? 'text-green-400' : 'text-red-400'}`}>
@@ -212,14 +212,14 @@ export default function CallComparison({ call1, call2, onClose }: Props) {
                     )}
                   </div>
                 </div>
-                <div className="text-sm text-[#94a3b8]">
+                <div className="text-sm text-[var(--color-text-secondary)]">
                   Duration: {formatDuration(call2.durationSeconds)}
                 </div>
               </div>
 
               {/* Category Scores */}
               {call2.score && (
-                <div className="rounded-2xl border border-[#1e293b]/50 bg-gradient-to-br from-[rgba(15,23,42,0.6)] to-[rgba(5,9,17,0.8)] p-6">
+                <div className="rounded-2xl border border-[var(--color-border-subtle)]/50 bg-gradient-to-br from-card-bg to-[rgba(5,9,17,0.8)] p-6">
                   <h4 className="text-lg font-bold text-white mb-4">Category Scores</h4>
                   <div className="space-y-3">
                     {call2.score.categoryScores.map((cat) => {
@@ -241,7 +241,7 @@ export default function CallComparison({ call1, call2, onClose }: Props) {
                           <div className="h-2 rounded-full bg-white/10">
                             <div
                               className={`h-full rounded-full transition-all ${
-                                isBetter ? 'bg-green-500' : 'bg-[#00d9ff]'
+                                isBetter ? 'bg-green-500' : 'bg-[var(--color-cyan-bright)]'
                               }`}
                               style={{ width: `${scorePercent}%` }}
                             />
@@ -254,22 +254,22 @@ export default function CallComparison({ call1, call2, onClose }: Props) {
               )}
 
               {/* Transcript */}
-              <div className="rounded-2xl border border-[#1e293b]/50 bg-gradient-to-br from-[rgba(15,23,42,0.6)] to-[rgba(5,9,17,0.8)] p-6">
+              <div className="rounded-2xl border border-[var(--color-border-subtle)]/50 bg-gradient-to-br from-card-bg to-[rgba(5,9,17,0.8)] p-6">
                 <h4 className="text-lg font-bold text-white mb-4">Transcript</h4>
                 <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
                   {call2.transcript.length === 0 ? (
-                    <p className="text-sm text-[#94a3b8]">No transcript available</p>
+                    <p className="text-sm text-[var(--color-text-secondary)]">No transcript available</p>
                   ) : (
                     call2.transcript.map((entry, index) => (
                       <div
                         key={`${call2.id}-${index}`}
                         className={`rounded-xl p-3 text-sm ${
                           entry.role === 'user'
-                            ? 'bg-[#0f172a] border border-[#00d9ff]/20'
-                            : 'bg-white/[0.03] border border-[#1e293b]/50'
+                            ? 'bg-[#0f172a] border border-[var(--color-cyan-bright)]/20'
+                            : 'bg-white/[0.03] border border-[var(--color-border-subtle)]/50'
                         }`}
                       >
-                        <div className="text-xs font-semibold text-[#94a3b8] mb-1">
+                        <div className="text-xs font-semibold text-[var(--color-text-secondary)] mb-1">
                           {entry.role === 'user' ? 'You' : 'Prospect'}
                         </div>
                         <p className="text-white leading-relaxed">{entry.text}</p>

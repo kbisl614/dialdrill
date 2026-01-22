@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { pool } from '@/lib/db';
 import { scoreCall, isCallTooShort, generateShortCallScore } from '@/lib/scoring-engine';
 import type { TranscriptEntry } from '@/lib/transcript-parser';
+import { logger } from '@/lib/logger';
 
 /**
  * POST /api/calls/score
@@ -107,7 +108,7 @@ export async function POST(request: Request) {
       }
     });
   } catch (error) {
-    console.error('[API /calls/score] ERROR:', error);
+    logger.apiError('/calls/score', error, { route: '/calls/score' });
     return NextResponse.json(
       {
         error: 'Internal server error',
@@ -165,7 +166,7 @@ export async function GET(request: Request) {
       createdAt: row.created_at
     });
   } catch (error) {
-    console.error('[API /calls/score] GET ERROR:', error);
+    logger.apiError('/calls/score', error, { route: '/calls/score', method: 'GET' });
     return NextResponse.json(
       {
         error: 'Internal server error',

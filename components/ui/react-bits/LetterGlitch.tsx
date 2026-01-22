@@ -21,6 +21,7 @@ export default function LetterGlitch({
 }: LetterGlitchProps) {
   const [isGlitching, setIsGlitching] = useState(trigger === 'always');
   const [glitchText, setGlitchText] = useState(text);
+  const [randomColor, setRandomColor] = useState(glitchColors[0]);
 
   useEffect(() => {
     if (trigger !== 'always' || !isGlitching) return;
@@ -38,15 +39,25 @@ export default function LetterGlitch({
         })
         .join('');
       setGlitchText(newText);
+      // Update random color in interval callback (not during render)
+      setRandomColor(glitchColors[Math.floor(Math.random() * glitchColors.length)]);
     }, speed);
 
     return () => clearInterval(interval);
-  }, [text, speed, intensity, trigger, isGlitching]);
+  }, [text, speed, intensity, trigger, isGlitching, glitchColors]);
+
+  // Update color when glitching starts (via callback, not effect)
+  const handleMouseEnter = () => {
+    if (trigger === 'hover') {
+      setRandomColor(glitchColors[Math.floor(Math.random() * glitchColors.length)]);
+      setIsGlitching(true);
+    }
+  };
 
   const glitchStyle = isGlitching
     ? {
         textShadow: glitchColors.map((color, i) => `${i * 2}px ${i * 2}px 0 ${color}`).join(', '),
-        color: glitchColors[Math.floor(Math.random() * glitchColors.length)],
+        color: randomColor,
       }
     : {};
 
@@ -54,7 +65,7 @@ export default function LetterGlitch({
     <span
       className={className}
       style={glitchStyle}
-      onMouseEnter={() => trigger === 'hover' && setIsGlitching(true)}
+      onMouseEnter={handleMouseEnter}
       onMouseLeave={() => trigger === 'hover' && setIsGlitching(false)}
     >
       {isGlitching ? glitchText : text}

@@ -4,6 +4,15 @@ import { useState, useEffect } from 'react';
 import { X, Keyboard } from 'lucide-react';
 import { getDefaultShortcuts } from '@/hooks/useKeyboardShortcuts';
 
+// KeyBadge component defined outside render to avoid React warning
+function KeyBadge({ keys }: { keys: string }) {
+  return (
+    <kbd className="px-2 py-1 text-xs font-semibold text-gray-800 bg-gray-100 border border-gray-200 rounded-lg dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600">
+      {keys}
+    </kbd>
+  );
+}
+
 export default function KeyboardShortcutsModal() {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -29,12 +38,6 @@ export default function KeyboardShortcutsModal() {
     search: shortcuts.filter((s) => s.category === 'search'),
     call: shortcuts.filter((s) => s.category === 'call'),
   };
-
-  const KeyBadge = ({ keys }: { keys: string }) => (
-    <kbd className="px-2 py-1 text-xs font-semibold text-gray-800 bg-gray-100 border border-gray-200 rounded-lg dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600">
-      {keys}
-    </kbd>
-  );
 
   return (
     <>

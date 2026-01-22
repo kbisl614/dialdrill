@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { PillNavigation, AnimatedNumber, LetterGlitch, Spotlight } from '@/components/ui/react-bits';
+import { PillNavigation, AnimatedNumber } from '@/components/ui/react-bits';
+import clientLogger from '@/lib/client-logger';
 
 interface ProfileDropdownModalProps {
   isOpen: boolean;
@@ -125,7 +126,7 @@ export default function ProfileDropdownModal({ isOpen, onClose, userData, loadin
         setUnreadCount(data.unreadCount);
       }
     } catch (error) {
-      console.error('Failed to fetch notifications:', error);
+      clientLogger.error('Failed to fetch notifications', error);
     } finally {
       setNotificationsLoading(false);
     }
@@ -141,7 +142,7 @@ export default function ProfileDropdownModal({ isOpen, onClose, userData, loadin
       // Refresh notifications
       fetchNotifications();
     } catch (error) {
-      console.error('Failed to mark notification as read:', error);
+      clientLogger.error('Failed to mark notification as read', error);
     }
   }
 
@@ -155,7 +156,7 @@ export default function ProfileDropdownModal({ isOpen, onClose, userData, loadin
       // Refresh notifications
       fetchNotifications();
     } catch (error) {
-      console.error('Failed to mark all notifications as read:', error);
+      clientLogger.error('Failed to mark all notifications as read', error);
     }
   }
 
@@ -211,8 +212,8 @@ export default function ProfileDropdownModal({ isOpen, onClose, userData, loadin
         <div className="fixed top-20 right-6 z-50 w-[480px] rounded-2xl border border-white/10 bg-[#1A1F2E] shadow-2xl p-6">
           <div className="flex items-center justify-center h-96">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00d9ff] mx-auto mb-4"></div>
-              <p className="text-sm text-[#9ca3af]">Loading profile...</p>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--color-cyan-bright)] mx-auto mb-4"></div>
+              <p className="text-sm text-[var(--color-text-secondary)]">Loading profile...</p>
             </div>
           </div>
         </div>
@@ -238,12 +239,12 @@ export default function ProfileDropdownModal({ isOpen, onClose, userData, loadin
       {/* Dropdown Modal */}
       <div className="fixed top-20 right-6 z-50 w-[480px] max-h-[calc(100vh-120px)] rounded-2xl border border-white/10 bg-[#1A1F2E] shadow-2xl">
         {/* Header */}
-        <div className="border-b border-white/10 bg-gradient-to-r from-[#00d9ff]/10 to-[#9d4edd]/10 p-6">
+        <div className="border-b border-white/10 bg-gradient-to-r from-[var(--color-cyan-bright)]/10 to-[#9d4edd]/10 p-6">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-4">
               {/* Avatar */}
               <div className="relative">
-                <div className="h-16 w-16 rounded-full bg-gradient-to-br from-[#00d9ff] to-[#9d4edd] p-0.5">
+                <div className="h-16 w-16 rounded-full bg-gradient-to-br from-[var(--color-cyan-bright)] to-[#9d4edd] p-0.5">
                   <div className="h-full w-full rounded-full bg-[#1A1F2E] flex items-center justify-center">
                     <span className="text-2xl font-bold text-white">
                       {(userData.username?.charAt(0) || 'U').toUpperCase()}
@@ -287,11 +288,11 @@ export default function ProfileDropdownModal({ isOpen, onClose, userData, loadin
 
           {/* Power Level Display */}
           <div className="text-center">
-            <p className="text-sm text-[#9ca3af] mb-1">Power Level</p>
+            <p className="text-sm text-[var(--color-text-secondary)] mb-1">Power Level</p>
             <AnimatedNumber
               value={userData.currentPower}
               duration={2000}
-              className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#00d9ff] to-[#9d4edd]"
+              className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-cyan-bright)] to-[#9d4edd]"
               formatOptions={{ useGrouping: true }}
               springConfig={{ stiffness: 80, damping: 25 }}
             />
@@ -313,36 +314,36 @@ export default function ProfileDropdownModal({ isOpen, onClose, userData, loadin
           <div className="mb-6 rounded-xl border border-white/10 bg-white/[0.03] p-4">
             <h3 className="text-sm font-semibold text-white mb-3">Next Milestone</h3>
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs text-[#9ca3af]">
+              <span className="text-xs text-[var(--color-text-secondary)]">
                 {userData.currentBelt.tier} {userData.currentBelt.belt} Belt
               </span>
-              <span className="text-xs text-[#9ca3af]">
+              <span className="text-xs text-[var(--color-text-secondary)]">
                 {userData.nextBelt.tier} {userData.nextBelt.belt} Belt
               </span>
             </div>
             {/* Progress bar */}
             <div className="h-3 w-full rounded-full bg-white/10 overflow-hidden mb-2">
               <div
-                className="h-full rounded-full bg-gradient-to-r from-[#00d9ff] to-[#9d4edd] transition-all duration-500"
+                className="h-full rounded-full bg-gradient-to-r from-[var(--color-cyan-bright)] to-[#9d4edd] transition-all duration-500"
                 style={{ width: `${Math.min(progressPercentage, 100)}%` }}
               />
             </div>
-            <p className="text-xs text-[#9ca3af] text-center">
+            <p className="text-xs text-[var(--color-text-secondary)] text-center">
               {powerToNextBelt.toLocaleString()} power to next belt ({progressPercentage.toFixed(1)}%)
             </p>
           </div>
 
           {/* Multiplier Status Card */}
           {userData.multiplier.active && (
-            <div className="mb-6 rounded-xl border border-[#00d9ff]/30 bg-gradient-to-r from-[#00d9ff]/10 to-[#9d4edd]/10 p-4">
+            <div className="mb-6 rounded-xl border border-[var(--color-cyan-bright)]/30 bg-gradient-to-r from-[var(--color-cyan-bright)]/10 to-[#9d4edd]/10 p-4">
               <div className="flex items-center justify-between mb-2">
                 <h3 className="text-sm font-semibold text-white">Active Multiplier</h3>
-                <span className="rounded-full bg-[#00d9ff]/20 px-3 py-1 text-sm font-bold text-[#00d9ff]">
+                <span className="rounded-full bg-[var(--color-cyan-bright)]/20 px-3 py-1 text-sm font-bold text-[var(--color-cyan-bright)]">
                   +{userData.multiplier.percentage}%
                 </span>
               </div>
               {userData.multiplier.daysToNext && userData.multiplier.nextMultiplier && (
-                <p className="text-xs text-[#9ca3af]">
+                <p className="text-xs text-[var(--color-text-secondary)]">
                   {userData.multiplier.daysToNext} more days to unlock +{userData.multiplier.nextMultiplier}% multiplier
                 </p>
               )}
@@ -454,8 +455,8 @@ function LeaderboardTab({
     return (
       <div className="flex items-center justify-center py-12">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#00d9ff] mx-auto mb-2"></div>
-          <p className="text-xs text-[#9ca3af]">Loading leaderboard...</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--color-cyan-bright)] mx-auto mb-2"></div>
+          <p className="text-xs text-[var(--color-text-secondary)]">Loading leaderboard...</p>
         </div>
       </div>
     );
@@ -468,7 +469,7 @@ function LeaderboardTab({
       <div className="flex items-center justify-center py-8">
         <div className="text-center space-y-2">
           <p className="text-sm font-semibold text-white">Leaderboard unavailable</p>
-          <p className="text-xs text-[#9ca3af]">We’ll show rankings once the API is live.</p>
+          <p className="text-xs text-[var(--color-text-secondary)]">We’ll show rankings once the API is live.</p>
         </div>
       </div>
     );
@@ -508,7 +509,7 @@ function LeaderboardTab({
   return (
     <div className="space-y-4">
       {/* Current User Card */}
-      <div className="rounded-xl border-2 border-[#00d9ff]/50 bg-gradient-to-r from-[#00d9ff]/10 to-[#9d4edd]/10 p-4">
+      <div className="rounded-xl border-2 border-[var(--color-cyan-bright)]/50 bg-gradient-to-r from-[var(--color-cyan-bright)]/10 to-[#9d4edd]/10 p-4">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-3">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -527,7 +528,7 @@ function LeaderboardTab({
           </div>
           <div className="text-right">
             <p className="text-lg font-bold text-white">{currentUser.powerLevel.toLocaleString()}</p>
-            <p className="text-xs text-[#9ca3af]">power</p>
+            <p className="text-xs text-[var(--color-text-secondary)]">power</p>
           </div>
         </div>
       </div>
@@ -550,7 +551,7 @@ function LeaderboardTab({
               </div>
             </div>
             <p className="text-xs font-semibold text-white text-center line-clamp-1">{leaderboard[1]?.username}</p>
-            <p className="text-xs text-[#9ca3af]">{leaderboard[1]?.power_level.toLocaleString()}</p>
+            <p className="text-xs text-[var(--color-text-secondary)]">{leaderboard[1]?.power_level.toLocaleString()}</p>
           </div>
 
           {/* 1st Place */}
@@ -571,7 +572,7 @@ function LeaderboardTab({
               </div>
             </div>
             <p className="text-sm font-bold text-white text-center line-clamp-1">{leaderboard[0]?.username}</p>
-            <p className="text-xs text-[#9ca3af]">{leaderboard[0]?.power_level.toLocaleString()}</p>
+            <p className="text-xs text-[var(--color-text-secondary)]">{leaderboard[0]?.power_level.toLocaleString()}</p>
           </div>
 
           {/* 3rd Place */}
@@ -589,7 +590,7 @@ function LeaderboardTab({
               </div>
             </div>
             <p className="text-xs font-semibold text-white text-center line-clamp-1">{leaderboard[2]?.username}</p>
-            <p className="text-xs text-[#9ca3af]">{leaderboard[2]?.power_level.toLocaleString()}</p>
+            <p className="text-xs text-[var(--color-text-secondary)]">{leaderboard[2]?.power_level.toLocaleString()}</p>
           </div>
         </div>
       )}
@@ -605,7 +606,7 @@ function LeaderboardTab({
               key={rank}
               className={`flex items-center justify-between rounded-lg border p-3 ${
                 isCurrentUser
-                  ? 'border-[#00d9ff]/50 bg-[#00d9ff]/5'
+                  ? 'border-[var(--color-cyan-bright)]/50 bg-[var(--color-cyan-bright)]/5'
                   : 'border-white/10 bg-white/[0.02]'
               }`}
             >
@@ -619,13 +620,13 @@ function LeaderboardTab({
                     style={{ borderColor: getBeltBorderColor(user.current_tier) }}
                   />
                   <div className={`absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold ${
-                    isCurrentUser ? 'bg-[#00d9ff] text-white' : 'bg-white/10 text-[#9ca3af]'
+                    isCurrentUser ? 'bg-[var(--color-cyan-bright)] text-white' : 'bg-white/10 text-[var(--color-text-secondary)]'
                   }`}>
                     {rank}
                   </div>
                 </div>
                 <div>
-                  <p className={`text-sm font-semibold ${isCurrentUser ? 'text-[#00d9ff]' : 'text-white'}`}>
+                  <p className={`text-sm font-semibold ${isCurrentUser ? 'text-[var(--color-cyan-bright)]' : 'text-white'}`}>
                     {user.username}
                   </p>
                   <p className="text-xs" style={{ color: getTierColor(user.current_tier) }}>
@@ -635,7 +636,7 @@ function LeaderboardTab({
               </div>
               <div className="text-right">
                 <p className="text-sm font-bold text-white">{user.power_level.toLocaleString()}</p>
-                <p className="text-xs text-[#9ca3af]">{user.total_calls} calls</p>
+                <p className="text-xs text-[var(--color-text-secondary)]">{user.total_calls} calls</p>
               </div>
             </div>
           );
@@ -645,8 +646,8 @@ function LeaderboardTab({
       {leaderboard.length === 0 && (
         <div className="text-center py-12">
           <div className="text-4xl mb-3">🏆</div>
-          <p className="text-sm text-[#9ca3af]">No leaderboard data yet</p>
-          <p className="text-xs text-[#9ca3af] mt-1">Complete calls to earn power and climb the ranks!</p>
+          <p className="text-sm text-[var(--color-text-secondary)]">No leaderboard data yet</p>
+          <p className="text-xs text-[var(--color-text-secondary)] mt-1">Complete calls to earn power and climb the ranks!</p>
         </div>
       )}
     </div>
@@ -669,8 +670,8 @@ function NotificationsTab({
     return (
       <div className="flex items-center justify-center py-12">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#00d9ff] mx-auto mb-2"></div>
-          <p className="text-xs text-[#9ca3af]">Loading notifications...</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--color-cyan-bright)] mx-auto mb-2"></div>
+          <p className="text-xs text-[var(--color-text-secondary)]">Loading notifications...</p>
         </div>
       </div>
     );
@@ -680,8 +681,8 @@ function NotificationsTab({
     return (
       <div className="text-center py-12">
         <div className="text-4xl mb-3">🔔</div>
-        <p className="text-sm text-[#9ca3af]">No notifications yet</p>
-        <p className="text-xs text-[#9ca3af] mt-1">We&apos;ll notify you when you earn badges and level up!</p>
+        <p className="text-sm text-[var(--color-text-secondary)]">No notifications yet</p>
+        <p className="text-xs text-[var(--color-text-secondary)] mt-1">We&apos;ll notify you when you earn badges and level up!</p>
       </div>
     );
   }
@@ -694,7 +695,7 @@ function NotificationsTab({
       {unreadNotifications.length > 0 && (
         <button
           onClick={onMarkAllAsRead}
-          className="w-full rounded-lg border border-[#00d9ff]/30 bg-[#00d9ff]/10 px-4 py-2 text-xs font-semibold text-[#00d9ff] transition hover:bg-[#00d9ff]/20"
+          className="w-full rounded-lg border border-[var(--color-cyan-bright)]/30 bg-[var(--color-cyan-bright)]/10 px-4 py-2 text-xs font-semibold text-[var(--color-cyan-bright)] transition hover:bg-[var(--color-cyan-bright)]/20"
         >
           Mark all as read
         </button>
@@ -718,7 +719,7 @@ function NotificationsTab({
             className={`rounded-lg border p-4 transition cursor-pointer ${
               notification.read
                 ? 'border-white/10 bg-white/[0.02] opacity-60'
-                : 'border-[#00d9ff]/30 bg-[#00d9ff]/5'
+                : 'border-[var(--color-cyan-bright)]/30 bg-[var(--color-cyan-bright)]/5'
             }`}
             onClick={() => !notification.read && onMarkAsRead(notification.id)}
           >
@@ -728,11 +729,11 @@ function NotificationsTab({
                 <div className="flex items-start justify-between mb-1">
                   <h4 className="text-sm font-bold text-white">{notification.title}</h4>
                   {!notification.read && (
-                    <div className="h-2 w-2 rounded-full bg-[#00d9ff] flex-shrink-0 ml-2 mt-1" />
+                    <div className="h-2 w-2 rounded-full bg-[var(--color-cyan-bright)] flex-shrink-0 ml-2 mt-1" />
                   )}
                 </div>
-                <p className="text-xs text-[#9ca3af] mb-2">{notification.message}</p>
-                <p className="text-xs text-[#9ca3af]">
+                <p className="text-xs text-[var(--color-text-secondary)] mb-2">{notification.message}</p>
+                <p className="text-xs text-[var(--color-text-secondary)]">
                   {new Date(notification.created_at).toLocaleDateString('en-US', {
                     month: 'short',
                     day: 'numeric',
@@ -790,18 +791,18 @@ function BadgesTab({ badges }: { badges: Badge[] }) {
           >
             {badge.name}
           </h4>
-          <p className="text-xs text-[#9ca3af] line-clamp-2">
+          <p className="text-xs text-[var(--color-text-secondary)] line-clamp-2">
             {badge.description}
           </p>
           {!badge.earned && badge.progress !== undefined && badge.total !== undefined && (
             <div className="mt-2">
               <div className="h-1 w-full rounded-full bg-white/10 overflow-hidden">
                 <div
-                  className="h-full rounded-full bg-gradient-to-r from-[#00d9ff] to-[#9d4edd]"
+                  className="h-full rounded-full bg-gradient-to-r from-[var(--color-cyan-bright)] to-[#9d4edd]"
                   style={{ width: `${(badge.progress / badge.total) * 100}%` }}
                 />
               </div>
-              <p className="text-xs text-[#9ca3af] mt-1">
+              <p className="text-xs text-[var(--color-text-secondary)] mt-1">
                 {badge.progress} / {badge.total}
               </p>
             </div>
@@ -940,7 +941,7 @@ function JourneyTab({ userData }: { userData: UserProfileData }) {
                   key={`${tierGroup.tier}-${belt}`}
                   className={`aspect-square rounded-lg border flex items-center justify-center p-2 ${
                     isCurrentBelt
-                      ? 'border-[#00d9ff] bg-[#00d9ff]/20 ring-2 ring-[#00d9ff]'
+                      ? 'border-[var(--color-cyan-bright)] bg-[var(--color-cyan-bright)]/20 ring-2 ring-[var(--color-cyan-bright)]'
                       : 'border-white/10 bg-white/[0.02]'
                   }`}
                 >
@@ -970,7 +971,7 @@ function StatisticsTab({ statistics }: { statistics: Statistics }) {
     <div className="space-y-4">
       {/* Volume Stats */}
       <div className="space-y-3">
-        <h3 className="text-xs font-semibold text-[#9ca3af] uppercase tracking-wide">Volume</h3>
+        <h3 className="text-xs font-semibold text-[var(--color-text-secondary)] uppercase tracking-wide">Volume</h3>
         <StatCard
           label="Total Calls"
           value={statistics.totalCalls.toLocaleString()}
@@ -985,7 +986,7 @@ function StatisticsTab({ statistics }: { statistics: Statistics }) {
 
       {/* Performance Stats with Progress Bars */}
       <div className="space-y-3">
-        <h3 className="text-xs font-semibold text-[#9ca3af] uppercase tracking-wide">Performance</h3>
+        <h3 className="text-xs font-semibold text-[var(--color-text-secondary)] uppercase tracking-wide">Performance</h3>
 
         <StatCardWithProgress
           label="Average Score"
@@ -1014,7 +1015,7 @@ function StatisticsTab({ statistics }: { statistics: Statistics }) {
 
       {/* Communication Stats */}
       <div className="space-y-3">
-        <h3 className="text-xs font-semibold text-[#9ca3af] uppercase tracking-wide">Communication</h3>
+        <h3 className="text-xs font-semibold text-[var(--color-text-secondary)] uppercase tracking-wide">Communication</h3>
         <StatCard
           label="Average WPM"
           value={statistics.averageWPM.toString()}
@@ -1035,7 +1036,7 @@ function StatCard({ label, value, icon }: { label: string; value: string; icon: 
     <div className="flex items-center justify-between rounded-lg border border-white/10 bg-white/[0.03] p-4">
       <div className="flex items-center gap-3">
         <span className="text-2xl">{icon}</span>
-        <span className="text-sm text-[#9ca3af]">{label}</span>
+        <span className="text-sm text-[var(--color-text-secondary)]">{label}</span>
       </div>
       <span className="text-lg font-bold text-white">{value}</span>
     </div>
@@ -1062,7 +1063,7 @@ function StatCardWithProgress({
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-3">
           <span className="text-2xl">{icon}</span>
-          <span className="text-sm text-[#9ca3af]">{label}</span>
+          <span className="text-sm text-[var(--color-text-secondary)]">{label}</span>
         </div>
         <span className="text-lg font-bold text-white">{value.toFixed(1)}%</span>
       </div>

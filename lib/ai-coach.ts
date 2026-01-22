@@ -4,7 +4,8 @@
  */
 
 import OpenAI from 'openai';
-import { CallScore, CategoryScore } from './scoring-framework';
+import { CallScore } from './scoring-framework';
+import { logger } from './logger';
 
 // Initialize OpenAI client
 const openai = process.env.OPENAI_API_KEY
@@ -265,8 +266,10 @@ Rules:
 /**
  * Save coaching analysis to database
  */
+import type { Pool } from 'pg';
+
 export async function saveCoachingAnalysis(
-  pool: any,
+  pool: Pool,
   callLogId: string,
   coaching: CoachingAnalysis
 ): Promise<void> {
@@ -323,9 +326,9 @@ export async function saveCoachingAnalysis(
       ]
     );
 
-    console.log(`[AI Coach] Saved coaching analysis for call ${callLogId}`);
+    logger.debug(`[AI Coach] Saved coaching analysis for call ${callLogId}`);
   } catch (error) {
-    console.error('[AI Coach] Error saving coaching analysis:', error);
+    logger.error('[AI Coach] Error saving coaching analysis', error);
     throw error;
   }
 }
@@ -334,7 +337,7 @@ export async function saveCoachingAnalysis(
  * Retrieve coaching analysis from database
  */
 export async function getCoachingAnalysis(
-  pool: any,
+  pool: Pool,
   callLogId: string
 ): Promise<CoachingAnalysis | null> {
   try {
@@ -389,7 +392,7 @@ export async function getCoachingAnalysis(
       },
     };
   } catch (error) {
-    console.error('[AI Coach] Error retrieving coaching analysis:', error);
+    logger.error('[AI Coach] Error retrieving coaching analysis', error);
     return null;
   }
 }

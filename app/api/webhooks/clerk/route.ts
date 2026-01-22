@@ -3,6 +3,7 @@ import { headers } from 'next/headers';
 import { WebhookEvent } from '@clerk/nextjs/server';
 import { pool } from '@/lib/db';
 import { NextResponse } from 'next/server';
+import { logger } from '@/lib/logger';
 
 export async function POST(req: Request) {
   const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET;
@@ -39,7 +40,7 @@ export async function POST(req: Request) {
       'svix-signature': svix_signature,
     }) as WebhookEvent;
   } catch (err) {
-    console.error('Error verifying webhook:', err);
+    logger.apiError('/webhooks/clerk', err, { route: '/webhooks/clerk', reason: 'Signature verification failed' });
     return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
   }
 
@@ -64,9 +65,9 @@ export async function POST(req: Request) {
         [id, primaryEmail.email_address]
       );
 
-      console.log('User created in database with trial plan:', id, primaryEmail.email_address);
+      logger.apiInfo('/webhooks/clerk', 'User created in database with trial plan', { userId: id, email: primaryEmail.email_address });
     } catch (error) {
-      console.error('Error creating user in database:', error);
+      logger.apiError('/webhooks/clerk', error, { route: '/webhooks/clerk', reason: 'Database error creating user' });
       return NextResponse.json({ error: 'Database error' }, { status: 500 });
     }
   }

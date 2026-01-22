@@ -182,7 +182,6 @@ export default function OnboardingModal({ isOpen, onClose, onComplete }: Onboard
   const currentQuestion = formQuestions[currentQuestionIndex];
   const step = onboardingSteps[currentStep];
   const isLastStep = phase === 2 && currentStep === onboardingSteps.length - 1;
-  const isFirstQuestion = phase === 1 && currentQuestionIndex === 0;
 
   return (
     <>
@@ -192,7 +191,7 @@ export default function OnboardingModal({ isOpen, onClose, onComplete }: Onboard
       {/* Modal */}
       <div className="fixed left-1/2 top-1/2 z-50 w-full max-w-2xl -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-white/10 bg-[#1A1F2E] shadow-2xl max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="border-b border-white/10 bg-gradient-to-r from-[#00d9ff]/10 to-[#9d4edd]/10 p-8">
+        <div className="border-b border-white/10 bg-gradient-to-r from-[var(--color-cyan-bright)]/10 to-[#9d4edd]/10 p-8">
           <div className="text-center">
             <div className="text-6xl mb-4 animate-bounce">
               {phase === 1 ? currentQuestion.icon : step.icon}
@@ -200,7 +199,7 @@ export default function OnboardingModal({ isOpen, onClose, onComplete }: Onboard
             <h2 className="text-3xl font-bold text-white mb-2">
               {phase === 1 ? 'Tell Us About Yourself' : step.title}
             </h2>
-            <p className="text-sm text-[#9ca3af]">
+            <p className="text-sm text-[var(--color-text-secondary)]">
               {phase === 1 ? 'Help us personalize your experience' : step.description}
             </p>
           </div>
@@ -223,7 +222,7 @@ export default function OnboardingModal({ isOpen, onClose, onComplete }: Onboard
               <div className="text-center mb-6">
                 <h3 className="text-xl font-bold text-white mb-2">{currentQuestion.question}</h3>
                 {currentQuestion.optional && (
-                  <p className="text-sm text-[#9ca3af]">Optional - skip if you prefer</p>
+                  <p className="text-sm text-[var(--color-text-secondary)]">Optional - skip if you prefer</p>
                 )}
               </div>
 
@@ -233,7 +232,7 @@ export default function OnboardingModal({ isOpen, onClose, onComplete }: Onboard
                   <select
                     value={role}
                     onChange={(e) => setRole(e.target.value)}
-                    className="w-full rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3 text-white focus:border-[#00d9ff] focus:outline-none focus:ring-2 focus:ring-[#00d9ff]/20"
+                    className="w-full rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3 text-white focus:border-[var(--color-cyan-bright)] focus:outline-none focus:ring-2 focus:ring-[var(--color-cyan-bright)]/20"
                   >
                     <option value="">Select your role</option>
                     <option value="sdr">SDR / BDR</option>
@@ -255,7 +254,7 @@ export default function OnboardingModal({ isOpen, onClose, onComplete }: Onboard
                       onClick={() => setExperience(level)}
                       className={`rounded-lg border px-4 py-3 text-sm font-semibold transition ${
                         experience === level
-                          ? 'border-[#00d9ff] bg-[#00d9ff]/20 text-[#00d9ff]'
+                          ? 'border-[var(--color-cyan-bright)] bg-[var(--color-cyan-bright)]/20 text-[var(--color-cyan-bright)]'
                           : 'border-white/10 bg-white/[0.03] text-white hover:bg-white/[0.05]'
                       }`}
                     >
@@ -282,7 +281,7 @@ export default function OnboardingModal({ isOpen, onClose, onComplete }: Onboard
                       onClick={() => toggleStruggle(struggle)}
                       className={`w-full text-left rounded-lg border px-4 py-3 text-sm font-medium transition ${
                         mainStruggles.includes(struggle)
-                          ? 'border-[#00d9ff] bg-[#00d9ff]/20 text-[#00d9ff]'
+                          ? 'border-[var(--color-cyan-bright)] bg-[var(--color-cyan-bright)]/20 text-[var(--color-cyan-bright)]'
                           : 'border-white/10 bg-white/[0.03] text-white hover:bg-white/[0.05]'
                       }`}
                     >
@@ -298,7 +297,7 @@ export default function OnboardingModal({ isOpen, onClose, onComplete }: Onboard
                   <select
                     value={howFound}
                     onChange={(e) => setHowFound(e.target.value)}
-                    className="w-full rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3 text-white focus:border-[#00d9ff] focus:outline-none focus:ring-2 focus:ring-[#00d9ff]/20"
+                    className="w-full rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3 text-white focus:border-[var(--color-cyan-bright)] focus:outline-none focus:ring-2 focus:ring-[var(--color-cyan-bright)]/20"
                   >
                     <option value="">Select an option</option>
                     <option value="google">Google Search</option>
@@ -321,7 +320,7 @@ export default function OnboardingModal({ isOpen, onClose, onComplete }: Onboard
                     onChange={(e) => setGoals(e.target.value)}
                     placeholder="e.g., Close more deals, improve objection handling, build confidence..."
                     rows={4}
-                    className="w-full rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3 text-white placeholder-[#9ca3af] focus:border-[#00d9ff] focus:outline-none focus:ring-2 focus:ring-[#00d9ff]/20 resize-none"
+                    className="w-full rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3 text-white placeholder-[var(--color-text-secondary)] focus:border-[var(--color-cyan-bright)] focus:outline-none focus:ring-2 focus:ring-[var(--color-cyan-bright)]/20 resize-none"
                   />
                 </div>
               )}
@@ -333,7 +332,7 @@ export default function OnboardingModal({ isOpen, onClose, onComplete }: Onboard
                   key={index}
                   className="flex items-start gap-4 rounded-xl border border-white/10 bg-white/[0.03] p-4 transition hover:bg-white/[0.05]"
                 >
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-[#00d9ff] to-[#9d4edd] text-sm font-bold text-white flex-shrink-0">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-[var(--color-cyan-bright)] to-[#9d4edd] text-sm font-bold text-white flex-shrink-0">
                     {index + 1}
                   </div>
                   <p className="text-sm text-white pt-1">{item}</p>
@@ -357,10 +356,10 @@ export default function OnboardingModal({ isOpen, onClose, onComplete }: Onboard
                 }}
                 className={`h-2 rounded-full transition-all ${
                   phase === 1 && index === currentQuestionIndex
-                    ? 'w-8 bg-gradient-to-r from-[#00d9ff] to-[#9d4edd]'
+                    ? 'w-8 bg-gradient-to-r from-[var(--color-cyan-bright)] to-[#9d4edd]'
                     : phase === 1
                     ? 'w-2 bg-white/20 hover:bg-white/30'
-                    : 'w-2 bg-[#00d9ff]/50'
+                    : 'w-2 bg-[var(--color-cyan-bright)]/50'
                 }`}
                 aria-label={`Go to question ${index + 1}`}
               />
@@ -380,7 +379,7 @@ export default function OnboardingModal({ isOpen, onClose, onComplete }: Onboard
                 }}
                 className={`h-2 rounded-full transition-all ${
                   phase === 2 && index === currentStep
-                    ? 'w-8 bg-gradient-to-r from-[#00d9ff] to-[#9d4edd]'
+                    ? 'w-8 bg-gradient-to-r from-[var(--color-cyan-bright)] to-[#9d4edd]'
                     : phase === 2
                     ? 'w-2 bg-white/20 hover:bg-white/30'
                     : 'w-2 bg-white/10'
@@ -395,7 +394,7 @@ export default function OnboardingModal({ isOpen, onClose, onComplete }: Onboard
         <div className="border-t border-white/10 p-6 flex items-center justify-between">
           <button
             onClick={handleSkip}
-            className="text-sm font-semibold text-[#9ca3af] transition hover:text-white"
+            className="text-sm font-semibold text-[var(--color-text-secondary)] transition hover:text-white"
           >
             Skip {phase === 1 ? 'Questions' : 'Tutorial'}
           </button>
@@ -411,7 +410,7 @@ export default function OnboardingModal({ isOpen, onClose, onComplete }: Onboard
             )}
             <button
               onClick={handleNext}
-              className="rounded-full bg-gradient-to-r from-[#00d9ff] to-[#9d4edd] px-6 py-3 text-sm font-semibold text-white transition hover:scale-105 shadow-lg hover:shadow-xl"
+              className="rounded-full bg-gradient-to-r from-[var(--color-cyan-bright)] to-[#9d4edd] px-6 py-3 text-sm font-semibold text-white transition hover:scale-105 shadow-lg hover:shadow-xl"
             >
               {isLastStep ? "Let's Start!" : phase === 1 && currentQuestionIndex === formQuestions.length - 1 ? 'Continue to Tour' : 'Next'}
             </button>

@@ -2,9 +2,10 @@ import { NextResponse } from 'next/server';
 import type Stripe from 'stripe';
 import { pool } from '@/lib/db';
 import { getStripeClient } from '@/lib/stripe';
+import { logger } from '@/lib/logger';
 
 export async function POST(request: Request) {
-  console.log('[Stripe Webhook] Received webhook');
+  logger.apiInfo('/stripe/webhook', 'Received webhook');
 
   try {
     const stripe = getStripeClient();
@@ -14,7 +15,7 @@ export async function POST(request: Request) {
     const signature = request.headers.get('stripe-signature');
 
     if (!signature) {
-      console.error('[Stripe Webhook] No signature found');
+      logger.apiError('/stripe/webhook', new Error('No signature found'), { route: '/stripe/webhook' });
       return NextResponse.json({ error: 'No signature' }, { status: 400 });
     }
 
@@ -25,16 +26,16 @@ export async function POST(request: Request) {
       try {
         event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
       } catch (err) {
-        console.error('[Stripe Webhook] Signature verification failed:', err);
+        logger.apiError('/stripe/webhook', err, { route: '/stripe/webhook', reason: 'Signature verification failed' });
         return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
       }
     } else {
       // Development mode: parse without verification
-      console.warn('[Stripe Webhook] ⚠️  No webhook secret - skipping signature verification');
+      logger.warn('[Stripe Webhook] No webhook secret - skipping signature verification');
       event = JSON.parse(body);
     }
 
-    console.log('[Stripe Webhook] Event type:', event.type);
+    logger.apiInfo('/stripe/webhook', 'Event received', { eventType: event.type });
 
     // Handle different event types
     switch (event.type) {
@@ -63,12 +64,12 @@ export async function POST(request: Request) {
       }
 
       default:
-        console.log(`[Stripe Webhook] Unhandled event type: ${event.type}`);
+        logger.apiInfo('/stripe/webhook', 'Unhandled event type', { eventType: event.type });
     }
 
     return NextResponse.json({ received: true });
   } catch (error) {
-    console.error('[Stripe Webhook] ERROR:', error);
+    logger.apiError('/stripe/webhook', error, { route: '/stripe/webhook' });
     return NextResponse.json(
       {
         error: 'Webhook handler failed',
@@ -81,17 +82,17 @@ export async function POST(request: Request) {
 
 // Handle successful checkout completion
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
-  console.log('[Stripe Webhook] Checkout completed:', session.id);
+  logger.apiInfo('/stripe/webhook', 'Checkout completed', { sessionId: session.id });
 
   const clerkUserId = session.metadata?.clerk_user_id;
   const planType = session.metadata?.plan_type; // 'trial' or 'paid'
 
   if (!clerkUserId) {
-    console.error('[Stripe Webhook] No clerk_user_id in metadata');
+    logger.apiError('/stripe/webhook', new Error('No clerk_user_id in metadata'), { sessionId: session.id });
     return;
   }
 
-  console.log(`[Stripe Webhook] User ${clerkUserId} purchased plan: ${planType}`);
+  logger.apiInfo('/stripe/webhook', 'User purchased plan', { clerkUserId, planType });
 
   if (planType === 'trial') {
     // Handle $5 trial purchase
@@ -104,7 +105,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
        WHERE clerk_id = $1`,
       [clerkUserId]
     );
-    console.log('[Stripe Webhook] ✓ Trial activated: +5 calls');
+    logger.apiInfo('/stripe/webhook', 'Trial activated: +5 calls', { clerkUserId });
   } else if (planType === 'paid') {
     // Handle $11.99 subscription purchase
     const subscriptionId = session.subscription as string;
@@ -120,13 +121,13 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
        WHERE clerk_id = $2`,
       [subscriptionId, clerkUserId]
     );
-    console.log('[Stripe Webhook] ✓ Paid subscription activated: 20,000 tokens');
+    logger.apiInfo('/stripe/webhook', 'Paid subscription activated: 20,000 tokens', { clerkUserId, subscriptionId });
   }
 }
 
 // Handle invoice paid (monthly renewals)
 async function handleInvoicePaid(invoice: Stripe.Invoice) {
-  console.log('[Stripe Webhook] Invoice paid:', invoice.id);
+  logger.apiInfo('/stripe/webhook', 'Invoice paid', { invoiceId: invoice.id });
 
   // Extract subscription ID (can be string or object)
   const subscriptionValue = (invoice as Stripe.Invoice & {
@@ -138,7 +139,7 @@ async function handleInvoicePaid(invoice: Stripe.Invoice) {
       : subscriptionValue?.id;
 
   if (!subscriptionId) {
-    console.log('[Stripe Webhook] No subscription ID in invoice');
+    logger.warn('[Stripe Webhook] No subscription ID in invoice', { invoiceId: invoice.id });
     return;
   }
 
@@ -152,12 +153,12 @@ async function handleInvoicePaid(invoice: Stripe.Invoice) {
      WHERE subscription_id = $1`,
     [subscriptionId]
   );
-  console.log('[Stripe Webhook] ✓ Tokens reset for new billing cycle');
+  logger.apiInfo('/stripe/webhook', 'Tokens reset for new billing cycle', { subscriptionId });
 }
 
 // Handle subscription updates (plan changes, status changes)
 async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
-  console.log('[Stripe Webhook] Subscription updated:', subscription.id);
+  logger.apiInfo('/stripe/webhook', 'Subscription updated', { subscriptionId: subscription.id });
 
   const status = subscription.status;
   const clerkUserId = subscription.metadata?.clerk_user_id;
@@ -169,7 +170,7 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
       [subscription.id]
     );
     if (result.rows.length === 0) {
-      console.error('[Stripe Webhook] Cannot find user for subscription:', subscription.id);
+      logger.apiError('/stripe/webhook', new Error('Cannot find user for subscription'), { subscriptionId: subscription.id });
       return;
     }
   }
@@ -187,12 +188,12 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
      WHERE subscription_id = $2`,
     [mappedStatus, subscription.id]
   );
-  console.log(`[Stripe Webhook] ✓ Subscription status updated to: ${mappedStatus}`);
+  logger.apiInfo('/stripe/webhook', 'Subscription status updated', { subscriptionId: subscription.id, status: mappedStatus });
 }
 
 // Handle subscription cancellation
 async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
-  console.log('[Stripe Webhook] Subscription deleted:', subscription.id);
+  logger.apiInfo('/stripe/webhook', 'Subscription deleted', { subscriptionId: subscription.id });
 
   await pool().query(
     `UPDATE users
@@ -202,5 +203,5 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
      WHERE subscription_id = $1`,
     [subscription.id]
   );
-  console.log('[Stripe Webhook] ✓ Subscription cancelled, user downgraded to trial');
+  logger.apiInfo('/stripe/webhook', 'Subscription cancelled, user downgraded to trial', { subscriptionId: subscription.id });
 }

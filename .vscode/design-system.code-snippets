@@ -1,0 +1,333 @@
+{
+  // =============================================================================
+  // DESIGN SYSTEM IMPORTS
+  // =============================================================================
+  "Import Design System": {
+    "prefix": "imp-ds",
+    "body": [
+      "import { ${1|colors,spacing,fadeIn,staggerContainer,cn,patterns|} } from '@/lib/design-system';"
+    ],
+    "description": "Import from design system"
+  },
+  "Import Design System Full": {
+    "prefix": "imp-ds-full",
+    "body": [
+      "import {",
+      "  colors,",
+      "  spacing,",
+      "  shadows,",
+      "  fadeIn,",
+      "  slideUp,",
+      "  staggerContainer,",
+      "  modalVariants,",
+      "  cn,",
+      "  patterns,",
+      "} from '@/lib/design-system';"
+    ],
+    "description": "Import common design system exports"
+  },
+  "Import Framer Motion + Animations": {
+    "prefix": "imp-motion",
+    "body": [
+      "import { motion, AnimatePresence } from 'framer-motion';",
+      "import { ${1:fadeIn}, ${2:staggerContainer} } from '@/lib/design-system';"
+    ],
+    "description": "Import Framer Motion with design system animations"
+  },
+
+  // =============================================================================
+  // ANIMATION VARIANTS
+  // =============================================================================
+  "Motion Div with Fade In": {
+    "prefix": "m-fade",
+    "body": [
+      "<motion.${1:div}",
+      "  variants={fadeIn}",
+      "  initial=\"initial\"",
+      "  animate=\"animate\"",
+      "  ${2:exit=\"exit\"}",
+      ">",
+      "  $0",
+      "</motion.${1:div}>"
+    ],
+    "description": "Motion div with fadeIn animation"
+  },
+  "Motion Div with Slide Up": {
+    "prefix": "m-slide",
+    "body": [
+      "<motion.${1:div}",
+      "  variants={slideUp}",
+      "  initial=\"initial\"",
+      "  animate=\"animate\"",
+      "  exit=\"exit\"",
+      ">",
+      "  $0",
+      "</motion.${1:div}>"
+    ],
+    "description": "Motion div with slideUp animation"
+  },
+  "Stagger Container": {
+    "prefix": "m-stagger",
+    "body": [
+      "<motion.${1:ul}",
+      "  variants={staggerContainer}",
+      "  initial=\"initial\"",
+      "  animate=\"animate\"",
+      "  className=\"$2\"",
+      ">",
+      "  {${3:items}.map((item) => (",
+      "    <motion.${4:li} key={item.id} variants={fadeIn}>",
+      "      {item.$5}",
+      "    </motion.${4:li}>",
+      "  ))}",
+      "</motion.${1:ul}>"
+    ],
+    "description": "Stagger container with children"
+  },
+  "Motion with AnimatePresence": {
+    "prefix": "m-presence",
+    "body": [
+      "<AnimatePresence mode=\"${1|wait,sync,popLayout|}\">",
+      "  {${2:isVisible} && (",
+      "    <motion.div",
+      "      key=\"${3:unique-key}\"",
+      "      variants={fadeIn}",
+      "      initial=\"initial\"",
+      "      animate=\"animate\"",
+      "      exit=\"exit\"",
+      "    >",
+      "      $0",
+      "    </motion.div>",
+      "  )}",
+      "</AnimatePresence>"
+    ],
+    "description": "AnimatePresence wrapper"
+  },
+  "Modal Animation": {
+    "prefix": "m-modal",
+    "body": [
+      "<AnimatePresence>",
+      "  {${1:isOpen} && (",
+      "    <>",
+      "      {/* Backdrop */}",
+      "      <motion.div",
+      "        variants={backdropVariants}",
+      "        initial=\"initial\"",
+      "        animate=\"animate\"",
+      "        exit=\"exit\"",
+      "        className=\"fixed inset-0 bg-black/60 backdrop-blur-sm z-40\"",
+      "        onClick={${2:onClose}}",
+      "      />",
+      "      {/* Modal */}",
+      "      <motion.div",
+      "        variants={modalVariants}",
+      "        initial=\"initial\"",
+      "        animate=\"animate\"",
+      "        exit=\"exit\"",
+      "        className=\"fixed inset-0 z-50 flex items-center justify-center p-4\"",
+      "      >",
+      "        <div className={cn(patterns.card, 'max-w-${3:md} w-full p-6')}>",
+      "          $0",
+      "        </div>",
+      "      </motion.div>",
+      "    </>",
+      "  )}",
+      "</AnimatePresence>"
+    ],
+    "description": "Complete modal with backdrop and content animation"
+  },
+
+  // =============================================================================
+  // UI PATTERNS
+  // =============================================================================
+  "Card Component": {
+    "prefix": "ds-card",
+    "body": [
+      "<div className={cn(patterns.card, 'p-${1:6}', ${2:className})}>",
+      "  $0",
+      "</div>"
+    ],
+    "description": "Design system card"
+  },
+  "Card with Glow": {
+    "prefix": "ds-card-glow",
+    "body": [
+      "<div className={cn(patterns.cardGlow, 'p-${1:6}', ${2:className})}>",
+      "  $0",
+      "</div>"
+    ],
+    "description": "Design system card with glow"
+  },
+  "Primary Button": {
+    "prefix": "ds-btn",
+    "body": [
+      "<button",
+      "  className={cn(patterns.buttonPrimary, ${1:className})}",
+      "  onClick={${2:onClick}}",
+      ">",
+      "  ${3:Button Text}",
+      "</button>"
+    ],
+    "description": "Primary button with design system styling"
+  },
+  "Secondary Button": {
+    "prefix": "ds-btn-secondary",
+    "body": [
+      "<button",
+      "  className={cn(patterns.buttonSecondary, ${1:className})}",
+      "  onClick={${2:onClick}}",
+      ">",
+      "  ${3:Button Text}",
+      "</button>"
+    ],
+    "description": "Secondary button with design system styling"
+  },
+  "Badge Cyan": {
+    "prefix": "ds-badge",
+    "body": [
+      "<span className={patterns.badgeCyan}>",
+      "  ${1:Badge Text}",
+      "</span>"
+    ],
+    "description": "Cyan badge"
+  },
+  "Input Field": {
+    "prefix": "ds-input",
+    "body": [
+      "<input",
+      "  type=\"${1:text}\"",
+      "  className={cn(patterns.input, ${2:className})}",
+      "  placeholder=\"${3:Placeholder}\"",
+      "  value={${4:value}}",
+      "  onChange={(e) => ${5:setValue}(e.target.value)}",
+      "/>"
+    ],
+    "description": "Input field with design system styling"
+  },
+  "Section Container": {
+    "prefix": "ds-section",
+    "body": [
+      "<section className={cn(patterns.section, 'py-${1:16}')}>",
+      "  $0",
+      "</section>"
+    ],
+    "description": "Section with max-width container"
+  },
+  "Text Gradient Cyan": {
+    "prefix": "ds-text-gradient",
+    "body": [
+      "<span className={patterns.textGradientCyan}>",
+      "  ${1:Gradient Text}",
+      "</span>"
+    ],
+    "description": "Text with cyan gradient"
+  },
+
+  // =============================================================================
+  // COLOR UTILITIES
+  // =============================================================================
+  "Color Token Reference": {
+    "prefix": "color-",
+    "body": [
+      "colors.${1|cyan.bright,cyan.muted,purple.DEFAULT,text.primary,text.secondary,background.dark,border.subtle|}"
+    ],
+    "description": "Reference a color token"
+  },
+  "Dynamic Background Color": {
+    "prefix": "style-bg",
+    "body": [
+      "style={{ backgroundColor: colors.${1|cyan.bright,purple.DEFAULT,background.dark|} }}"
+    ],
+    "description": "Inline style with color token"
+  },
+  "CN Utility": {
+    "prefix": "cn",
+    "body": [
+      "className={cn(",
+      "  '${1:base-classes}',",
+      "  ${2:condition} && '${3:conditional-classes}',",
+      "  ${4:className}",
+      ")}"
+    ],
+    "description": "cn() for conditional classes"
+  },
+
+  // =============================================================================
+  // SPACING
+  // =============================================================================
+  "Spacing Token": {
+    "prefix": "space-",
+    "body": [
+      "spacing.${1|xs,sm,md,lg,xl,2xl,3xl,4xl,5xl|}"
+    ],
+    "description": "Reference a spacing token"
+  },
+
+  // =============================================================================
+  // COMPLETE COMPONENTS
+  // =============================================================================
+  "Animated Card Component": {
+    "prefix": "comp-card-animated",
+    "body": [
+      "import { motion } from 'framer-motion';",
+      "import { fadeIn, cn, patterns } from '@/lib/design-system';",
+      "",
+      "interface ${1:CardName}Props {",
+      "  title: string;",
+      "  children: React.ReactNode;",
+      "  className?: string;",
+      "}",
+      "",
+      "export function ${1:CardName}({ title, children, className }: ${1:CardName}Props) {",
+      "  return (",
+      "    <motion.div",
+      "      variants={fadeIn}",
+      "      initial=\"initial\"",
+      "      animate=\"animate\"",
+      "      className={cn(patterns.card, 'p-6', className)}",
+      "    >",
+      "      <h3 className=\"text-lg font-semibold text-text-primary mb-4\">",
+      "        {title}",
+      "      </h3>",
+      "      {children}",
+      "    </motion.div>",
+      "  );",
+      "}"
+    ],
+    "description": "Complete animated card component"
+  },
+  "Animated List Component": {
+    "prefix": "comp-list-animated",
+    "body": [
+      "import { motion } from 'framer-motion';",
+      "import { fadeIn, staggerContainer, cn } from '@/lib/design-system';",
+      "",
+      "interface ${1:ListName}Props {",
+      "  items: { id: string; ${2:label}: string }[];",
+      "  className?: string;",
+      "}",
+      "",
+      "export function ${1:ListName}({ items, className }: ${1:ListName}Props) {",
+      "  return (",
+      "    <motion.ul",
+      "      variants={staggerContainer}",
+      "      initial=\"initial\"",
+      "      animate=\"animate\"",
+      "      className={cn('space-y-2', className)}",
+      "    >",
+      "      {items.map((item) => (",
+      "        <motion.li",
+      "          key={item.id}",
+      "          variants={fadeIn}",
+      "          className=\"p-4 rounded-lg bg-card-bg border border-border-subtle\"",
+      "        >",
+      "          {item.${2:label}}",
+      "        </motion.li>",
+      "      ))}",
+      "    </motion.ul>",
+      "  );",
+      "}"
+    ],
+    "description": "Complete animated list component"
+  }
+}

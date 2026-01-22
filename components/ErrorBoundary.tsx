@@ -2,6 +2,7 @@
 
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import Link from 'next/link';
+import clientLogger from '@/lib/client-logger';
 
 interface Props {
   children: ReactNode;
@@ -24,7 +25,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('[ErrorBoundary] Caught error:', error, errorInfo);
+    clientLogger.error('[ErrorBoundary] Caught error', error, { errorInfo });
   }
 
   render() {
@@ -34,7 +35,7 @@ export class ErrorBoundary extends Component<Props, State> {
       }
 
       return (
-        <div className="min-h-screen bg-[#080d1a] grid-background flex items-center justify-center p-4">
+        <div className="min-h-screen bg-[var(--color-dark-bg)] grid-background flex items-center justify-center p-4">
           <div className="max-w-2xl w-full text-center">
             <div className="mb-8 inline-flex h-24 w-24 items-center justify-center rounded-3xl bg-gradient-to-br from-red-500/20 to-red-500/5 ring-2 ring-red-500/30">
               <svg className="h-12 w-12 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -42,11 +43,11 @@ export class ErrorBoundary extends Component<Props, State> {
               </svg>
             </div>
             <h1 className="text-4xl font-extrabold text-white mb-4">Something went wrong</h1>
-            <p className="text-lg text-[#94a3b8] mb-2">
-              We encountered an unexpected error. Don't worry, your data is safe.
+            <p className="text-lg text-[var(--color-text-secondary)] mb-2">
+              We encountered an unexpected error. Don&apos;t worry, your data is safe.
             </p>
             {this.state.error && (
-              <p className="text-sm text-[#64748b] mb-8 font-mono bg-[#1e293b]/50 p-3 rounded-lg">
+              <p className="text-sm text-[var(--color-text-muted)] mb-8 font-mono bg-[var(--color-border-subtle)]/50 p-3 rounded-lg">
                 {this.state.error.message}
               </p>
             )}
@@ -56,7 +57,7 @@ export class ErrorBoundary extends Component<Props, State> {
                   this.setState({ hasError: false, error: null });
                   window.location.reload();
                 }}
-                className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-[#00d9ff] to-[#00ffea] px-8 py-3 text-base font-semibold text-[#080d1a] transition-all hover:scale-105 shadow-lg"
+                className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-[var(--color-cyan-bright)] to-[#00ffea] px-8 py-3 text-base font-semibold text-[var(--color-dark-bg)] transition-all hover:scale-105 shadow-lg"
               >
                 Reload Page
               </button>

@@ -4,6 +4,7 @@
  */
 
 import { TranscriptEntry } from './ai-coach';
+import { logger } from './logger';
 
 export interface VoiceAnalytics {
   // Speech metrics
@@ -302,8 +303,10 @@ function estimatePauseCount(turns: TranscriptEntry[]): number {
 /**
  * Save voice analytics to database
  */
+import type { Pool } from 'pg';
+
 export async function saveVoiceAnalytics(
-  pool: any,
+  pool: Pool,
   callLogId: string,
   analytics: VoiceAnalytics
 ): Promise<void> {
@@ -375,9 +378,9 @@ export async function saveVoiceAnalytics(
       ]
     );
 
-    console.log(`[Voice Analytics] Saved analytics for call ${callLogId}`);
+    logger.debug(`[Voice Analytics] Saved analytics for call ${callLogId}`);
   } catch (error) {
-    console.error('[Voice Analytics] Error saving analytics:', error);
+    logger.error('[Voice Analytics] Error saving analytics', error);
     throw error;
   }
 }
@@ -385,7 +388,7 @@ export async function saveVoiceAnalytics(
 /**
  * Retrieve voice analytics from database
  */
-export async function getVoiceAnalytics(pool: any, callLogId: string): Promise<VoiceAnalytics | null> {
+export async function getVoiceAnalytics(pool: Pool, callLogId: string): Promise<VoiceAnalytics | null> {
   try {
     const result = await pool.query(
       `
@@ -441,7 +444,7 @@ export async function getVoiceAnalytics(pool: any, callLogId: string): Promise<V
       questionQualityScore: parseFloat(row.question_quality_score),
     };
   } catch (error) {
-    console.error('[Voice Analytics] Error retrieving analytics:', error);
+    logger.error('[Voice Analytics] Error retrieving analytics', error);
     return null;
   }
 }

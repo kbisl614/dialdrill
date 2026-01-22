@@ -3,9 +3,10 @@ import { NextResponse } from 'next/server';
 import type Stripe from 'stripe';
 import { pool } from '@/lib/db';
 import { getStripeClient } from '@/lib/stripe';
+import { logger } from '@/lib/logger';
 
 export async function POST(request: Request) {
-  console.log('[API /stripe/checkout] Request received');
+  logger.apiInfo('/stripe/checkout', 'Request received');
 
   try {
     const stripe = getStripeClient();
@@ -17,7 +18,7 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { priceId, planType } = body; // planType: 'trial' or 'paid'
 
-    console.log('[Stripe Checkout] Creating session for:', { userId, priceId, planType });
+    logger.apiInfo('/stripe/checkout', 'Creating session', { userId, priceId, planType });
 
     // Get or create Stripe customer
     const userResult = await pool().query(
@@ -34,7 +35,7 @@ export async function POST(request: Request) {
 
     // Create Stripe customer if doesn't exist
     if (!customerId) {
-      console.log('[Stripe Checkout] Creating new Stripe customer');
+      logger.apiInfo('/stripe/checkout', 'Creating new Stripe customer', { userId });
       const customer = await stripe.customers.create({
         email: user.email,
         metadata: {
@@ -48,7 +49,7 @@ export async function POST(request: Request) {
         'UPDATE users SET stripe_customer_id = $1 WHERE clerk_id = $2',
         [customerId, userId]
       );
-      console.log('[Stripe Checkout] Stripe customer created:', customerId);
+      logger.apiInfo('/stripe/checkout', 'Stripe customer created', { userId, customerId });
     }
 
     // Determine checkout mode based on plan type
@@ -88,14 +89,14 @@ export async function POST(request: Request) {
 
     const session = await stripe.checkout.sessions.create(sessionParams);
 
-    console.log('[Stripe Checkout] Session created:', session.id);
+    logger.apiInfo('/stripe/checkout', 'Session created', { sessionId: session.id, userId });
 
     return NextResponse.json({
       sessionId: session.id,
       url: session.url,
     });
   } catch (error) {
-    console.error('[API /stripe/checkout] ERROR:', error);
+    logger.apiError('/stripe/checkout', error, { route: '/stripe/checkout' });
     return NextResponse.json(
       {
         error: 'Failed to create checkout session',

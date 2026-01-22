@@ -187,7 +187,7 @@ export default function Threads({
     window.addEventListener('resize', resize);
     resize();
 
-    let currentMouse: [number, number] = [0.5, 0.5];
+    const currentMouse: [number, number] = [0.5, 0.5];
     let targetMouse: [number, number] = [0.5, 0.5];
 
     function handleMouseMove(e: MouseEvent) {

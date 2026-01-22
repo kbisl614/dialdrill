@@ -40,7 +40,7 @@ export default function CallHistoryFilters({
     maxScore: 10,
   });
 
-  const updateFilter = (key: keyof FilterState, value: any) => {
+  const updateFilter = (key: keyof FilterState, value: string | number | Date | null) => {
     const newFilters = { ...filters, [key]: value };
     setFilters(newFilters);
     onFilterChange(newFilters);

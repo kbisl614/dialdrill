@@ -406,11 +406,11 @@ export default function ObjectionLibraryModal({ isOpen, onClose }: ObjectionLibr
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="border-b border-white/10 bg-gradient-to-r from-[#2dd4e6]/10 to-[#9333ea]/10 p-6">
+        <div className="border-b border-white/10 bg-gradient-to-r from-[#2dd4e6]/10 to-[var(--color-purple-dark)]/10 p-6">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h2 className="text-2xl font-bold text-white">Objection Library</h2>
-              <p className="mt-1 text-sm text-[#9ca3af]">
+              <p className="mt-1 text-sm text-[var(--color-text-secondary)]">
                 35 common objections with structured responses
               </p>
             </div>
@@ -459,7 +459,7 @@ export default function ObjectionLibraryModal({ isOpen, onClose }: ObjectionLibr
               return (
                 <div
                   key={objection.id}
-                  className="rounded-xl border border-white/10 bg-white/[0.03] transition hover:bg-white/[0.06] hover:border-[#00d9ff]/30"
+                  className="rounded-xl border border-white/10 bg-white/[0.03] transition hover:bg-white/[0.06] hover:border-[var(--color-cyan-bright)]/30"
                 >
                   <button
                     onClick={() => toggleObjection(objection.id)}
@@ -470,7 +470,7 @@ export default function ObjectionLibraryModal({ isOpen, onClose }: ObjectionLibr
                       {objection.objection}
                     </h3>
                     <svg
-                      className={`h-5 w-5 shrink-0 text-[#00d9ff] transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                      className={`h-5 w-5 shrink-0 text-[var(--color-cyan-bright)] transition-transform ${isExpanded ? 'rotate-180' : ''}`}
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -482,7 +482,7 @@ export default function ObjectionLibraryModal({ isOpen, onClose }: ObjectionLibr
                   {isExpanded && (
                     <div className="border-t border-white/10 bg-white/[0.02] p-4 space-y-4">
                       <div>
-                        <p className="text-xs font-semibold text-[#00d9ff] uppercase tracking-wide mb-2">
+                        <p className="text-xs font-semibold text-[var(--color-cyan-bright)] uppercase tracking-wide mb-2">
                           1. Empathy & Validation
                         </p>
                         <p className="text-sm text-white/80 leading-relaxed">
@@ -491,7 +491,7 @@ export default function ObjectionLibraryModal({ isOpen, onClose }: ObjectionLibr
                       </div>
 
                       <div>
-                        <p className="text-xs font-semibold text-[#00d9ff] uppercase tracking-wide mb-2">
+                        <p className="text-xs font-semibold text-[var(--color-cyan-bright)] uppercase tracking-wide mb-2">
                           2. Clarifying Question
                         </p>
                         <p className="text-sm text-white/80 leading-relaxed">
@@ -500,7 +500,7 @@ export default function ObjectionLibraryModal({ isOpen, onClose }: ObjectionLibr
                       </div>
 
                       <div>
-                        <p className="text-xs font-semibold text-[#00d9ff] uppercase tracking-wide mb-2">
+                        <p className="text-xs font-semibold text-[var(--color-cyan-bright)] uppercase tracking-wide mb-2">
                           3. Response & Positioning
                         </p>
                         <p className="text-sm text-white/80 leading-relaxed">
@@ -509,7 +509,7 @@ export default function ObjectionLibraryModal({ isOpen, onClose }: ObjectionLibr
                       </div>
 
                       <div>
-                        <p className="text-xs font-semibold text-[#00d9ff] uppercase tracking-wide mb-2">
+                        <p className="text-xs font-semibold text-[var(--color-cyan-bright)] uppercase tracking-wide mb-2">
                           4. Call to Action
                         </p>
                         <p className="text-sm text-white/80 leading-relaxed">
@@ -528,7 +528,7 @@ export default function ObjectionLibraryModal({ isOpen, onClose }: ObjectionLibr
         <div className="border-t border-white/10 bg-white/[0.02] p-4">
           <button
             onClick={onClose}
-            className="w-full rounded-xl bg-gradient-to-r from-[#00d9ff] to-[#00ffea] px-6 py-3 text-sm font-semibold text-[#020817] transition hover:opacity-90"
+            className="w-full rounded-xl bg-gradient-to-r from-[var(--color-cyan-bright)] to-[#00ffea] px-6 py-3 text-sm font-semibold text-[#020817] transition hover:opacity-90"
           >
             Got It
           </button>

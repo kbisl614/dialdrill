@@ -6,6 +6,32 @@
 import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import { pool } from '@/lib/db';
+import { logger } from '@/lib/logger';
+
+interface CallScore {
+  overall_score: string;
+  category_scores: Array<{ category: string; score: number }>;
+}
+
+interface CategoryAverages {
+  overall: number;
+  opening: number;
+  discovery: number;
+  objectionHandling: number;
+  clarity: number;
+  closing: number;
+}
+
+type Trend = 'improving' | 'declining' | 'stable';
+
+interface TrendData {
+  opening: Trend;
+  discovery: Trend;
+  objectionHandling: Trend;
+  clarity: Trend;
+  closing: Trend;
+  overall: Trend;
+}
 
 export async function GET() {
   try {
@@ -269,15 +295,15 @@ async function calculateAndSaveLearningProgress(userInternalId: string) {
       ]
     );
 
-    console.log(`[Learning Progress] Updated progress for user ${userInternalId}`);
+    logger.debug(`[Learning Progress] Updated progress for user ${userInternalId}`);
   } catch (error) {
-    console.error('[Learning Progress] Error calculating progress:', error);
+    logger.error('[Learning Progress] Error calculating progress', error);
   }
 }
 
-function calculateCategoryAverages(calls: any[]) {
-  const categories = ['opening', 'discovery', 'objectionHandling', 'clarity', 'closing'];
-  const averages: any = { overall: 0 };
+function calculateCategoryAverages(calls: CallScore[]): CategoryAverages {
+  const categories = ['opening', 'discovery', 'objectionHandling', 'clarity', 'closing'] as const;
+  const averages: CategoryAverages = { overall: 0, opening: 0, discovery: 0, objectionHandling: 0, clarity: 0, closing: 0 };
 
   // Calculate overall average
   const overallSum = calls.reduce((sum, call) => sum + parseFloat(call.overall_score), 0);
@@ -290,7 +316,7 @@ function calculateCategoryAverages(calls: any[]) {
 
     for (const call of calls) {
       const categoryScores = call.category_scores;
-      const categoryScore = categoryScores.find((c: any) => c.category === category);
+      const categoryScore = categoryScores.find((c) => c.category === category);
 
       if (categoryScore) {
         sum += categoryScore.score;
@@ -304,7 +330,7 @@ function calculateCategoryAverages(calls: any[]) {
   return averages;
 }
 
-function calculateTrends(recent: any, previous: any | null) {
+function calculateTrends(recent: CategoryAverages, previous: CategoryAverages | null): TrendData {
   if (!previous) {
     return {
       opening: 'stable',
@@ -333,7 +359,7 @@ function calculateTrends(recent: any, previous: any | null) {
   };
 }
 
-function determineFocusAreas(averages: any): [string, string] {
+function determineFocusAreas(averages: CategoryAverages): [string, string] {
   const categories = [
     { name: 'opening', score: averages.opening },
     { name: 'discovery', score: averages.discovery },

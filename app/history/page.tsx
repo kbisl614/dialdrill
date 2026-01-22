@@ -171,7 +171,7 @@ export default async function HistoryPage() {
 
         <div className="mb-12 text-center">
           <h1 className="text-4xl font-extrabold text-white sm:text-5xl">Call History</h1>
-          <p className="mt-4 text-lg text-[#94a3b8]">
+          <p className="mt-4 text-lg text-[var(--color-text-secondary)]">
             Review transcripts, durations, and minutes used from your recent practice calls.
           </p>
         </div>

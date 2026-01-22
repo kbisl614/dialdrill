@@ -11,7 +11,7 @@ export default function SkillRadarChart({ categoryScores, maxScore = 10 }: Skill
 
   if (categories.length === 0) {
     return (
-      <div className="flex items-center justify-center h-64 text-[#94a3b8]">
+      <div className="flex items-center justify-center h-64 text-[var(--color-text-secondary)]">
         <p>No data available yet. Complete a call to see your skills!</p>
       </div>
     );
@@ -119,8 +119,8 @@ export default function SkillRadarChart({ categoryScores, maxScore = 10 }: Skill
       <div className="mt-4 flex flex-wrap justify-center gap-3">
         {categories.map((category, index) => (
           <div key={category} className="flex items-center gap-2">
-            <div className="h-3 w-3 rounded-full bg-[#00d9ff]"></div>
-            <span className="text-xs text-[#94a3b8]">
+            <div className="h-3 w-3 rounded-full bg-[var(--color-cyan-bright)]"></div>
+            <span className="text-xs text-[var(--color-text-secondary)]">
               {category}: <span className="text-white font-semibold">{values[index].toFixed(1)}/{maxScore}</span>
             </span>
           </div>

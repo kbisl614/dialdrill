@@ -2,6 +2,7 @@ import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import { pool } from '@/lib/db';
 import CallSummaryClient from '@/components/CallSummaryClient';
+import { logger } from '@/lib/logger';
 
 interface CallSummaryData {
   callLog: {
@@ -109,7 +110,7 @@ async function getCallSummary(callLogId: string, userId: string): Promise<CallSu
       gamification,
     };
   } catch (error) {
-    console.error('Error fetching call summary:', error);
+    logger.apiError('/call-summary/[callLogId]', error, { callLogId, userId });
     return null;
   }
 }

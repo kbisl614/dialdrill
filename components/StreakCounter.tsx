@@ -27,7 +27,7 @@ export default function StreakCounter({ currentStreak, longestStreak }: StreakCo
   };
 
   return (
-    <div className="rounded-2xl border border-[#1e293b]/50 bg-gradient-to-br from-[rgba(255,123,0,0.05)] to-[rgba(15,23,42,0.6)] p-6 relative overflow-hidden">
+    <div className="rounded-2xl border border-[var(--color-border-subtle)]/50 bg-gradient-to-br from-[rgba(255,123,0,0.05)] to-[rgba(15,23,42,0.6)] p-6 relative overflow-hidden">
       {/* Background decoration */}
       <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-orange-500/10 to-transparent rounded-full blur-3xl"></div>
 
@@ -47,20 +47,20 @@ export default function StreakCounter({ currentStreak, longestStreak }: StreakCo
             <span className="text-5xl font-extrabold text-white tabular-nums">
               {currentStreak}
             </span>
-            <span className="text-xl text-[#94a3b8]">
+            <span className="text-xl text-[var(--color-text-secondary)]">
               {currentStreak === 1 ? 'day' : 'days'}
             </span>
           </div>
         </motion.div>
 
-        <p className="text-sm text-[#00d9ff] font-semibold mb-4">
+        <p className="text-sm text-[var(--color-cyan-bright)] font-semibold mb-4">
           {getStreakMessage(currentStreak)}
         </p>
 
         {longestStreak > 0 && (
           <div className="pt-4 border-t border-white/10">
             <div className="flex items-center justify-between text-sm">
-              <span className="text-[#94a3b8]">Longest streak:</span>
+              <span className="text-[var(--color-text-secondary)]">Longest streak:</span>
               <span className="text-white font-bold">
                 {longestStreak} {longestStreak === 1 ? 'day' : 'days'}
               </span>
@@ -82,12 +82,12 @@ export default function StreakCounter({ currentStreak, longestStreak }: StreakCo
               className={`h-2 flex-1 rounded-full ${
                 i < 7 ? 'bg-gradient-to-r from-orange-500 to-red-500' :
                 i < 14 ? 'bg-gradient-to-r from-purple-500 to-pink-500' :
-                'bg-gradient-to-r from-[#00d9ff] to-[#00ffea]'
+                'bg-gradient-to-r from-[var(--color-cyan-bright)] to-[#00ffea]'
               }`}
             ></motion.div>
           ))}
           {currentStreak > 30 && (
-            <div className="text-xs text-[#00d9ff] font-bold">+{currentStreak - 30}</div>
+            <div className="text-xs text-[var(--color-cyan-bright)] font-bold">+{currentStreak - 30}</div>
           )}
         </div>
       </div>

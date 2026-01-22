@@ -7,6 +7,7 @@ import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import { pool } from '@/lib/db';
 import { getVoiceAnalytics } from '@/lib/voice-analytics';
+import { logger } from '@/lib/logger';
 
 export async function GET(request: Request, { params }: { params: Promise<{ callLogId: string }> }) {
   try {
@@ -53,7 +54,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ call
       analytics,
     });
   } catch (error) {
-    console.error('[API /analytics/voice/[callLogId]] ERROR:', error);
+    logger.apiError('/analytics/voice/[callLogId]', error, { route: '/analytics/voice/[callLogId]' });
     return NextResponse.json(
       {
         error: 'Internal server error',

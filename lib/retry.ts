@@ -22,20 +22,28 @@ function sleep(ms: number): Promise<void> {
 /**
  * Check if error is retryable
  */
-function isRetryableError(error: any, retryableErrors?: Array<{ message?: string; code?: string; status?: number }>): boolean {
+interface RetryableError {
+  message?: string;
+  code?: string;
+  status?: number;
+}
+
+function isRetryableError(error: unknown, retryableErrors?: RetryableError[]): boolean {
+  const err = error as RetryableError;
+  
   if (!retryableErrors || retryableErrors.length === 0) {
     // Default: retry on network errors and 5xx status codes
-    if (error?.status >= 500 && error?.status < 600) return true;
-    if (error?.code === 'ECONNRESET' || error?.code === 'ETIMEDOUT' || error?.code === 'ENOTFOUND') return true;
-    if (error?.message?.includes('timeout')) return true;
+    if (err?.status && err.status >= 500 && err.status < 600) return true;
+    if (err?.code === 'ECONNRESET' || err?.code === 'ETIMEDOUT' || err?.code === 'ENOTFOUND') return true;
+    if (err?.message?.includes('timeout')) return true;
     return false;
   }
 
   // Check against custom retryable errors
   return retryableErrors.some(retryable => {
-    if (retryable.message && error?.message?.includes(retryable.message)) return true;
-    if (retryable.code && error?.code === retryable.code) return true;
-    if (retryable.status && error?.status === retryable.status) return true;
+    if (retryable.message && err?.message?.includes(retryable.message)) return true;
+    if (retryable.code && err?.code === retryable.code) return true;
+    if (retryable.status && err?.status === retryable.status) return true;
     return false;
   });
 }
@@ -52,7 +60,7 @@ export async function retryWithBackoff<T>(
     backoffMultiplier: 2,
   }
 ): Promise<T> {
-  let lastError: any;
+  let lastError: unknown;
   let delay = options.initialDelay;
 
   for (let attempt = 1; attempt <= options.maxAttempts; attempt++) {

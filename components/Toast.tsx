@@ -22,7 +22,7 @@ export default function Toast({ message, type = 'info', show, onClose, duration 
   const colors = {
     success: 'from-green-500 to-emerald-500',
     error: 'from-red-500 to-rose-500',
-    info: 'from-[#00d9ff] to-[#00ffea]'
+    info: 'from-[var(--color-cyan-bright)] to-[#00ffea]'
   };
 
   const icons = {

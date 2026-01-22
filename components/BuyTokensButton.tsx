@@ -140,7 +140,7 @@ export default function BuyTokensButton() {
     return (
       <button
         onClick={() => router.push('/plans')}
-        className="fixed right-6 top-6 z-50 rounded-full bg-gradient-to-r from-[#2dd4e6] to-[#9333ea] px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-[#2dd4e6]/30 transition hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/50"
+        className="fixed right-6 top-6 z-50 rounded-full bg-gradient-to-r from-[#2dd4e6] to-[var(--color-purple-dark)] px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-[#2dd4e6]/30 transition hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/50"
       >
         Add Minutes
       </button>
@@ -152,7 +152,7 @@ export default function BuyTokensButton() {
       <button
         onClick={handleButtonClick}
         disabled={entitlementsLoading || checkoutLoading !== null}
-        className="fixed right-6 top-6 z-50 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#2dd4e6] to-[#9333ea] px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-[#2dd4e6]/30 transition hover:scale-105 disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/50"
+        className="fixed right-6 top-6 z-50 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#2dd4e6] to-[var(--color-purple-dark)] px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-[#2dd4e6]/30 transition hover:scale-105 disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/50"
       >
         {entitlementsLoading ? 'Loading...' : 'Add Minutes'}
       </button>
@@ -173,7 +173,7 @@ export default function BuyTokensButton() {
 
             {modalState === 'trialOptions' && (
               <>
-                <p className="text-sm text-[#9ca3af]">
+                <p className="text-sm text-[var(--color-text-secondary)]">
                   Need more practice time? Purchase another $5 trial (limit 2) or upgrade to Pro for unlimited access to all personalities and longer calls.
                 </p>
                 <div className="mt-6 space-y-3">
@@ -187,7 +187,7 @@ export default function BuyTokensButton() {
                   <button
                     onClick={() => handleCheckout('paid')}
                     disabled={checkoutLoading !== null}
-                    className="w-full rounded-xl bg-gradient-to-r from-[#a855f7] to-[#9333ea] px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="w-full rounded-xl bg-gradient-to-r from-[var(--color-purple)] to-[var(--color-purple-dark)] px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {checkoutLoading === 'paid' ? 'Redirecting…' : 'Upgrade to Pro ($11.99 / mo)'}
                   </button>
@@ -197,13 +197,13 @@ export default function BuyTokensButton() {
 
             {modalState === 'upgradeOnly' && (
               <>
-                <p className="text-sm text-[#9ca3af]">
+                <p className="text-sm text-[var(--color-text-secondary)]">
                   You have already used both available $5 trials. Upgrade to the Pro plan to unlock 20 minutes each month and all eight personalities.
                 </p>
                 <button
                   onClick={() => handleCheckout('paid')}
                   disabled={checkoutLoading !== null}
-                  className="mt-6 w-full rounded-xl bg-gradient-to-r from-[#a855f7] to-[#9333ea] px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="mt-6 w-full rounded-xl bg-gradient-to-r from-[var(--color-purple)] to-[var(--color-purple-dark)] px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {checkoutLoading === 'paid' ? 'Redirecting…' : 'Upgrade to Pro'}
                 </button>
@@ -211,7 +211,7 @@ export default function BuyTokensButton() {
             )}
 
             {modalState === 'paidInfo' && (
-              <p className="text-sm text-[#9ca3af]">
+              <p className="text-sm text-[var(--color-text-secondary)]">
                 You&apos;re already on the highest tier. Additional calls are billed automatically at $1 per minute when you run out of included minutes.
               </p>
             )}

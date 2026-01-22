@@ -1,6 +1,7 @@
 import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import { pool } from '@/lib/db';
+import { logger } from '@/lib/logger';
 
 export async function POST(request: Request) {
   try {
@@ -34,13 +35,13 @@ export async function POST(request: Request) {
       );
     } catch (dbError) {
       // Log but don't fail if columns don't exist yet
-      console.warn('Could not save onboarding data to database:', dbError);
-      console.log('Onboarding data would have been:', { role, experience, mainStruggles, howFound, goals });
+      logger.warn('Could not save onboarding data to database', { error: dbError });
+      logger.debug('Onboarding data would have been', { role, experience, mainStruggles, howFound, goals });
     }
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error in onboarding endpoint:', error);
+    logger.apiError('/user/onboarding', error, { route: '/user/onboarding' });
     return NextResponse.json(
       { error: 'Failed to save onboarding data' },
       { status: 500 }

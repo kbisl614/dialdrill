@@ -61,14 +61,14 @@ export default function PersonalitySelector({
         onClick={() => onModeChange('random')}
         className={`group relative overflow-hidden rounded-2xl border p-6 text-left transition-all duration-300 ${
           selectionMode === 'random'
-            ? 'border-[#00d9ff]/50 bg-gradient-to-br from-[#00d9ff]/10 to-[#00ffea]/5 shadow-[0_0_30px_rgba(0,217,255,0.3)]'
+            ? 'border-[var(--color-cyan-bright)]/50 bg-gradient-to-br from-[var(--color-cyan-bright)]/10 to-[#00ffea]/5 shadow-[0_0_30px_rgba(0,217,255,0.3)]'
             : 'border-white/10 bg-white/[0.03] hover:border-white/20 hover:bg-white/[0.05]'
         }`}
       >
         <div className="absolute top-4 right-4">
           {selectionMode === 'random' && (
-            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[#00d9ff] shadow-[0_0_15px_rgba(0,217,255,0.6)]">
-              <svg className="w-3.5 h-3.5 text-[#080d1a]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[var(--color-cyan-bright)] shadow-[0_0_15px_rgba(0,217,255,0.6)]">
+              <svg className="w-3.5 h-3.5 text-[var(--color-dark-bg)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
               </svg>
             </div>
@@ -77,17 +77,17 @@ export default function PersonalitySelector({
         <div className="flex items-center gap-4 mb-4">
           <div className={`flex h-14 w-14 items-center justify-center rounded-2xl text-3xl transition-transform ${
             selectionMode === 'random'
-              ? 'bg-[#00d9ff]/20 scale-110'
+              ? 'bg-[var(--color-cyan-bright)]/20 scale-110'
               : 'bg-white/10 group-hover:scale-105'
           }`}>
             🎲
           </div>
           <div>
             <h3 className="text-xl font-bold text-white mb-1">Surprise Me</h3>
-            <p className="text-xs font-semibold text-[#00d9ff]">Recommended</p>
+            <p className="text-xs font-semibold text-[var(--color-cyan-bright)]">Recommended</p>
           </div>
         </div>
-        <p className="text-sm text-[#94a3b8] leading-relaxed">
+        <p className="text-sm text-[var(--color-text-secondary)] leading-relaxed">
           Random selection from {unlockedPersonalities.length} personalities. Best for realistic training.
         </p>
       </button>
@@ -97,14 +97,14 @@ export default function PersonalitySelector({
         onClick={() => onModeChange('select')}
         className={`group relative overflow-hidden rounded-2xl border p-6 text-left transition-all duration-300 ${
           selectionMode === 'select'
-            ? 'border-[#00d9ff]/50 bg-gradient-to-br from-[#00d9ff]/10 to-[#00ffea]/5 shadow-[0_0_30px_rgba(0,217,255,0.3)]'
+            ? 'border-[var(--color-cyan-bright)]/50 bg-gradient-to-br from-[var(--color-cyan-bright)]/10 to-[#00ffea]/5 shadow-[0_0_30px_rgba(0,217,255,0.3)]'
             : 'border-white/10 bg-white/[0.03] hover:border-white/20 hover:bg-white/[0.05]'
         }`}
       >
         <div className="absolute top-4 right-4">
           {selectionMode === 'select' && (
-            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[#00d9ff] shadow-[0_0_15px_rgba(0,217,255,0.6)]">
-              <svg className="w-3.5 h-3.5 text-[#080d1a]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[var(--color-cyan-bright)] shadow-[0_0_15px_rgba(0,217,255,0.6)]">
+              <svg className="w-3.5 h-3.5 text-[var(--color-dark-bg)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
               </svg>
             </div>
@@ -113,7 +113,7 @@ export default function PersonalitySelector({
         <div className="flex items-center gap-4 mb-4">
           <div className={`flex h-14 w-14 items-center justify-center rounded-2xl transition-transform ${
             selectionMode === 'select'
-              ? 'bg-[#00d9ff]/20 scale-110'
+              ? 'bg-[var(--color-cyan-bright)]/20 scale-110'
               : 'bg-white/10 group-hover:scale-105'
           }`}>
             <svg className="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -123,10 +123,10 @@ export default function PersonalitySelector({
           </div>
           <div>
             <h3 className="text-xl font-bold text-white mb-1">Pick Specific</h3>
-            <p className="text-xs font-semibold text-[#94a3b8]">Target practice</p>
+            <p className="text-xs font-semibold text-[var(--color-text-secondary)]">Target practice</p>
           </div>
         </div>
-        <p className="text-sm text-[#94a3b8] leading-relaxed">
+        <p className="text-sm text-[var(--color-text-secondary)] leading-relaxed">
           Choose exactly who you want to practice with. Great for focused training.
         </p>
       </button>
@@ -145,9 +145,9 @@ export default function PersonalitySelector({
                 onClick={() => (isUnlocked ? onSelectPersonality(personality.id) : onRequestUpgrade())}
                 className={`group relative flex flex-col items-center rounded-xl border p-4 text-center transition-all ${
                   isUnlocked
-                    ? 'border-white/10 bg-white/[0.03] hover:border-[#00d9ff]/50 hover:bg-white/[0.06] hover:scale-105'
+                    ? 'border-white/10 bg-white/[0.03] hover:border-[var(--color-cyan-bright)]/50 hover:bg-white/[0.06] hover:scale-105'
                     : 'border-white/5 bg-black/20 opacity-50 hover:opacity-70'
-                } ${isSelected ? 'ring-2 ring-[#00d9ff] shadow-[0_0_20px_rgba(0,217,255,0.4)] scale-105' : ''}`}
+                } ${isSelected ? 'ring-2 ring-[var(--color-cyan-bright)] shadow-[0_0_20px_rgba(0,217,255,0.4)] scale-105' : ''}`}
               >
                 {!isUnlocked && (
                   <div className="absolute inset-0 flex items-center justify-center bg-black/60 rounded-xl backdrop-blur-sm z-10">
@@ -164,13 +164,13 @@ export default function PersonalitySelector({
                 </div>
                 <h4 className="text-sm font-bold text-white leading-tight">{personality.name}</h4>
                 {personality.isBoss && (
-                  <span className="mt-2 inline-block rounded-full bg-[#a855f7]/20 px-2 py-0.5 text-[9px] font-bold text-[#d8b4fe]">
+                  <span className="mt-2 inline-block rounded-full bg-[var(--color-purple)]/20 px-2 py-0.5 text-[9px] font-bold text-[#d8b4fe]">
                     BOSS
                   </span>
                 )}
                 {isSelected && (
-                  <div className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-[#00d9ff] shadow-[0_0_15px_rgba(0,217,255,0.6)] z-20">
-                    <svg className="w-3 h-3 text-[#080d1a]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <div className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-[var(--color-cyan-bright)] shadow-[0_0_15px_rgba(0,217,255,0.6)] z-20">
+                    <svg className="w-3 h-3 text-[var(--color-dark-bg)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                     </svg>
                   </div>

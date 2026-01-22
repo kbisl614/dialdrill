@@ -1,6 +1,7 @@
 import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import { pool } from '@/lib/db';
+import { logger } from '@/lib/logger';
 
 // GET /api/leaderboard - Get top users by power level
 export async function GET(request: Request) {
@@ -98,7 +99,7 @@ export async function GET(request: Request) {
       userContext: contextResult.rows,
     });
   } catch (error) {
-    console.error('[API /leaderboard] ERROR:', error);
+    logger.apiError('/leaderboard', error, { route: '/leaderboard' });
     return NextResponse.json(
       {
         error: 'Internal server error',

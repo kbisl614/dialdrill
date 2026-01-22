@@ -41,13 +41,13 @@ export default function AchievementBadges({ achievements }: AchievementBadgesPro
           transition={{ delay: index * 0.05 }}
           className={`relative rounded-xl border p-4 transition-all ${
             achievement.unlocked
-              ? 'border-[#00d9ff]/50 bg-gradient-to-br from-[#00d9ff]/10 to-transparent shadow-[0_0_20px_rgba(0,217,255,0.3)]'
+              ? 'border-[var(--color-cyan-bright)]/50 bg-gradient-to-br from-[var(--color-cyan-bright)]/10 to-transparent shadow-[0_0_20px_rgba(0,217,255,0.3)]'
               : 'border-white/10 bg-white/[0.02] opacity-60'
           }`}
         >
           {achievement.unlocked && (
-            <div className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-gradient-to-r from-[#00d9ff] to-[#00ffea] flex items-center justify-center">
-              <svg className="h-4 w-4 text-[#080d1a]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-gradient-to-r from-[var(--color-cyan-bright)] to-[#00ffea] flex items-center justify-center">
+              <svg className="h-4 w-4 text-[var(--color-dark-bg)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
               </svg>
             </div>
@@ -57,10 +57,10 @@ export default function AchievementBadges({ achievements }: AchievementBadgesPro
             <div className={`text-4xl mb-2 ${achievement.unlocked ? '' : 'grayscale opacity-50'}`}>
               {getIconEmoji(achievement.icon)}
             </div>
-            <h4 className={`text-sm font-bold mb-1 ${achievement.unlocked ? 'text-white' : 'text-[#64748b]'}`}>
+            <h4 className={`text-sm font-bold mb-1 ${achievement.unlocked ? 'text-white' : 'text-[var(--color-text-muted)]'}`}>
               {achievement.name}
             </h4>
-            <p className="text-xs text-[#94a3b8] leading-relaxed">
+            <p className="text-xs text-[var(--color-text-secondary)] leading-relaxed">
               {achievement.description}
             </p>
 
@@ -68,11 +68,11 @@ export default function AchievementBadges({ achievements }: AchievementBadgesPro
               <div className="mt-2">
                 <div className="h-1.5 rounded-full bg-white/10">
                   <div
-                    className="h-full rounded-full bg-gradient-to-r from-[#00d9ff] to-[#00ffea]"
+                    className="h-full rounded-full bg-gradient-to-r from-[var(--color-cyan-bright)] to-[#00ffea]"
                     style={{ width: `${(achievement.progress / achievement.maxProgress) * 100}%` }}
                   ></div>
                 </div>
-                <p className="text-xs text-[#64748b] mt-1">
+                <p className="text-xs text-[var(--color-text-muted)] mt-1">
                   {achievement.progress}/{achievement.maxProgress}
                 </p>
               </div>

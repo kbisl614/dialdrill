@@ -31,7 +31,7 @@ export default function InteractiveButton({
   };
 
   const variantStyles = {
-    primary: 'bg-gradient-to-r from-[#00d9ff] to-[#00ffea] text-[#080d1a] shadow-[0_0_40px_rgba(0,217,255,0.6)] hover:shadow-[0_0_60px_rgba(0,255,234,0.8)]',
+    primary: 'bg-gradient-to-r from-[var(--color-cyan-bright)] to-[#00ffea] text-[var(--color-dark-bg)] shadow-[0_0_40px_rgba(0,217,255,0.6)] hover:shadow-[0_0_60px_rgba(0,255,234,0.8)]',
     secondary: 'border border-white/20 bg-white/5 text-white hover:bg-white/10',
     ghost: 'text-white hover:bg-white/5'
   };

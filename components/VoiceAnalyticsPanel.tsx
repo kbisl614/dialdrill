@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Activity, Clock, MessageCircle, Zap, TrendingUp, Volume2 } from 'lucide-react';
+import { Activity, Clock, MessageCircle, TrendingUp, Volume2 } from 'lucide-react';
+import clientLogger from '@/lib/client-logger';
 
 interface VoiceAnalytics {
   avgSpeakingPace: number;
@@ -40,7 +41,7 @@ export default function VoiceAnalyticsPanel({ callLogId }: VoiceAnalyticsPanelPr
           setAnalytics(data.analytics);
         }
       } catch (err) {
-        console.error('Error fetching voice analytics:', err);
+        clientLogger.error('Error fetching voice analytics', err);
       } finally {
         setLoading(false);
       }
@@ -67,18 +68,6 @@ export default function VoiceAnalyticsPanel({ callLogId }: VoiceAnalyticsPanelPr
     return null;
   }
 
-  const getEnergyColor = (level: string) => {
-    switch (level) {
-      case 'high':
-        return 'text-green-600 bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-800';
-      case 'medium':
-        return 'text-blue-600 bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800';
-      case 'low':
-        return 'text-yellow-600 bg-yellow-50 dark:bg-yellow-950/20 border-yellow-200 dark:border-yellow-800';
-      default:
-        return 'text-gray-600 bg-gray-50 dark:bg-gray-950/20 border-gray-200 dark:border-gray-800';
-    }
-  };
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
