@@ -24,9 +24,9 @@ interface PersonalitySelectorProps {
 
 const personalityIcons: Record<string, string> = {
   Josh: '🛠️',
-  zenia: '🌸',
+  Zenia: '🌸',
   Marcus: '🏋️',
-  'The wolf': '🐺',
+  'The Wolf': '🐺',
   'The Shark': '🦈',
   'The Titan': '🏛️',
   Matrix: '🔴',
