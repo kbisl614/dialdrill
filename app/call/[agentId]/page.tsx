@@ -88,8 +88,8 @@ export default function CallPage() {
   // PROTECTION: Handle page unload (user closes tab/refreshes)
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      // Only warn if call is active and not completed
-      if (callLogId && status !== 'completed' && !transcriptSavedRef.current && status !== 'idle') {
+      // Only warn if call is active and transcript not saved
+      if (callLogId && !transcriptSavedRef.current && (status === 'connecting' || status === 'connected')) {
         // Mark as abandoned using sendBeacon (reliable even during page close)
         const abandonData = JSON.stringify({ callLogId });
         if (navigator.sendBeacon) {
@@ -311,8 +311,8 @@ export default function CallPage() {
       }
 
       // PROTECTION: Mark call as abandoned if user navigates away/closes tab
-      // Only if call hasn't been completed (no transcript saved)
-      if (callLogId && status !== 'completed' && !transcriptSavedRef.current) {
+      // Only if call hasn't been saved (no transcript saved)
+      if (callLogId && !transcriptSavedRef.current && (status === 'connecting' || status === 'connected')) {
         // Use sendBeacon for reliable delivery even if page is closing
         const abandonData = JSON.stringify({ callLogId });
         if (navigator.sendBeacon) {
