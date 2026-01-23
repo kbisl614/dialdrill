@@ -11,6 +11,26 @@ interface LogContext {
   [key: string]: unknown;
 }
 
+function serializeError(error: Error | unknown) {
+  if (error instanceof Response) {
+    return {
+      name: 'Response',
+      message: `${error.status} ${error.statusText}`,
+      status: error.status,
+      statusText: error.statusText,
+    };
+  }
+  if (error instanceof Error) {
+    return {
+      name: error.name,
+      message: error.message,
+      stack: error.stack,
+      cause: 'cause' in error ? error.cause : undefined,
+    };
+  }
+  return { message: String(error) };
+}
+
 class ClientLogger {
   private isDevelopment = typeof window !== 'undefined' && 
     (window.location.hostname === 'localhost' || 
@@ -41,22 +61,35 @@ class ClientLogger {
 
   /**
    * Error logs - always logged, includes stack trace in development
+   *
+   * @param message - Human-readable error description
+   * @param error - The caught error (Error, Response, or unknown)
+   * @param context - Additional debugging context (NEVER pass empty {})
    */
   error(message: string, error?: Error | unknown, context?: LogContext): void {
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    const stack = error instanceof Error ? error.stack : undefined;
+    const errorInfo = serializeError(error);
 
-    if (this.isDevelopment && stack) {
-      console.error(`[ERROR] ${message}`, {
-        ...context,
-        error: errorMessage,
-        stack,
-      });
-    } else {
-      console.error(`[ERROR] ${message}`, {
-        ...context,
-        error: errorMessage,
-      });
+    // Build context payload - ensure we NEVER log empty {}
+    const contextPayload: LogContext = {
+      timestamp: new Date().toISOString(),
+      error: errorInfo,
+    };
+
+    // Merge caller-provided context, filtering out undefined/null values
+    if (context && typeof context === 'object') {
+      for (const [key, value] of Object.entries(context)) {
+        if (value !== undefined && value !== null) {
+          contextPayload[key] = value;
+        }
+      }
+    }
+
+    // Always include at least error info - never log empty {}
+    console.error(`[ERROR] ${message}`, contextPayload);
+
+    // In development, also log the raw error for stack trace inspection
+    if (this.isDevelopment && error instanceof Error) {
+      console.error('[ERROR] Stack trace:', error);
     }
   }
 
@@ -87,4 +120,3 @@ export const clientLogger = new ClientLogger();
 
 // Convenience exports
 export default clientLogger;
-

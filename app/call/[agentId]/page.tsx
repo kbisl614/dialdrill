@@ -85,6 +85,24 @@ export default function CallPage() {
     }
   }, [isLoaded, user]);
 
+  // PROTECTION: Handle page unload (user closes tab/refreshes)
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      // Only warn if call is active and not completed
+      if (callLogId && status !== 'completed' && !transcriptSavedRef.current && status !== 'idle') {
+        // Mark as abandoned using sendBeacon (reliable even during page close)
+        const abandonData = JSON.stringify({ callLogId });
+        if (navigator.sendBeacon) {
+          navigator.sendBeacon('/api/calls/abandon', abandonData);
+        }
+        clientLogger.debug('[Call] Marked call as abandoned on beforeunload', { callLogId });
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [callLogId, status, transcriptSavedRef]);
+
   useEffect(() => {
     // Prevent double initialization in React StrictMode
     if (!isLoaded || !user || isInitializedRef.current) return;
@@ -110,10 +128,15 @@ export default function CallPage() {
         const apiCallStart = performance.now();
         clientLogger.perf('Fetching signed URL', apiCallStart - perfStart);
 
+        // PROTECTION: Pass callLogId to validate call session
+        if (!callLogId) {
+          throw new Error('Call session ID is required. Please start a new call from the dashboard.');
+        }
+
         const response = await fetch('/api/calls/signed-url', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ agentId }),
+          body: JSON.stringify({ agentId, callLogId }),
         });
 
         const apiCallEnd = performance.now();
@@ -285,6 +308,27 @@ export default function CallPage() {
         } catch (e) {
           clientLogger.error('[Call] Error during cleanup', e);
         }
+      }
+
+      // PROTECTION: Mark call as abandoned if user navigates away/closes tab
+      // Only if call hasn't been completed (no transcript saved)
+      if (callLogId && status !== 'completed' && !transcriptSavedRef.current) {
+        // Use sendBeacon for reliable delivery even if page is closing
+        const abandonData = JSON.stringify({ callLogId });
+        if (navigator.sendBeacon) {
+          navigator.sendBeacon('/api/calls/abandon', abandonData);
+        } else {
+          // Fallback: fire and forget fetch
+          fetch('/api/calls/abandon', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: abandonData,
+            keepalive: true,
+          }).catch(() => {
+            // Ignore errors - best effort
+          });
+        }
+        clientLogger.debug('[Call] Marked call as abandoned on unmount', { callLogId });
       }
     };
   }, [isLoaded, user, agentId, micPermissionGranted]);

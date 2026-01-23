@@ -5,7 +5,8 @@ import { getStripeClient } from '@/lib/stripe';
 import { logger } from '@/lib/logger';
 
 export async function POST(request: Request) {
-  logger.apiInfo('/stripe/webhook', 'Received webhook');
+  const requestId = `webhook-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  logger.apiInfo('/stripe/webhook', 'Received webhook', { requestId });
 
   try {
     const stripe = getStripeClient();
@@ -15,7 +16,7 @@ export async function POST(request: Request) {
     const signature = request.headers.get('stripe-signature');
 
     if (!signature) {
-      logger.apiError('/stripe/webhook', new Error('No signature found'), { route: '/stripe/webhook' });
+      logger.apiError('/stripe/webhook', new Error('No signature found'), { route: '/stripe/webhook', requestId });
       return NextResponse.json({ error: 'No signature' }, { status: 400 });
     }
 
@@ -26,16 +27,43 @@ export async function POST(request: Request) {
       try {
         event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
       } catch (err) {
-        logger.apiError('/stripe/webhook', err, { route: '/stripe/webhook', reason: 'Signature verification failed' });
+        logger.apiError('/stripe/webhook', err, { route: '/stripe/webhook', reason: 'Signature verification failed', requestId });
         return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
       }
     } else {
       // Development mode: parse without verification
-      logger.warn('[Stripe Webhook] No webhook secret - skipping signature verification');
+      logger.warn('[Stripe Webhook] No webhook secret - skipping signature verification', { requestId });
       event = JSON.parse(body);
     }
 
-    logger.apiInfo('/stripe/webhook', 'Event received', { eventType: event.type });
+    // IDEMPOTENCY: Check if we've already processed this event
+    const eventId = event.id;
+    const dbPool = pool();
+    const existingEvent = await dbPool.query(
+      `SELECT id FROM processed_webhook_events WHERE event_id = $1`,
+      [eventId]
+    );
+
+    if (existingEvent.rows.length > 0) {
+      logger.apiInfo('/stripe/webhook', 'Event already processed, skipping', { eventId, eventType: event.type, requestId });
+      return NextResponse.json({ received: true, duplicate: true });
+    }
+
+    // Store event ID before processing (prevents race conditions)
+    try {
+      await dbPool.query(
+        `INSERT INTO processed_webhook_events (event_id, event_type, processed_at)
+         VALUES ($1, $2, NOW())
+         ON CONFLICT (event_id) DO NOTHING`,
+        [eventId, event.type]
+      );
+    } catch (err) {
+      // If insert fails due to race condition, another instance already processed it
+      logger.apiInfo('/stripe/webhook', 'Event already processed (race condition)', { eventId, requestId });
+      return NextResponse.json({ received: true, duplicate: true });
+    }
+
+    logger.apiInfo('/stripe/webhook', 'Event received', { eventType: event.type, eventId, requestId });
 
     // Handle different event types
     switch (event.type) {
@@ -64,12 +92,12 @@ export async function POST(request: Request) {
       }
 
       default:
-        logger.apiInfo('/stripe/webhook', 'Unhandled event type', { eventType: event.type });
+        logger.apiInfo('/stripe/webhook', 'Unhandled event type', { eventType: event.type, requestId });
     }
 
     return NextResponse.json({ received: true });
   } catch (error) {
-    logger.apiError('/stripe/webhook', error, { route: '/stripe/webhook' });
+    logger.apiError('/stripe/webhook', error, { route: '/stripe/webhook', requestId });
     return NextResponse.json(
       {
         error: 'Webhook handler failed',

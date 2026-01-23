@@ -2,11 +2,12 @@
 
 import { useAuth, useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import PersonalitySelector, { type Personality } from '@/components/PersonalitySelector';
 import QuickPracticeModal from '@/components/QuickPracticeModal';
 import ObjectionLibraryModal from '@/components/ObjectionLibraryModal';
 import ProfileDropdownModal from '@/components/ProfileDropdownModal';
+import { resolveRingColor } from '@/lib/profile-ring';
 import OnboardingModal from '@/components/OnboardingModal';
 import Sidebar from '@/components/Sidebar';
 import Breadcrumb from '@/components/Breadcrumb';
@@ -38,6 +39,7 @@ interface UserProfileData {
   avatar: string;
   email: string;
   memberSince: string;
+  profileRingColor?: string | null;
   currentPower: number;
   currentBelt: {
     tier: string;
@@ -103,6 +105,19 @@ function DashboardContent() {
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [profileData, setProfileData] = useState<UserProfileData | null>(null);
   const [profileLoading, setProfileLoading] = useState(false);
+  const [profileStatus, setProfileStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [profileError, setProfileError] = useState<string | null>(null);
+  const profileFetchInFlight = useRef<Promise<void> | null>(null);
+  const profileAbortRef = useRef<AbortController | null>(null);
+  const profileRequestSeq = useRef(0);
+  const profileMountedRef = useRef(true);
+
+  useEffect(() => {
+    return () => {
+      profileMountedRef.current = false;
+      profileAbortRef.current?.abort();
+    };
+  }, []);
   const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0);
   const [showOnboarding, setShowOnboarding] = useState(false);
 
@@ -194,10 +209,14 @@ function DashboardContent() {
 
   // Fetch profile data when modal opens
   useEffect(() => {
-    if (showProfileDropdown && !profileData) {
-      fetchProfileData();
+    if (showProfileDropdown && profileStatus === 'idle') {
+      fetchProfileData({ reason: 'open' });
     }
-  }, [showProfileDropdown, profileData]);
+    if (!showProfileDropdown && profileStatus === 'error') {
+      setProfileStatus('idle');
+      setProfileError(null);
+    }
+  }, [showProfileDropdown, profileStatus]);
 
   // Fetch unread notifications count on mount and periodically
   useEffect(() => {
@@ -215,21 +234,101 @@ function DashboardContent() {
     }
   }, [isLoaded, isSignedIn, entitlements]);
 
-  async function fetchProfileData() {
-    setProfileLoading(true);
-    try {
-      const response = await fetch('/api/user/profile');
-      if (response.ok) {
-        const data = await response.json();
-        setProfileData(data);
-      } else {
-        const errorData = await response.json();
-        clientLogger.error('Failed to fetch profile', undefined, { status: response.status, errorData });
+  async function fetchProfileData({ reason, force = false }: { reason: string; force?: boolean }) {
+    if (profileFetchInFlight.current) {
+      return profileFetchInFlight.current;
+    }
+    if (!force && (profileStatus === 'loading' || profileStatus === 'success' || profileStatus === 'error')) {
+      return;
+    }
+
+    const requestId = `profile-${Date.now()}-${profileRequestSeq.current++}`;
+    const maxRetries = 2;
+    const timeoutMs = 8000;
+
+    const run = (async () => {
+      if (!profileMountedRef.current) return;
+      setProfileLoading(true);
+      setProfileStatus('loading');
+      setProfileError(null);
+      clientLogger.info('[Profile] Fetch start', { requestId, reason });
+
+      for (let attempt = 0; attempt <= maxRetries; attempt += 1) {
+        profileAbortRef.current?.abort();
+        const controller = new AbortController();
+        profileAbortRef.current = controller;
+        const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
+        try {
+          const response = await fetch('/api/user/profile', {
+            signal: controller.signal,
+            headers: { 'X-Correlation-Id': requestId },
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            if (!profileMountedRef.current) return;
+            setProfileData(data);
+            setProfileStatus('success');
+            setProfileLoading(false);
+            clientLogger.info('[Profile] Fetch success', { requestId, attempt });
+            return;
+          }
+
+          let errorData: unknown = null;
+          try {
+            errorData = await response.json();
+          } catch {
+            errorData = null;
+          }
+
+          const status = response.status;
+          const isRetryable = status >= 500 || status === 408 || status === 429;
+          const message =
+            status === 401 || status === 403
+              ? 'You are not authorized. Please sign in again.'
+              : status === 404
+                ? 'Profile not found.'
+                : 'We couldn’t load your profile. Please try again.';
+
+          if (!isRetryable || attempt === maxRetries) {
+            clientLogger.error('[Profile] Fetch failed', undefined, { requestId, status, attempt, errorData });
+          } else {
+            clientLogger.warn('[Profile] Fetch retrying', { requestId, status, attempt });
+          }
+
+          if (!isRetryable || attempt === maxRetries) {
+            if (!profileMountedRef.current) return;
+            setProfileStatus('error');
+            setProfileError(message);
+            setProfileLoading(false);
+            return;
+          }
+        } catch (error) {
+          const isAbort = error instanceof DOMException && error.name === 'AbortError';
+          const isLast = attempt === maxRetries;
+          clientLogger.warn('[Profile] Fetch error', { requestId, attempt, isAbort });
+
+          if (isLast) {
+            if (!profileMountedRef.current) return;
+            setProfileStatus('error');
+            setProfileError(isAbort ? 'Request timed out. Please try again.' : 'Network error. Please try again.');
+            setProfileLoading(false);
+            return;
+          }
+        } finally {
+          clearTimeout(timeout);
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, 300 * Math.pow(2, attempt)));
       }
-    } catch (error) {
-      clientLogger.error('Error fetching profile', error);
+    })();
+
+    profileFetchInFlight.current = run;
+    try {
+      await run;
     } finally {
-      setProfileLoading(false);
+      profileFetchInFlight.current = null;
     }
   }
 
@@ -430,18 +529,34 @@ function DashboardContent() {
           <Breadcrumb items={[{ label: 'Dashboard' }]} />
 
           {/* Profile Avatar Button */}
+          {(() => {
+            const ringColor = resolveRingColor(
+              profileData?.profileRingColor ?? null,
+              user?.id || user?.username || user?.firstName || 'user'
+            );
+            return (
           <button
             onClick={() => {
               setShowProfileDropdown(true);
               // Refresh notifications count when opening profile
               fetchUnreadNotificationsCount();
             }}
-            className="relative h-10 w-10 rounded-full bg-gradient-to-br from-[var(--color-cyan-bright)] to-[var(--color-purple-magenta)] p-0.5 transition hover:scale-105"
+            className="relative h-10 w-10 transition hover:scale-105"
+            style={
+              {
+                ['--ring-base' as never]: ringColor.base,
+                ['--ring-glow' as never]: ringColor.glow,
+                ['--ring-shine' as never]: ringColor.shine,
+                ['--ring-shadow' as never]: ringColor.shadow,
+              } as Record<string, string>
+            }
           >
-            <div className="h-full w-full rounded-full bg-[var(--color-card-bg-dark)] flex items-center justify-center">
-              <span className="text-sm font-bold text-white">
-                {user?.firstName?.charAt(0) || user?.username?.charAt(0) || 'U'}
-              </span>
+            <div className="electric-ring h-full w-full">
+              <div className="electric-ring-inner h-full w-full flex items-center justify-center">
+                <span className="text-sm font-bold text-white">
+                  {user?.firstName?.charAt(0) || user?.username?.charAt(0) || 'U'}
+                </span>
+              </div>
             </div>
             {/* Notification badge - show when there are unread notifications */}
             {unreadNotificationsCount > 0 && (
@@ -456,6 +571,8 @@ function DashboardContent() {
               </div>
             )}
           </button>
+            );
+          })()}
         </div>
 
         {/* Welcome Section */}
@@ -675,22 +792,29 @@ function DashboardContent() {
           </div>
         </div>
 
-        {/* Quick Stats - Hidden until user has call history */}
-        {/* TODO: Unhide this section and populate with real data from call history */}
-        {false && (
+        {/* Quick Stats - Show when user has call history */}
+        {profileData && profileData.statistics.totalCalls > 0 && (
           <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="rounded-2xl border border-[var(--color-border-subtle)]/50 bg-white/[0.02] p-6 backdrop-blur-xl text-center">
+            <Card variant="default" padding="md" className="text-center">
               <p className="text-sm font-medium text-[var(--color-text-secondary)] mb-2">Total Calls</p>
-              <p className="text-3xl font-extrabold text-white">0</p>
-            </div>
-            <div className="rounded-2xl border border-[var(--color-border-subtle)]/50 bg-white/[0.02] p-6 backdrop-blur-xl text-center">
+              <p className="text-3xl font-extrabold text-white">{profileData.statistics.totalCalls}</p>
+            </Card>
+            <Card variant="default" padding="md" className="text-center">
               <p className="text-sm font-medium text-[var(--color-text-secondary)] mb-2">Avg. Score</p>
-              <p className="text-3xl font-extrabold text-white">—</p>
-            </div>
-            <div className="rounded-2xl border border-[var(--color-border-subtle)]/50 bg-white/[0.02] p-6 backdrop-blur-xl text-center">
+              <p className="text-3xl font-extrabold text-white">
+                {profileData.statistics.averageScore > 0 
+                  ? Math.round(profileData.statistics.averageScore) 
+                  : '—'}
+              </p>
+            </Card>
+            <Card variant="default" padding="md" className="text-center">
               <p className="text-sm font-medium text-[var(--color-text-secondary)] mb-2">Success Rate</p>
-              <p className="text-3xl font-extrabold text-white">—</p>
-            </div>
+              <p className="text-3xl font-extrabold text-white">
+                {profileData.statistics.objectionSuccessRate > 0 
+                  ? `${Math.round(profileData.statistics.objectionSuccessRate)}%` 
+                  : '—'}
+              </p>
+            </Card>
           </div>
         )}
       </div>
@@ -714,6 +838,11 @@ function DashboardContent() {
         onClose={() => setShowProfileDropdown(false)}
         userData={profileData}
         loading={profileLoading}
+        errorMessage={profileError}
+        onRetry={() => fetchProfileData({ reason: 'retry', force: true })}
+        onRingColorChange={(ringColor) => {
+          setProfileData((prev) => (prev ? { ...prev, profileRingColor: ringColor } : prev));
+        }}
       />
 
       {/* Onboarding Modal */}

@@ -161,6 +161,21 @@ body {
   background-size: 60px 60px;
 }
 
+/* =========================================================================
+ * BELT NEON BORDER (Gamification)
+ * ========================================================================= */
+.belt-neon-trace {
+  stroke-dasharray: 110 70;
+  stroke-dashoffset: 0;
+  animation: belt-neon-sweep 2.8s linear infinite;
+}
+
+@keyframes belt-neon-sweep {
+  to {
+    stroke-dashoffset: -180;
+  }
+}
+
 /* Radial glow effect - Muted cyan */
 .radial-glow {
   position: relative;
@@ -196,6 +211,155 @@ body {
 
 .section-fade-bottom {
   position: relative;
+}
+
+/* =========================================================================
+ * ELECTRIC PROFILE RING - Shiny Metallic Gradients
+ * ========================================================================= */
+.electric-ring {
+  position: relative;
+  border-radius: 9999px;
+  padding: 2px;
+  /* Shiny metallic gradient with multiple color stops for glossy effect */
+  background: conic-gradient(
+    from 0deg,
+    var(--ring-shadow) 0deg,
+    var(--ring-base) 45deg,
+    var(--ring-shine) 90deg,
+    var(--ring-glow) 135deg,
+    var(--ring-base) 180deg,
+    var(--ring-shadow) 225deg,
+    var(--ring-base) 270deg,
+    var(--ring-shine) 315deg,
+    var(--ring-shadow) 360deg
+  );
+  animation: electric-ring-spin 7s linear infinite;
+  box-shadow:
+    0 0 18px var(--ring-glow),
+    0 0 30px var(--ring-base),
+    inset 0 0 8px rgba(255, 255, 255, 0.15);
+}
+
+.electric-ring::before {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: inherit;
+  background: conic-gradient(
+    from 0deg,
+    var(--ring-shadow) 0deg,
+    var(--ring-base) 45deg,
+    var(--ring-shine) 90deg,
+    var(--ring-glow) 135deg,
+    var(--ring-base) 180deg,
+    var(--ring-shadow) 225deg,
+    var(--ring-base) 270deg,
+    var(--ring-shine) 315deg,
+    var(--ring-shadow) 360deg
+  );
+  filter: blur(12px);
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Inner shine highlight overlay */
+.electric-ring::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.25) 0%,
+    transparent 40%,
+    transparent 60%,
+    rgba(255, 255, 255, 0.1) 100%
+  );
+  pointer-events: none;
+}
+
+.electric-ring-inner {
+  position: relative;
+  border-radius: inherit;
+  background: #1a1f2e;
+  overflow: hidden;
+}
+
+/* Gold - Warm metallic gold with bright shine */
+.ring-gold {
+  --ring-base: #f59e0b;
+  --ring-glow: #ffd08a;
+  --ring-shine: #fff7e0;
+  --ring-shadow: #b45309;
+}
+
+/* Sky - Electric cyan with icy shine */
+.ring-sky {
+  --ring-base: #00d9ff;
+  --ring-glow: #6bfff2;
+  --ring-shine: #e0ffff;
+  --ring-shadow: #0891b2;
+}
+
+/* Mint - Fresh green with bright highlight */
+.ring-mint {
+  --ring-base: #22c55e;
+  --ring-glow: #8cffb2;
+  --ring-shine: #dcfce7;
+  --ring-shadow: #15803d;
+}
+
+/* Violet - Rich purple with ethereal glow */
+.ring-violet {
+  --ring-base: #a855f7;
+  --ring-glow: #d7b3ff;
+  --ring-shine: #f3e8ff;
+  --ring-shadow: #7c3aed;
+}
+
+/* Slate - Cool silver with chrome shine */
+.ring-slate {
+  --ring-base: #94a3b8;
+  --ring-glow: #e2e8f0;
+  --ring-shine: #f8fafc;
+  --ring-shadow: #475569;
+}
+
+@keyframes electric-ring-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* =========================================================================
+ * BELT ANIMATIONS - Sales Predator Electric Pulse
+ * ========================================================================= */
+.belt-predator-pulse {
+  animation: predator-glow-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes predator-glow-pulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 3px #ef4444) drop-shadow(0 0 6px #ff8a8a);
+    opacity: 1;
+  }
+  50% {
+    filter: drop-shadow(0 0 6px #ef4444) drop-shadow(0 0 12px #ff8a8a) drop-shadow(0 0 18px #fca5a5);
+    opacity: 0.9;
+  }
+}
+
+.belt-neon-trace {
+  animation: belt-shimmer 3s ease-in-out infinite;
+}
+
+@keyframes belt-shimmer {
+  0%, 100% {
+    opacity: 0.85;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 
 .section-fade-bottom::after {

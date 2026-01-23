@@ -2,6 +2,7 @@ import { auth } from '@clerk/nextjs/server';
 import { pool } from '@/lib/db';
 import { NextResponse } from 'next/server';
 import { logger } from '@/lib/logger';
+import { RING_COLORS } from '@/lib/profile-ring';
 
 export async function GET(
   request: Request,
@@ -33,26 +34,56 @@ export async function GET(
     const requesterId = requesterResult.rows[0].id;
 
     // Get the profile user's data
-    const profileResult = await dbPool.query(
-      `SELECT
-        id,
-        clerk_id,
-        email,
-        power_level,
-        current_tier,
-        current_belt,
-        current_streak,
-        longest_streak,
-        total_calls,
-        total_minutes,
-        total_badges_earned,
-        member_since,
-        profile_visibility,
-        show_stats_publicly
-      FROM users
-      WHERE id = $1`,
-      [id]
-    );
+    let profileResult;
+    try {
+      profileResult = await dbPool.query(
+        `SELECT
+          id,
+          clerk_id,
+          email,
+          power_level,
+          current_tier,
+          current_belt,
+          current_streak,
+          longest_streak,
+          total_calls,
+          total_minutes,
+          total_badges_earned,
+          member_since,
+          profile_visibility,
+          show_stats_publicly,
+          profile_ring_color
+        FROM users
+        WHERE id = $1`,
+        [id]
+      );
+    } catch (error: any) {
+      // Backward-compatible fallback if migration hasn't run yet
+      if (error?.code === '42703') {
+        profileResult = await dbPool.query(
+          `SELECT
+            id,
+            clerk_id,
+            email,
+            power_level,
+            current_tier,
+            current_belt,
+            current_streak,
+            longest_streak,
+            total_calls,
+            total_minutes,
+            total_badges_earned,
+            member_since,
+            profile_visibility,
+            show_stats_publicly
+          FROM users
+          WHERE id = $1`,
+          [id]
+        );
+      } else {
+        throw error;
+      }
+    }
 
     if (profileResult.rows.length === 0) {
       return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
@@ -110,11 +141,17 @@ export async function GET(
       filler_word_average: 0
     };
 
+    const allowedRingColors = new Set(RING_COLORS.map((color) => color.key));
+    const profileRingColor = allowedRingColors.has(profileUser.profile_ring_color)
+      ? profileUser.profile_ring_color
+      : null;
+
     // Build response - always include belt, tier, badges, power_level
     const profileData: {
       username: string;
       email?: string;
       memberSince: string;
+      profileRingColor?: string | null;
       currentPower: number;
       currentBelt: {
         tier: string;
@@ -143,6 +180,7 @@ export async function GET(
     } = {
       username: profileUser.email.split('@')[0] || 'User',
       memberSince: profileUser.member_since || 'January 2025',
+      profileRingColor,
       currentPower: profileUser.power_level || 0,
       currentBelt: {
         tier: profileUser.current_tier || 'Bronze',

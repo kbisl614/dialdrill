@@ -44,6 +44,38 @@ export async function POST(request: Request) {
       plan: entitlements.plan 
     });
 
+    // PROTECTION 1: Check for active/pending calls (prevent multiple simultaneous calls)
+    const activeCallCheck = await pool().query(
+      `SELECT id, status, created_at 
+       FROM call_logs 
+       WHERE user_id = (SELECT id FROM users WHERE clerk_id = $1)
+         AND status IN ('pending', 'active')
+         AND created_at > NOW() - INTERVAL '1 hour'
+       ORDER BY created_at DESC
+       LIMIT 1`,
+      [userId]
+    );
+
+    if (activeCallCheck.rows.length > 0) {
+      const activeCall = activeCallCheck.rows[0];
+      logger.api('/calls/start', 'User has active call', { userId, activeCallId: activeCall.id, status: activeCall.status });
+      
+      // If call is very recent (< 30 seconds), likely a refresh - return existing call
+      const callAge = Date.now() - new Date(activeCall.created_at).getTime();
+      if (callAge < 30000 && activeCall.status === 'pending') {
+        return NextResponse.json({
+          error: 'You already have a call in progress. Please complete or abandon it before starting a new one.',
+          existingCallLogId: activeCall.id,
+          redirect: true,
+        }, { status: 409 });
+      }
+      
+      return NextResponse.json({
+        error: 'You already have an active call. Please complete it before starting a new one.',
+        existingCallLogId: activeCall.id,
+      }, { status: 409 });
+    }
+
     // Check if user can make a call
     if (!entitlements.canCall) {
       logger.api('/calls/start', 'User cannot make calls', { userId });
@@ -102,11 +134,11 @@ export async function POST(request: Request) {
       }, { status: 500 });
     }
 
-    // Log the call in call_logs table
+    // Log the call in call_logs table with status tracking
     let callLogId: string | null = null;
     const logResult = await pool().query(
-      `INSERT INTO call_logs (user_id, personality_id, tokens_used, overage_charge)
-       SELECT id, $2, $3, $4 FROM users WHERE clerk_id = $1
+      `INSERT INTO call_logs (user_id, personality_id, tokens_used, overage_charge, status, session_started_at)
+       SELECT id, $2, $3, $4, 'pending', NOW() FROM users WHERE clerk_id = $1
        RETURNING id`,
       [
         userId,

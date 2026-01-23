@@ -1,5 +1,8 @@
 import { z } from 'zod';
 
+// Re-export z for convenience
+export { z };
+
 /**
  * Validation schemas for API endpoints
  */
@@ -17,14 +20,20 @@ export const saveTranscriptSchema = z.object({
   callLogId: z.string().uuid(),
   transcript: z.array(z.object({
     role: z.enum(['agent', 'user']),
-    message: z.string(),
-    timestamp: z.number().optional(),
+    text: z.string(),
+    timestamp: z.union([z.string(), z.number(), z.null()]).optional(),
   })),
-  durationSeconds: z.number().min(0).max(600), // Max 10 minutes
+  durationSeconds: z.number().min(0).max(600).optional(), // Max 10 minutes, optional for backward compatibility
 });
 
 // /api/calls/score
 export const scoreCallSchema = z.object({
+  callLogId: z.string().uuid(),
+});
+
+// /api/calls/signed-url
+export const signedUrlSchema = z.object({
+  agentId: z.string().uuid(),
   callLogId: z.string().uuid(),
 });
 

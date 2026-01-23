@@ -1,14 +1,18 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { PillNavigation, AnimatedNumber } from '@/components/ui/react-bits';
 import clientLogger from '@/lib/client-logger';
+import { RING_COLORS, resolveRingColor, type RingColorKey } from '@/lib/profile-ring';
 
 interface ProfileDropdownModalProps {
   isOpen: boolean;
   onClose: () => void;
   userData: UserProfileData | null;
   loading?: boolean;
+  onRingColorChange?: (ringColor: RingColorKey) => void;
+  errorMessage?: string | null;
+  onRetry?: () => void;
 }
 
 interface UserProfileData {
@@ -16,6 +20,7 @@ interface UserProfileData {
   avatar: string;
   email: string;
   memberSince: string;
+  profileRingColor?: string | null;
   currentPower: number;
   currentBelt: BeltInfo;
   nextBelt: BeltInfo;
@@ -98,7 +103,15 @@ interface LeaderboardData {
   };
 }
 
-export default function ProfileDropdownModal({ isOpen, onClose, userData, loading = false }: ProfileDropdownModalProps) {
+export default function ProfileDropdownModal({
+  isOpen,
+  onClose,
+  userData,
+  loading = false,
+  onRingColorChange,
+  errorMessage,
+  onRetry,
+}: ProfileDropdownModalProps) {
   const [activeTab, setActiveTab] = useState<TabType>('statistics');
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -106,6 +119,17 @@ export default function ProfileDropdownModal({ isOpen, onClose, userData, loadin
   const [leaderboardData, setLeaderboardData] = useState<LeaderboardData | null>(null);
   const [leaderboardLoading, setLeaderboardLoading] = useState(false);
   const [leaderboardError, setLeaderboardError] = useState(false);
+  const [ringColorKey, setRingColorKey] = useState<RingColorKey | null>(
+    (userData?.profileRingColor as RingColorKey) ?? null
+  );
+  const [ringSaving, setRingSaving] = useState(false);
+  const [ringSaved, setRingSaved] = useState(false);
+  const [ringError, setRingError] = useState<string | null>(null);
+  const lastRingAttemptRef = useRef<RingColorKey | null>(null);
+
+  useEffect(() => {
+    setRingColorKey((userData?.profileRingColor as RingColorKey) ?? null);
+  }, [userData?.profileRingColor]);
 
   // Fetch notifications when modal opens
   useEffect(() => {
@@ -204,6 +228,46 @@ export default function ProfileDropdownModal({ isOpen, onClose, userData, loadin
 
   if (!isOpen) return null;
 
+  if (errorMessage) {
+    return (
+      <>
+        <div className="fixed inset-0 z-40 bg-black/50" onClick={onClose} />
+        <div className="fixed top-20 right-6 z-50 w-[480px] rounded-2xl border border-white/10 bg-[#1A1F2E] shadow-2xl">
+          <div className="border-b border-white/10 bg-gradient-to-r from-[var(--color-cyan-bright)]/10 to-[#9d4edd]/10 p-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-bold text-white">Profile unavailable</h2>
+              <button
+                onClick={onClose}
+                className="rounded-full p-2 text-white/60 transition hover:bg-white/10 hover:text-white"
+                aria-label="Close"
+              >
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <p className="mt-2 text-sm text-[var(--color-text-secondary)]">{errorMessage}</p>
+            <div className="mt-4 flex gap-2">
+              <button
+                onClick={onRetry}
+                className="rounded-lg bg-[var(--color-cyan-bright)] px-4 py-2 text-sm font-semibold text-[var(--color-dark-bg)] transition hover:opacity-90"
+                disabled={!onRetry}
+              >
+                Retry
+              </button>
+              <button
+                onClick={onClose}
+                className="rounded-lg border border-white/10 px-4 py-2 text-sm font-semibold text-white/80 transition hover:border-white/30 hover:text-white"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  }
+
   // Show loading state
   if (loading || !userData) {
     return (
@@ -228,6 +292,112 @@ export default function ProfileDropdownModal({ isOpen, onClose, userData, loadin
 
   const powerToNextBelt = userData.nextBelt.minPower - userData.currentPower;
 
+  const resolvedRing = resolveRingColor(
+    ringColorKey ?? (userData.profileRingColor as RingColorKey) ?? null,
+    userData.username || userData.email || 'user'
+  );
+
+  /**
+   * Update ring color with optimistic UI and robust error handling.
+   * - Optimistic update + revert on failure
+   * - No infinite loading (always clears saving state)
+   * - No request loops (user action only, in-flight guard)
+   * - Comprehensive logging with full context (never {})
+   */
+  async function updateRingColor(nextKey: RingColorKey) {
+    // Guard: prevent duplicate requests or no-op updates
+    if (ringSaving || nextKey === ringColorKey) return;
+
+    // Setup state
+    setRingSaving(true);
+    setRingSaved(false);
+    setRingError(null);
+
+    const previousKey = ringColorKey;
+    const requestId = `ring-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const endpoint = '/api/user/profile-ring';
+    const method = 'PATCH';
+
+    // Optimistic update
+    setRingColorKey(nextKey);
+    lastRingAttemptRef.current = nextKey;
+
+    // Base context for logging - always populated
+    const baseLogContext = {
+      selectedKey: nextKey,
+      previousKey: previousKey ?? 'none',
+      endpoint,
+      method,
+      requestId,
+    };
+
+    try {
+      const response = await fetch(endpoint, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Request-Id': requestId,
+        },
+        body: JSON.stringify({ ringColor: nextKey }),
+      });
+
+      // Read response body (text first, then try JSON)
+      const contentType = response.headers.get('content-type') || '';
+      const responseText = await response.text();
+      let responseBody: Record<string, unknown> = {};
+
+      if (contentType.includes('application/json') && responseText) {
+        try {
+          responseBody = JSON.parse(responseText);
+        } catch {
+          responseBody = { rawText: responseText.slice(0, 500) };
+        }
+      } else if (responseText) {
+        responseBody = { rawText: responseText.slice(0, 500) };
+      }
+
+      if (!response.ok) {
+        // Log detailed failure context
+        const errorMessage = (responseBody.error as string) || `HTTP ${response.status}`;
+        clientLogger.error('Failed to update profile ring', new Error(errorMessage), {
+          ...baseLogContext,
+          status: response.status,
+          statusText: response.statusText,
+          contentType,
+          responseBody,
+          errorType: 'http_error',
+        });
+
+        // Rollback optimistic update
+        setRingColorKey(previousKey ?? null);
+        setRingError(`Could not save ring color: ${errorMessage}`);
+        return;
+      }
+
+      // Success: update state with server-confirmed value
+      const savedKey = (responseBody.ringColor as RingColorKey) ?? nextKey;
+      onRingColorChange?.(savedKey);
+      setRingColorKey(savedKey);
+      setRingSaved(true);
+      setTimeout(() => setRingSaved(false), 1500);
+
+    } catch (error) {
+      // Network error or unexpected failure
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      clientLogger.error('Failed to update profile ring', error, {
+        ...baseLogContext,
+        errorType: 'network_or_exception',
+        errorMessage,
+      });
+
+      // Rollback optimistic update
+      setRingColorKey(previousKey ?? null);
+      setRingError(`Network error. Check connection and retry.`);
+    } finally {
+      setRingSaving(false);
+    }
+  }
+
   return (
     <>
       {/* Backdrop */}
@@ -236,16 +406,26 @@ export default function ProfileDropdownModal({ isOpen, onClose, userData, loadin
         onClick={onClose}
       />
 
-      {/* Dropdown Modal */}
-      <div className="fixed top-20 right-6 z-50 w-[480px] max-h-[calc(100vh-120px)] rounded-2xl border border-white/10 bg-[#1A1F2E] shadow-2xl">
-        {/* Header */}
-        <div className="border-b border-white/10 bg-gradient-to-r from-[var(--color-cyan-bright)]/10 to-[#9d4edd]/10 p-6">
+      {/* Dropdown Modal - positioned with safe margins for browser chrome */}
+      <div className="fixed top-4 right-6 z-50 w-[480px] max-h-[calc(100vh-32px)] rounded-2xl border border-white/10 bg-[#1A1F2E] shadow-2xl flex flex-col">
+        {/* Header - fixed, doesn't shrink */}
+        <div className="flex-shrink-0 border-b border-white/10 bg-gradient-to-r from-[var(--color-cyan-bright)]/10 to-[#9d4edd]/10 p-6">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-4">
               {/* Avatar */}
               <div className="relative">
-                <div className="h-16 w-16 rounded-full bg-gradient-to-br from-[var(--color-cyan-bright)] to-[#9d4edd] p-0.5">
-                  <div className="h-full w-full rounded-full bg-[#1A1F2E] flex items-center justify-center">
+                <div
+                  className="electric-ring h-16 w-16"
+                  style={
+                    {
+                      ['--ring-base' as never]: resolvedRing.base,
+                      ['--ring-glow' as never]: resolvedRing.glow,
+                      ['--ring-shine' as never]: resolvedRing.shine,
+                      ['--ring-shadow' as never]: resolvedRing.shadow,
+                    } as Record<string, string>
+                  }
+                >
+                  <div className="electric-ring-inner h-full w-full flex items-center justify-center">
                     <span className="text-2xl font-bold text-white">
                       {(userData.username?.charAt(0) || 'U').toUpperCase()}
                     </span>
@@ -296,14 +476,67 @@ export default function ProfileDropdownModal({ isOpen, onClose, userData, loadin
               springConfig={{ stiffness: 80, damping: 25 }}
             />
           </div>
+
+          {/* Profile Ring Picker */}
+          <div className="mt-4 rounded-xl border border-white/10 bg-white/[0.04] p-3">
+            <div className="flex items-center justify-between">
+              <p className="text-xs uppercase tracking-[0.2em] text-[var(--color-text-muted)]">Profile ring</p>
+              {ringSaving ? (
+                <span className="text-xs text-[var(--color-text-secondary)]">Saving…</span>
+              ) : ringSaved ? (
+                <span className="text-xs text-[var(--color-cyan-bright)]">Saved</span>
+              ) : null}
+            </div>
+            <div className="mt-3 grid grid-cols-5 gap-2">
+              {RING_COLORS.map((color) => {
+                const isSelected = (ringColorKey ?? resolvedRing.key) === color.key;
+                return (
+                  <button
+                    key={color.key}
+                    type="button"
+                    onClick={() => updateRingColor(color.key)}
+                    disabled={ringSaving}
+                    className={`flex items-center justify-center rounded-lg border p-2 transition-all ${
+                      isSelected
+                        ? 'border-[var(--color-cyan-bright)] bg-[var(--color-cyan-bright)]/10'
+                        : 'border-white/10 bg-white/[0.02] hover:border-[var(--color-border-medium)]'
+                    } ${ringSaving ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    aria-pressed={isSelected}
+                    aria-label={`Set ring color to ${color.label}`}
+                  >
+                    <div
+                      className={`electric-ring h-7 w-7 ${color.className}`}
+                    >
+                      <div className="electric-ring-inner h-full w-full" />
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+            {ringError && (
+              <div className="mt-2 flex items-center justify-between gap-3 text-xs text-red-400">
+                <span>{ringError}</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const retryKey = lastRingAttemptRef.current ?? ringColorKey ?? resolvedRing.key;
+                    updateRingColor(retryKey);
+                  }}
+                  className="text-[var(--color-cyan-bright)] hover:text-white"
+                  disabled={ringSaving}
+                >
+                  Retry
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Scrollable Content */}
+        {/* Scrollable Content - grows to fill available space */}
         <div
           data-lenis-prevent
-          className="overflow-y-scroll p-6 scrollbar-custom"
+          className="flex-1 min-h-0 overflow-y-auto p-6 scrollbar-custom"
           style={{
-            height: '600px',
             scrollbarWidth: 'auto',
             scrollbarColor: '#00d9ff #1e293b',
             WebkitOverflowScrolling: 'touch'
@@ -829,30 +1062,94 @@ function BeltIcon({ tier, belt, isCurrent }: BeltIconProps) {
     'Sales Predator': '#ef4444',
   };
 
-  // Belt colors - consistent across all tiers
-  const beltColors: Record<string, { main: string; light: string; dark: string }> = {
-    'White': { main: '#ffffff', light: '#f8fafc', dark: '#e2e8f0' },
-    'Yellow': { main: '#facc15', light: '#fef08a', dark: '#eab308' },
-    'Orange': { main: '#fb923c', light: '#fdba74', dark: '#f97316' },
-    'Green': { main: '#22c55e', light: '#4ade80', dark: '#16a34a' },
-    'Blue': { main: '#3b82f6', light: '#60a5fa', dark: '#2563eb' },
-    'Brown': { main: '#92400e', light: '#b45309', dark: '#78350f' },
-    'Black': { main: '#0f172a', light: '#1e293b', dark: '#020617' },
+  const tierGlowColors: Record<string, string> = {
+    'Bronze': '#ffb36a',
+    'Silver': '#f3f6ff',
+    'Gold': '#ffe27a',
+    'Platinum': '#b8f3ff',
+    'Diamond': '#6fd3ff',
+    'Sales Master': '#d9b3ff',
+    'Sales Predator': '#ff8a8a',
+  };
+
+  // Belt colors with shiny metallic gradient stops
+  const beltColors: Record<string, { main: string; light: string; dark: string; shine: string }> = {
+    'White': { main: '#ffffff', light: '#f8fafc', dark: '#cbd5e1', shine: '#ffffff' },
+    'Yellow': { main: '#facc15', light: '#fef08a', dark: '#ca8a04', shine: '#fefce8' },
+    'Orange': { main: '#fb923c', light: '#fdba74', dark: '#c2410c', shine: '#fff7ed' },
+    'Green': { main: '#22c55e', light: '#4ade80', dark: '#15803d', shine: '#dcfce7' },
+    'Blue': { main: '#3b82f6', light: '#60a5fa', dark: '#1d4ed8', shine: '#dbeafe' },
+    'Brown': { main: '#92400e', light: '#b45309', dark: '#451a03', shine: '#d6a77a' },
+    'Black': { main: '#1e293b', light: '#475569', dark: '#020617', shine: '#64748b' },
   };
 
   const tierBorderColor = tierBorderColors[tier] || '#334155';
-  const beltColor = beltColors[belt] || { main: '#0f172a', light: '#1e293b', dark: '#020617' };
-  const gradientId = `belt-gradient-${tier.replace(/\s+/g, '-')}-${belt}`;
+  const tierGlowColor = tierGlowColors[tier] || tierBorderColor;
+  const beltColor = beltColors[belt] || { main: '#0f172a', light: '#1e293b', dark: '#020617', shine: '#475569' };
+
+  // Unique IDs for this belt instance
+  const uniqueId = `${tier.replace(/\s+/g, '-')}-${belt}-${Math.random().toString(36).slice(2, 6)}`;
+  const gradientId = `belt-gradient-${uniqueId}`;
+  const shineGradientId = `belt-shine-${uniqueId}`;
+  const neonGradientId = `belt-neon-${uniqueId}`;
+  const glowFilterId = `belt-glow-${uniqueId}`;
+  const animatedGradientId = `belt-animated-${uniqueId}`;
+
+  const isSalesPredator = tier === 'Sales Predator';
 
   return (
-    <svg viewBox="0 0 80 30" className="w-full h-8" xmlns="http://www.w3.org/2000/svg">
+    <svg viewBox="0 0 80 30" className="w-full h-8 pointer-events-none" xmlns="http://www.w3.org/2000/svg">
       <defs>
-        {/* Belt gradient - gives it depth and texture */}
-        <linearGradient id={gradientId} x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stopColor={beltColor.light} />
-          <stop offset="50%" stopColor={beltColor.main} />
+        {/* Shiny metallic belt gradient - diagonal for glossy effect */}
+        <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor={beltColor.shine} />
+          <stop offset="20%" stopColor={beltColor.light} />
+          <stop offset="45%" stopColor={beltColor.main} />
+          <stop offset="55%" stopColor={beltColor.main} />
+          <stop offset="80%" stopColor={beltColor.dark} />
           <stop offset="100%" stopColor={beltColor.dark} />
         </linearGradient>
+
+        {/* Horizontal shine overlay for extra gloss */}
+        <linearGradient id={shineGradientId} x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor="white" stopOpacity="0.4" />
+          <stop offset="30%" stopColor="white" stopOpacity="0.1" />
+          <stop offset="50%" stopColor="white" stopOpacity="0" />
+          <stop offset="70%" stopColor="black" stopOpacity="0.1" />
+          <stop offset="100%" stopColor="black" stopOpacity="0.2" />
+        </linearGradient>
+
+        {/* Neon border gradient based on tier color */}
+        <linearGradient id={neonGradientId} x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor={tierBorderColor} />
+          <stop offset="50%" stopColor={tierGlowColor} />
+          <stop offset="100%" stopColor={tierBorderColor} />
+        </linearGradient>
+
+        {/* Animated gradient for Sales Predator */}
+        {isSalesPredator && (
+          <linearGradient id={animatedGradientId} x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#ef4444">
+              <animate attributeName="stop-color" values="#ef4444;#ff8a8a;#fca5a5;#ff8a8a;#ef4444" dur="2s" repeatCount="indefinite" />
+            </stop>
+            <stop offset="25%" stopColor="#ff8a8a">
+              <animate attributeName="stop-color" values="#ff8a8a;#fca5a5;#ef4444;#fca5a5;#ff8a8a" dur="2s" repeatCount="indefinite" />
+            </stop>
+            <stop offset="50%" stopColor="#fca5a5">
+              <animate attributeName="stop-color" values="#fca5a5;#ef4444;#ff8a8a;#ef4444;#fca5a5" dur="2s" repeatCount="indefinite" />
+            </stop>
+            <stop offset="75%" stopColor="#ff8a8a">
+              <animate attributeName="stop-color" values="#ff8a8a;#fca5a5;#ef4444;#fca5a5;#ff8a8a" dur="2s" repeatCount="indefinite" />
+            </stop>
+            <stop offset="100%" stopColor="#ef4444">
+              <animate attributeName="stop-color" values="#ef4444;#ff8a8a;#fca5a5;#ff8a8a;#ef4444" dur="2s" repeatCount="indefinite" />
+            </stop>
+          </linearGradient>
+        )}
+
+        <filter id={glowFilterId} x="-50%" y="-50%" width="200%" height="200%">
+          <feDropShadow dx="0" dy="0" stdDeviation={isSalesPredator ? "2.5" : "1.8"} floodColor={tierGlowColor} floodOpacity={isSalesPredator ? "1" : "0.85"} />
+        </filter>
       </defs>
 
       {/* Tier border - thick outer border in tier color */}
@@ -864,11 +1161,27 @@ function BeltIcon({ tier, belt, isCurrent }: BeltIconProps) {
         rx="3"
         ry="3"
         fill="none"
-        stroke={tierBorderColor}
+        stroke={isSalesPredator ? `url(#${animatedGradientId})` : tierBorderColor}
         strokeWidth={isCurrent ? "4" : "3.5"}
+        filter={isSalesPredator ? `url(#${glowFilterId})` : undefined}
       />
 
-      {/* Belt body with gradient for 3D effect */}
+      {/* Neon animated trace - enhanced for Sales Predator */}
+      <rect
+        x="3"
+        y="3"
+        width="74"
+        height="24"
+        rx="3"
+        ry="3"
+        fill="none"
+        stroke={isSalesPredator ? `url(#${animatedGradientId})` : `url(#${neonGradientId})`}
+        strokeWidth="2.5"
+        className={isSalesPredator ? "belt-predator-pulse" : "belt-neon-trace"}
+        filter={`url(#${glowFilterId})`}
+      />
+
+      {/* Belt body with shiny metallic gradient */}
       <rect
         x="8"
         y="8"
@@ -879,15 +1192,23 @@ function BeltIcon({ tier, belt, isCurrent }: BeltIconProps) {
         fill={`url(#${gradientId})`}
       />
 
-      {/* Belt texture lines for realistic look */}
-      <line x1="12" y1="10" x2="12" y2="20" stroke={beltColor.dark} strokeWidth="0.5" opacity="0.3" />
-      <line x1="20" y1="10" x2="20" y2="20" stroke={beltColor.dark} strokeWidth="0.5" opacity="0.3" />
-      <line x1="28" y1="10" x2="28" y2="20" stroke={beltColor.dark} strokeWidth="0.5" opacity="0.3" />
-      <line x1="36" y1="10" x2="36" y2="20" stroke={beltColor.dark} strokeWidth="0.5" opacity="0.3" />
-      <line x1="44" y1="10" x2="44" y2="20" stroke={beltColor.dark} strokeWidth="0.5" opacity="0.3" />
-      <line x1="52" y1="10" x2="52" y2="20" stroke={beltColor.dark} strokeWidth="0.5" opacity="0.3" />
-      <line x1="60" y1="10" x2="60" y2="20" stroke={beltColor.dark} strokeWidth="0.5" opacity="0.3" />
-      <line x1="68" y1="10" x2="68" y2="20" stroke={beltColor.dark} strokeWidth="0.5" opacity="0.3" />
+      {/* Shine overlay for glossy effect */}
+      <rect
+        x="8"
+        y="8"
+        width="64"
+        height="14"
+        rx="2"
+        ry="2"
+        fill={`url(#${shineGradientId})`}
+      />
+
+      {/* Belt texture lines - subtle for realism */}
+      <line x1="16" y1="9" x2="16" y2="21" stroke={beltColor.dark} strokeWidth="0.3" opacity="0.15" />
+      <line x1="28" y1="9" x2="28" y2="21" stroke={beltColor.dark} strokeWidth="0.3" opacity="0.15" />
+      <line x1="40" y1="9" x2="40" y2="21" stroke={beltColor.dark} strokeWidth="0.3" opacity="0.15" />
+      <line x1="52" y1="9" x2="52" y2="21" stroke={beltColor.dark} strokeWidth="0.3" opacity="0.15" />
+      <line x1="64" y1="9" x2="64" y2="21" stroke={beltColor.dark} strokeWidth="0.3" opacity="0.15" />
 
       {/* Current belt cyan glow */}
       {isCurrent && (
@@ -910,6 +1231,10 @@ function BeltIcon({ tier, belt, isCurrent }: BeltIconProps) {
 
 // Hero's Journey Tab Component
 function JourneyTab({ userData }: { userData: UserProfileData }) {
+  const [selectedBelt, setSelectedBelt] = useState<{ tier: string; belt: string }>({
+    tier: userData.currentBelt.tier,
+    belt: userData.currentBelt.belt,
+  });
   const allBelts = [
     { tier: 'Bronze', belts: ['White', 'Yellow', 'Orange', 'Green', 'Blue', 'Brown', 'Black'], color: '#cd7f32' },
     { tier: 'Silver', belts: ['White', 'Yellow', 'Orange', 'Green', 'Blue', 'Brown', 'Black'], color: '#c0c0c0' },
@@ -922,6 +1247,15 @@ function JourneyTab({ userData }: { userData: UserProfileData }) {
 
   return (
     <div className="space-y-6">
+      <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
+        <div className="text-xs uppercase tracking-[0.2em] text-[var(--color-text-muted)]">Selected rank</div>
+        <div className="mt-2 text-sm font-semibold text-white">
+          {selectedBelt.tier} {selectedBelt.belt} Belt
+        </div>
+        <div className="mt-1 text-xs text-[var(--color-text-secondary)]">
+          Tap any belt to preview a different rank.
+        </div>
+      </div>
       {allBelts.map((tierGroup) => (
         <div key={tierGroup.tier}>
           <h4 className="text-sm font-bold mb-3" style={{ color: tierGroup.color }}>
@@ -932,21 +1266,26 @@ function JourneyTab({ userData }: { userData: UserProfileData }) {
               const isCurrentBelt =
                 userData.currentBelt.tier === tierGroup.tier &&
                 userData.currentBelt.belt === belt;
+              const isSelected =
+                selectedBelt.tier === tierGroup.tier && selectedBelt.belt === belt;
 
               return (
-                <div
+                <button
                   key={`${tierGroup.tier}-${belt}`}
-                  className={`aspect-square rounded-lg border flex items-center justify-center p-2 ${
+                  type="button"
+                  onClick={() => setSelectedBelt({ tier: tierGroup.tier, belt })}
+                  className={`aspect-square rounded-lg border flex items-center justify-center p-2 transition-all duration-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[var(--color-cyan-bright)]/70 ${
                     isCurrentBelt
                       ? 'border-[var(--color-cyan-bright)] bg-[var(--color-cyan-bright)]/20 ring-2 ring-[var(--color-cyan-bright)]'
-                      : 'border-white/10 bg-white/[0.02]'
-                  }`}
+                      : 'border-white/10 bg-white/[0.02] hover:border-[var(--color-border-medium)] hover:bg-white/[0.04]'
+                  } ${isSelected ? 'ring-2 ring-white/30' : ''}`}
+                  aria-pressed={isSelected}
                 >
                   <div className="flex flex-col items-center gap-2 w-full">
                     <BeltIcon tier={tierGroup.tier} belt={belt} isCurrent={isCurrentBelt} />
                     <span className="text-[10px] text-center text-[#e2e8f0] font-semibold">{belt}</span>
                   </div>
-                </div>
+                </button>
               );
             })}
           </div>

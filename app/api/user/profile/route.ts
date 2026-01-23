@@ -2,6 +2,7 @@ import { auth } from '@clerk/nextjs/server';
 import { pool } from '@/lib/db';
 import { NextResponse } from 'next/server';
 import { logger } from '@/lib/logger';
+import { RING_COLORS } from '@/lib/profile-ring';
 
 // Belt progression configuration (49 total levels)
 const BELT_PROGRESSION = [
@@ -180,27 +181,58 @@ export async function GET() {
     const dbPool = pool();
 
     // Get user data
-    const userResult = await dbPool.query(
-      `SELECT
-        id,
-        clerk_id,
-        email,
-        power_level,
-        current_tier,
-        current_belt,
-        current_streak,
-        longest_streak,
-        last_login_date,
-        streak_multiplier,
-        total_calls,
-        total_minutes,
-        total_badges_earned,
-        member_since,
-        created_at
-      FROM users
-      WHERE clerk_id = $1`,
-      [userId]
-    );
+    let userResult;
+    try {
+      userResult = await dbPool.query(
+        `SELECT
+          id,
+          clerk_id,
+          email,
+          power_level,
+          current_tier,
+          current_belt,
+          current_streak,
+          longest_streak,
+          last_login_date,
+          streak_multiplier,
+          total_calls,
+          total_minutes,
+          total_badges_earned,
+          member_since,
+          created_at,
+          profile_ring_color
+        FROM users
+        WHERE clerk_id = $1`,
+        [userId]
+      );
+    } catch (error: any) {
+      // Backward-compatible fallback if migration hasn't run yet
+      if (error?.code === '42703') {
+        userResult = await dbPool.query(
+          `SELECT
+            id,
+            clerk_id,
+            email,
+            power_level,
+            current_tier,
+            current_belt,
+            current_streak,
+            longest_streak,
+            last_login_date,
+            streak_multiplier,
+            total_calls,
+            total_minutes,
+            total_badges_earned,
+            member_since,
+            created_at
+          FROM users
+          WHERE clerk_id = $1`,
+          [userId]
+        );
+      } else {
+        throw error;
+      }
+    }
 
     if (userResult.rows.length === 0) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
@@ -311,11 +343,17 @@ export async function GET() {
     const emailParts = user.email?.split('@') || [];
     const username = emailParts[0] || 'User';
 
+    const allowedRingColors = new Set(RING_COLORS.map((color) => color.key));
+    const profileRingColor = allowedRingColors.has(user.profile_ring_color)
+      ? user.profile_ring_color
+      : null;
+
     const profileData = {
       username,
       avatar: '',
       email: user.email,
       memberSince: user.member_since || 'January 2025',
+      profileRingColor,
       currentPower: user.power_level || 0,
       currentBelt: {
         tier: currentBelt.tier,

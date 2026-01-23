@@ -85,13 +85,102 @@ async function getCallSummary(callLogId: string, userId: string): Promise<CallSu
     const durationSeconds = row.duration_seconds || 0;
     const powerGained = durationSeconds >= 90 ? Math.floor(row.overall_score * 10) : 0;
     
-    // TODO: Get actual gamification data from database (badges, belt upgrades)
+    // Get user's internal ID for queries
+    const userResult = await pool().query(
+      `SELECT id, current_tier, current_belt, power_level FROM users WHERE clerk_id = $1`,
+      [userId]
+    );
+    const internalUserId = userResult.rows[0]?.id;
+    
+    // Query badges earned around the time of this call (within 5 minutes after call)
+    const callTime = new Date(row.created_at);
+    const fiveMinutesLater = new Date(callTime.getTime() + 5 * 60 * 1000);
+    
+    const badgesResult = await pool().query(
+      `SELECT ub.badge_id, ub.earned_at
+       FROM user_badges ub
+       WHERE ub.user_id = $1 
+         AND ub.earned_at >= $2 
+         AND ub.earned_at <= $3
+       ORDER BY ub.earned_at ASC`,
+      [internalUserId, callTime, fiveMinutesLater]
+    );
+    
+    // Badge definitions (matching save-transcript)
+    const ALL_BADGES = [
+      { id: 'badge_5_calls', name: 'First Steps', description: 'Complete 5 calls', rarity: 'common' },
+      { id: 'badge_10_calls', name: 'Building Momentum', description: 'Complete 10 calls', rarity: 'common' },
+      { id: 'badge_25_calls', name: 'Quarter Century', description: 'Complete 25 calls', rarity: 'uncommon' },
+      { id: 'badge_50_calls', name: 'Halfway Master', description: 'Complete 50 calls', rarity: 'rare' },
+      { id: 'badge_7_day_streak', name: 'Week Warrior', description: '7 day streak', rarity: 'uncommon' },
+      { id: 'badge_14_day_streak', name: 'Fortnight Fighter', description: '14 day streak', rarity: 'rare' },
+      { id: 'badge_30_day_streak', name: 'Month Master', description: '30 day streak', rarity: 'epic' },
+    ];
+    
+    const badgesUnlocked = badgesResult.rows.map(row => {
+      const badgeDef = ALL_BADGES.find(b => b.id === row.badge_id);
+      return {
+        id: row.badge_id,
+        name: badgeDef?.name || 'Unknown Badge',
+        description: badgeDef?.description || '',
+        rarity: badgeDef?.rarity || 'common',
+      };
+    });
+    
+    // Check if belt was upgraded around this call time
+    // Query notifications for belt_upgrade type around call time
+    const beltUpgradeResult = await pool().query(
+      `SELECT metadata
+       FROM user_notifications
+       WHERE user_id = $1 
+         AND type = 'belt_upgrade'
+         AND created_at >= $2 
+         AND created_at <= $3
+       ORDER BY created_at DESC
+       LIMIT 1`,
+      [internalUserId, callTime, fiveMinutesLater]
+    );
+    
+    // Belt progression colors (matching save-transcript)
+    const BELT_COLORS: Record<string, string> = {
+      'Bronze': '#cd7f32',
+      'Silver': '#c0c0c0',
+      'Gold': '#ffd700',
+      'Platinum': '#e5e4e2',
+      'Diamond': '#b9f2ff',
+      'Sales Master': '#ff6b6b',
+      'Sales Predator': '#8b00ff',
+    };
+    
+    let beltUpgrade: {
+      upgraded: boolean;
+      newBelt?: { tier: string; belt: string; color: string };
+      previousBelt?: { tier: string; belt: string; color: string };
+    } = { upgraded: false };
+    
+    if (beltUpgradeResult.rows.length > 0 && internalUserId) {
+      const metadata = beltUpgradeResult.rows[0].metadata;
+      const currentUser = userResult.rows[0];
+      
+      beltUpgrade = {
+        upgraded: true,
+        newBelt: {
+          tier: currentUser.current_tier || 'Bronze',
+          belt: currentUser.current_belt || 'White',
+          color: BELT_COLORS[currentUser.current_tier] || '#cd7f32',
+        },
+        previousBelt: metadata?.oldBelt ? {
+          tier: metadata.oldBelt.split(' ')[0],
+          belt: metadata.oldBelt.split(' ')[1],
+          color: BELT_COLORS[metadata.oldBelt.split(' ')[0]] || '#cd7f32',
+        } : undefined,
+      };
+    }
+    
     const gamification = {
       powerGained,
-      badgesUnlocked: [], // TODO: Query from badge system
-      beltUpgrade: {
-        upgraded: false, // TODO: Check if user upgraded
-      },
+      badgesUnlocked,
+      beltUpgrade,
     };
 
     return {

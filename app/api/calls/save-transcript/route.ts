@@ -8,6 +8,8 @@ import { createNotification } from '@/lib/create-notification';
 import { analyzeCallForCoaching, saveCoachingAnalysis } from '@/lib/ai-coach';
 import { analyzeVoiceMetrics, saveVoiceAnalytics } from '@/lib/voice-analytics';
 import { logger } from '@/lib/logger';
+import { rateLimit, RATE_LIMITS, rateLimitHeaders } from '@/lib/rate-limit';
+import { validateBody, saveTranscriptSchema, isValidationError } from '@/lib/validation';
 
 interface TranscriptEntry {
   role: 'user' | 'agent';
@@ -41,23 +43,29 @@ function normalizeTranscriptEntry(item: RawTranscriptEntry): TranscriptEntry {
 }
 
 export async function POST(request: Request) {
+  const requestId = `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  logger.apiInfo('/calls/save-transcript', 'Request received', { requestId });
+
   try {
     const { userId } = await auth();
 
     if (!userId) {
+      logger.apiInfo('/calls/save-transcript', 'Unauthorized - no userId', { requestId });
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const body = await request.json();
-    const { callLogId, transcript, durationSeconds } = body ?? {};
-
-    if (!callLogId || typeof callLogId !== 'string') {
-      return NextResponse.json({ error: 'callLogId is required' }, { status: 400 });
+    // Rate limit: 20 transcript saves per minute per user
+    const rateLimitResult = rateLimit(`save-transcript:${userId}`, { limit: 20, windowSeconds: 60 });
+    if (!rateLimitResult.success) {
+      logger.apiInfo('/calls/save-transcript', 'Rate limited', { userId, requestId });
+      return NextResponse.json(
+        { error: 'Too many requests. Please wait before saving another transcript.' },
+        { status: 429, headers: rateLimitHeaders(rateLimitResult) }
+      );
     }
 
-    if (!Array.isArray(transcript)) {
-      return NextResponse.json({ error: 'transcript must be an array' }, { status: 400 });
-    }
+    // Validate input using schema
+    const { callLogId, transcript, durationSeconds } = await validateBody(request, saveTranscriptSchema);
 
     const normalizedTranscript: TranscriptEntry[] = (transcript as RawTranscriptEntry[]).map((item) =>
       normalizeTranscriptEntry(item)
@@ -68,18 +76,54 @@ export async function POST(request: Request) {
         ? Math.max(0, Math.round(durationSeconds))
         : null;
 
+    // PROTECTION 6: Prevent duplicate transcript saves (idempotency)
+    const callCheck = await pool().query(
+      `SELECT id, status, transcript_saved, transcript
+       FROM call_logs
+       WHERE id = $1
+         AND user_id = (SELECT id FROM users WHERE clerk_id = $2)`,
+      [callLogId, userId]
+    );
+
+    if (callCheck.rows.length === 0) {
+      return NextResponse.json({ error: 'Call log not found' }, { status: 404 });
+    }
+
+    const call = callCheck.rows[0];
+
+    // If transcript already saved, return success (idempotent)
+    if (call.transcript_saved) {
+      logger.apiInfo('/calls/save-transcript', 'Transcript already saved (idempotent)', { callLogId, requestId });
+      return NextResponse.json({ success: true, alreadySaved: true });
+    }
+
+    // PROTECTION 7: Only allow saving transcript for active/completed calls
+    if (call.status === 'abandoned' || call.status === 'failed') {
+      logger.apiInfo('/calls/save-transcript', 'Cannot save transcript for abandoned/failed call', { callLogId, status: call.status, requestId });
+      return NextResponse.json({
+        error: `Cannot save transcript for call in ${call.status} state`,
+        status: call.status,
+      }, { status: 409 });
+    }
+
     const result = await pool().query(
       `UPDATE call_logs
        SET transcript = $1,
-           duration_seconds = $2
+           duration_seconds = $2,
+           status = 'completed',
+           session_ended_at = NOW(),
+           transcript_saved = true
        WHERE id = $3
          AND user_id = (SELECT id FROM users WHERE clerk_id = $4)
+         AND transcript_saved = false
        RETURNING id`,
       [JSON.stringify(normalizedTranscript), parsedDuration, callLogId, userId]
     );
 
     if (result.rowCount === 0) {
-      return NextResponse.json({ error: 'Call log not found' }, { status: 404 });
+      // Race condition - another request already saved it
+      logger.apiInfo('/calls/save-transcript', 'Transcript save race condition (already saved)', { callLogId, requestId });
+      return NextResponse.json({ success: true, alreadySaved: true });
     }
 
     // Automatically score the call after saving transcript
@@ -239,9 +283,19 @@ export async function POST(request: Request) {
       logger.apiError('/calls/save-transcript', scoreError, { route: '/calls/save-transcript', step: 'scoring' });
     }
 
+    logger.apiInfo('/calls/save-transcript', 'Transcript saved successfully', { callLogId, requestId });
     return NextResponse.json({ success: true });
   } catch (error) {
-    logger.apiError('/calls/save-transcript', error, { route: '/calls/save-transcript' });
+    logger.apiError('/calls/save-transcript', error, { route: '/calls/save-transcript', requestId });
+    
+    // Handle validation errors
+    if (isValidationError(error)) {
+      return NextResponse.json(
+        { error: 'Invalid request', details: error.errors },
+        { status: 400 }
+      );
+    }
+    
     return NextResponse.json(
       {
         error: 'Internal server error',
