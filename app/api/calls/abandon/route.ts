@@ -22,13 +22,34 @@ export async function POST(request: Request) {
   logger.apiInfo('/calls/abandon', 'Request received', { requestId });
 
   try {
-    const { userId } = await auth();
+    // Handle sendBeacon requests (no auth headers, but body contains callLogId)
+    let body: { callLogId?: string };
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
+    }
+
+    const { callLogId: rawCallLogId } = body;
+    if (!rawCallLogId || typeof rawCallLogId !== 'string') {
+      return NextResponse.json({ error: 'callLogId is required' }, { status: 400 });
+    }
+    const callLogId: string = rawCallLogId;
+
+    // Try to get userId from auth (may not be available for sendBeacon)
+    let userId: string | null = null;
+    try {
+      const authResult = await auth();
+      userId = authResult.userId || null;
+    } catch {
+      // Auth may fail for sendBeacon - we'll validate via callLogId ownership
+    }
 
     // Rate limit by callLogId if no userId (sendBeacon case)
     const rateLimitKey = userId ? `calls/abandon:${userId}` : `calls/abandon:${callLogId}`;
     const rateLimitResult = rateLimit(rateLimitKey, RATE_LIMITS.standard);
     if (!rateLimitResult.success) {
-      logger.apiInfo('/calls/abandon', 'Rate limited', { userId, callLogId, requestId });
+      logger.apiInfo('/calls/abandon', 'Rate limited', { userId: userId || undefined, callLogId, requestId });
       return NextResponse.json(
         { error: 'Too many requests. Please wait before abandoning another call.' },
         { status: 429, headers: rateLimitHeaders(rateLimitResult) }
@@ -60,7 +81,7 @@ export async function POST(request: Request) {
     }
 
     if (callCheck.rows.length === 0) {
-      logger.apiInfo('/calls/abandon', 'Call not found or unauthorized', { callLogId, userId, requestId });
+      logger.apiInfo('/calls/abandon', 'Call not found or unauthorized', { callLogId, userId: userId || undefined, requestId });
       return NextResponse.json({ error: 'Call not found' }, { status: 404 });
     }
 
@@ -90,7 +111,7 @@ export async function POST(request: Request) {
       [callLogId]
     );
 
-    logger.apiInfo('/calls/abandon', 'Call abandoned successfully', { callLogId, userId, requestId });
+    logger.apiInfo('/calls/abandon', 'Call abandoned successfully', { callLogId, userId: userId || undefined, requestId });
 
     return NextResponse.json({ success: true });
   } catch (error) {
