@@ -1,5 +1,6 @@
 import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
+import { pool } from '@/lib/db';
 import { isSimulatedMode } from '@/lib/agent-selector';
 import { logger } from '@/lib/logger';
 import { rateLimit, RATE_LIMITS, rateLimitHeaders } from '@/lib/rate-limit';
