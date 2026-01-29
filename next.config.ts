@@ -2,6 +2,17 @@ import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs";
 
 const nextConfig: NextConfig = {
+  // Set workspace root to this directory to avoid lockfile detection warnings
+  turbopack: {
+    root: __dirname,
+  },
+  // Workaround for Clerk compatibility with Next.js 16.1.4+
+  // This allows non-async functions in server components (Clerk's internal code)
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '2mb',
+    },
+  },
   // Security headers
   async headers() {
     return [
